@@ -16,8 +16,28 @@ import {
   useState,
 } from 'react';
 
-const portraitUrl =
-  'https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png';
+const heroExpressions = [
+  {
+    src: '/avatars/01_smug_smirk.png',
+    alt: 'Zney avatar with a smug smirk',
+    label: 'Smug smirk',
+  },
+  {
+    src: '/avatars/02_happy_smile.png',
+    alt: 'Zney avatar with a happy smile',
+    label: 'Happy smile',
+  },
+  {
+    src: '/avatars/03_deadpan.png',
+    alt: 'Zney avatar with a deadpan expression',
+    label: 'Deadpan',
+  },
+  {
+    src: '/avatars/04_angry.png',
+    alt: 'Zney avatar with an angry expression',
+    label: 'Angry mode',
+  },
+];
 
 const aboutImages = [
   {
@@ -318,12 +338,17 @@ function ContactButton() {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded-2xl bg-[#1a1a1a] p-3 border border-[#333] shadow-xl min-w-[200px] z-50">
+        <div 
+          className="absolute top-full mt-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded-3xl p-3 border border-white/20 shadow-2xl min-w-[220px] z-50 backdrop-blur-md"
+          style={{
+            background: 'linear-gradient(123deg, rgba(24,1,31,0.95) 7%, rgba(182,0,168,0.95) 37%, rgba(118,33,176,0.95) 72%, rgba(190,76,0,0.95) 100%)',
+          }}
+        >
           <a
             href="https://www.facebook.com/psyotic.zney/"
             target="_blank"
             rel="noreferrer"
-            className="text-[#D7E2EA] hover:bg-[#333] px-4 py-3 rounded-xl transition-colors text-center text-sm font-medium uppercase tracking-widest"
+            className="text-white hover:bg-white/20 px-4 py-3 rounded-2xl transition-all text-center text-sm font-bold uppercase tracking-widest"
           >
             Facebook
           </a>
@@ -331,7 +356,7 @@ function ContactButton() {
             href="https://github.com/psy-zney"
             target="_blank"
             rel="noreferrer"
-            className="text-[#D7E2EA] hover:bg-[#333] px-4 py-3 rounded-xl transition-colors text-center text-sm font-medium uppercase tracking-widest"
+            className="text-white hover:bg-white/20 px-4 py-3 rounded-2xl transition-all text-center text-sm font-bold uppercase tracking-widest"
           >
             GitHub
           </a>
@@ -357,6 +382,77 @@ function LiveProjectButton({ href }: { href?: string }) {
 }
 
 function HeroSection() {
+  const [activeExpression, setActiveExpression] = useState(0);
+  const avatarRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const avatarElement = avatarRef.current;
+
+    if (!avatarElement) {
+      return;
+    }
+
+    let isAvatarVisible = true;
+    let lastScrollY = window.scrollY;
+    let scrollAccumulator = 0;
+    const scrollThreshold = 120;
+    const cycleExpression = (direction: 1 | -1 = 1) => {
+      setActiveExpression((current) => {
+        const nextIndex =
+          (current + direction + heroExpressions.length) % heroExpressions.length;
+        return nextIndex;
+      });
+    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isAvatarVisible = entry.isIntersecting;
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(avatarElement);
+
+    const handleScroll = () => {
+      if (!isAvatarVisible) {
+        lastScrollY = window.scrollY;
+        scrollAccumulator = 0;
+        return;
+      }
+
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY;
+      lastScrollY = currentScrollY;
+
+      if (delta === 0) {
+        return;
+      }
+
+      scrollAccumulator += delta;
+
+      if (Math.abs(scrollAccumulator) < scrollThreshold) {
+        return;
+      }
+
+      cycleExpression(scrollAccumulator > 0 ? 1 : -1);
+      scrollAccumulator = 0;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setActiveExpression((current) => (current + 1) % heroExpressions.length);
+    }, 10000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   return (
     <section className="relative flex h-screen flex-col overflow-x-clip bg-[#0C0C0C]">
       <FadeIn
@@ -396,13 +492,55 @@ function HeroSection() {
             strength={3}
             activeTransition="transform 0.3s ease-out"
             inactiveTransition="transform 0.6s ease-in-out"
+            className="relative"
           >
-            <img
-              src={portraitUrl}
-              alt="Portfolio - zney"
-              className="w-full select-none object-contain"
-              draggable={false}
-            />
+            <button
+              ref={avatarRef}
+              type="button"
+              onClick={() =>
+                setActiveExpression(
+                  (current) => (current + 1) % heroExpressions.length,
+                )
+              }
+              className="group relative block w-full cursor-pointer bg-transparent text-left"
+              aria-label={`Change avatar expression. Current expression: ${heroExpressions[activeExpression].label}`}
+            >
+              <div className="pointer-events-none absolute inset-x-[16%] bottom-[12%] h-[18%] rounded-full bg-[#f97316]/20 blur-3xl transition-opacity duration-300 group-hover:opacity-90" />
+              <motion.div
+                className="relative scale-[1.08] sm:scale-[1.1]"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                {heroExpressions.map((expression, index) => {
+                  const isActive = index === activeExpression;
+
+                  return (
+                    <motion.img
+                      key={expression.src}
+                      src={expression.src}
+                      alt={expression.alt}
+                      draggable={false}
+                      className="select-none object-contain"
+                      initial={false}
+                      animate={{
+                        opacity: isActive ? 1 : 0,
+                        scale: isActive ? 1 : 0.965,
+                        rotate: isActive ? 0 : -1.5,
+                        filter: isActive
+                          ? 'drop-shadow(0 30px 55px rgba(0, 0, 0, 0.42))'
+                          : 'drop-shadow(0 16px 28px rgba(0, 0, 0, 0.18))',
+                      }}
+                      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                      style={{
+                        position: index === 0 ? 'relative' : 'absolute',
+                        inset: 0,
+                        width: '100%',
+                      }}
+                    />
+                  );
+                })}
+              </motion.div>
+            </button>
           </Magnet>
         </FadeIn>
       </div>
