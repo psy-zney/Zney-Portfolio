@@ -2,7 +2,7 @@
 
 A modern, highly interactive, and visually striking personal portfolio website for **Zney**, a talented 3D creator and developer. Built with performance and aesthetics in mind, this project showcases a dark-themed UI, smooth scroll animations, and dynamic content integration.
 
-![Zney Portfolio](public/avatar.png)
+
 
 ## ✨ Key Features
 
