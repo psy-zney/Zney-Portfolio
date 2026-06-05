@@ -1,75 +1,86 @@
-# Jack -- 3D Creator
+# Zney - 3D Creator Portfolio
 
-Landing page portfolio cho "Jack", duoc xay dung bang React, TypeScript, Tailwind CSS, Framer Motion va Lucide React.
+A modern, highly interactive, and visually striking personal portfolio website for **Zney**, a talented 3D creator and developer. Built with performance and aesthetics in mind, this project showcases a dark-themed UI, smooth scroll animations, and dynamic content integration.
 
-## Gioi thieu
+![Zney Portfolio](public/avatar.png)
 
-Du an nay la mot landing page portfolio phong cach dark, tap trung vao trai nghiem thi giac manh voi:
+## ✨ Key Features
 
-- Hero section typography lon va portrait 3D o trung tam
-- Marquee anh dong theo scroll
-- About section voi hieu ung text reveal theo ky tu
-- Services section trinh bay dich vu ro rang, toi gian
-- Projects section dang sticky stacking cards
+- **Immersive Hero Section:** Large typography with a magnetic, interactive 3D portrait at the center.
+- **Dynamic Scroll Animations:** Utilizing Framer Motion for beautiful text reveals, fade-ins, and scroll-linked transformations.
+- **Marquee Showcase:** A continuous scrolling marquee to display visual assets and dynamic GIFs.
+- **Sticky Stacking Cards:** An engaging projects section where cards seamlessly stack on top of each other as the user scrolls.
+- **Interactive Dropdown Menus:** Modern UI interactions like the glowing "Contact Me" dropdown to easily access social links.
+- **Automated Deployments:** Fully configured with GitHub Actions to automatically build and deploy to GitHub Pages on every push.
 
-## Cong nghe su dung
+## 🛠️ Tech Stack
 
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Framer Motion
-- Lucide React
-- Google Fonts: Kanit
+- **Framework:** React 18
+- **Build Tool:** Vite
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **Typography:** Google Fonts (Kanit)
 
-## Chay local
+## 🚀 Getting Started
 
-Yeu cau:
+To run this project locally, follow these steps:
 
-- Node.js 18 tro len
-- npm
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
 
-Cai dependencies:
+### Installation
 
-```bash
-npm install
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/psy-zney/psy-zney.github.io.git
+   cd psy-zney.github.io
+   ```
 
-Chay moi truong dev:
+2. Install the dependencies:
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-Mac dinh app chay tai:
+4. Open your browser and navigate to `http://127.0.0.1:5173`.
 
-```text
-http://127.0.0.1:5173
-```
+### Build for Production
 
-## Build production
-
+To create an optimized production build:
 ```bash
 npm run build
 ```
 
-Preview ban build:
-
+You can preview the production build locally with:
 ```bash
 npm run preview
 ```
 
-## Cau truc chinh
+## 📂 Project Structure
 
 ```text
 src/
-  App.tsx       # Toan bo landing page va reusable components
-  index.css     # Global styles, reset, hero gradient text
-  main.tsx      # Entry point React
+  ├── App.tsx       # Main landing page and reusable components
+  ├── index.css     # Global styles, resets, and custom utilities
+  └── main.tsx      # React application entry point
+public/
+  ├── avatar.png    # Original 3D portrait asset
+  ├── icon_web.jpg  # Custom favicon
+  └── .nojekyll     # Bypasses GitHub Pages Jekyll processing
+.github/
+  └── workflows/
+      └── deploy.yml # GitHub Actions workflow for automatic deployment
 ```
 
-## Ghi chu
+## 🎓 Credits & License
 
-- Repo nay dang dung Vite + React theo huong SPA.
-- Thu muc `dist/` va `node_modules/` da duoc bo qua trong `.gitignore`.
-- Cac hinh anh hien tai dang duoc load tu remote URLs.
+Designed, developed, and maintained by **Zney** ([@psy-zney](https://github.com/psy-zney)).
+
+Feel free to explore the code or reach out via [Facebook](https://www.facebook.com/psyotic.zney/) or [GitHub](https://github.com/psy-zney) if you'd like to collaborate!
