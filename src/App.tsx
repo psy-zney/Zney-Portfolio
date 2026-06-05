@@ -16,7 +16,8 @@ import {
   useState,
 } from 'react';
 
-const portraitUrl = './avatar.png';
+const portraitUrl =
+  'https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png';
 
 const aboutImages = [
   {
@@ -283,28 +284,60 @@ function Magnet({
   );
 }
 
-function ContactButton({ href, text }: { href?: string; text?: string }) {
-  const actualHref = href || "https://github.com/psy-zney";
-  const actualText = text || "Contact Me";
+function ContactButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <a
-      href={actualHref}
-      target="_blank"
-      rel="noreferrer"
-      className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white outline outline-2 outline-offset-[-3px] outline-white sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base"
-      style={{
-        background:
-          'linear-gradient(123deg, #18011F 7%, #B600A8 37%, #7621B0 72%, #BE4C00 100%)',
-        boxShadow:
-          '0px 4px 4px rgba(181, 1, 167, 0.25), 4px 4px 12px #7721B1 inset',
-      }}
-    >
-      <span>{actualText}</span>
-      <ArrowUpRight
-        className="hidden h-4 w-4 sm:block md:h-5 md:w-5"
-        aria-hidden="true"
-      />
-    </a>
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white outline outline-2 outline-offset-[-3px] outline-white sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base transition-transform hover:scale-105"
+        style={{
+          background:
+            'linear-gradient(123deg, #18011F 7%, #B600A8 37%, #7621B0 72%, #BE4C00 100%)',
+          boxShadow:
+            '0px 4px 4px rgba(181, 1, 167, 0.25), 4px 4px 12px #7721B1 inset',
+        }}
+      >
+        <span>Contact Me</span>
+        <ArrowUpRight
+          className="hidden h-4 w-4 sm:block md:h-5 md:w-5"
+          aria-hidden="true"
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded-2xl bg-[#1a1a1a] p-3 border border-[#333] shadow-xl min-w-[200px] z-50">
+          <a
+            href="https://www.facebook.com/psyotic.zney/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[#D7E2EA] hover:bg-[#333] px-4 py-3 rounded-xl transition-colors text-center text-sm font-medium uppercase tracking-widest"
+          >
+            Facebook
+          </a>
+          <a
+            href="https://github.com/psy-zney"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[#D7E2EA] hover:bg-[#333] px-4 py-3 rounded-xl transition-colors text-center text-sm font-medium uppercase tracking-widest"
+          >
+            GitHub
+          </a>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -366,7 +399,7 @@ function HeroSection() {
           >
             <img
               src={portraitUrl}
-              alt="Zney 3D creator portrait"
+              alt="Portfolio - zney"
               className="w-full select-none object-contain"
               draggable={false}
             />
@@ -380,9 +413,8 @@ function HeroSection() {
             a 3d creator driven by crafting striking and unforgettable projects
           </p>
         </FadeIn>
-        <FadeIn delay={0.5} y={20} onLoad className="flex gap-4">
-          <ContactButton href="https://github.com/psy-zney" text="GitHub" />
-          <ContactButton href="https://www.facebook.com/psyotic.zney/" text="Facebook" />
+        <FadeIn delay={0.5} y={20} onLoad>
+          <ContactButton />
         </FadeIn>
       </div>
     </section>
