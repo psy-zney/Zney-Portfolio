@@ -352,7 +352,7 @@ function HeroSection() {
         className="relative z-0 mt-6 w-full overflow-hidden sm:mt-4 md:-mt-5"
       >
         <h1 className="hero-heading w-full whitespace-nowrap text-center text-[14vw] font-black uppercase leading-none tracking-tight sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw]">
-          Hi, i&apos;m psy zney
+          Hi, i&apos;m zney
         </h1>
       </FadeIn>
 
@@ -382,7 +382,7 @@ function HeroSection() {
         </FadeIn>
         <FadeIn delay={0.5} y={20} onLoad className="flex gap-4">
           <ContactButton href="https://github.com/psy-zney" text="GitHub" />
-          <ContactButton href="https://facebook.com/psy-zney" text="Facebook" />
+          <ContactButton href="https://www.facebook.com/psyotic.zney/" text="Facebook" />
         </FadeIn>
       </div>
     </section>
