@@ -16,8 +16,7 @@ import {
   useState,
 } from 'react';
 
-const portraitUrl =
-  'https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png';
+const portraitUrl = './avatar.png';
 
 const aboutImages = [
   {
@@ -110,34 +109,70 @@ const services = [
 const projects = [
   {
     number: '01',
-    category: 'Client',
-    name: 'Nextlevel Studio',
+    category: 'Personal',
+    name: 'AI English Learning',
     images: [
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055344_5eff02e0-87a5-41ce-b64f-eb08da8f33db.png&w=1280&q=85',
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png&w=1280&q=85',
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png&w=1280&q=85',
     ],
+    link: 'https://github.com/psy-zney/ai-english-learning'
   },
   {
     number: '02',
-    category: 'Personal',
-    name: 'Aura Brand Identity',
+    category: 'University',
+    name: 'DoAnOOP',
     images: [
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055654_911201c5-36d9-4bc6-bac7-331adfce159f.png&w=1280&q=85',
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055723_5ceda0b8-d9c2-4665-b2e3-83ba19ba76d1.png&w=1280&q=85',
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055753_adc5dcbd-a8e6-49c0-b43a-9b030d835cea.png&w=1280&q=85',
     ],
+    link: 'https://github.com/psy-zney/DoAnOOP'
   },
   {
     number: '03',
-    category: 'Client',
-    name: 'Solaris Digital',
+    category: 'Algorithm',
+    name: 'AI Hill Climbing TSP',
     images: [
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055759_963cfb0b-4bd1-4b0f-9d0a-09bd6cf95b2f.png&w=1280&q=85',
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_060108_438f781a-9846-4dcc-89ab-c4e6cb830f5b.png&w=1280&q=85',
       'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055818_9d062121-ad7e-46b9-999a-1a6a692ef1ee.png&w=1280&q=85',
     ],
+    link: 'https://github.com/psy-zney/AI_Hill_Climbing_TSP'
   },
+  {
+    number: '04',
+    category: 'Personal',
+    name: 'Beatsync',
+    images: [
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055344_5eff02e0-87a5-41ce-b64f-eb08da8f33db.png&w=1280&q=85',
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png&w=1280&q=85',
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png&w=1280&q=85',
+    ],
+    link: 'https://github.com/psy-zney/beatsync'
+  },
+  {
+    number: '05',
+    category: 'Personal',
+    name: 'Security',
+    images: [
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055654_911201c5-36d9-4bc6-bac7-331adfce159f.png&w=1280&q=85',
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055723_5ceda0b8-d9c2-4665-b2e3-83ba19ba76d1.png&w=1280&q=85',
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055753_adc5dcbd-a8e6-49c0-b43a-9b030d835cea.png&w=1280&q=85',
+    ],
+    link: 'https://github.com/psy-zney/Security'
+  },
+  {
+    number: '06',
+    category: 'Personal',
+    name: 'Mandycrimson',
+    images: [
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055759_963cfb0b-4bd1-4b0f-9d0a-09bd6cf95b2f.png&w=1280&q=85',
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_060108_438f781a-9846-4dcc-89ab-c4e6cb830f5b.png&w=1280&q=85',
+      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055818_9d062121-ad7e-46b9-999a-1a6a692ef1ee.png&w=1280&q=85',
+    ],
+    link: 'https://github.com/psy-zney/mandycrimson'
+  }
 ];
 
 type FadeInProps = {
@@ -248,10 +283,14 @@ function Magnet({
   );
 }
 
-function ContactButton() {
+function ContactButton({ href, text }: { href?: string; text?: string }) {
+  const actualHref = href || "https://github.com/psy-zney";
+  const actualText = text || "Contact Me";
   return (
     <a
-      href="mailto:jack@example.com"
+      href={actualHref}
+      target="_blank"
+      rel="noreferrer"
       className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white outline outline-2 outline-offset-[-3px] outline-white sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base"
       style={{
         background:
@@ -260,7 +299,7 @@ function ContactButton() {
           '0px 4px 4px rgba(181, 1, 167, 0.25), 4px 4px 12px #7721B1 inset',
       }}
     >
-      <span>Contact Me</span>
+      <span>{actualText}</span>
       <ArrowUpRight
         className="hidden h-4 w-4 sm:block md:h-5 md:w-5"
         aria-hidden="true"
@@ -269,13 +308,16 @@ function ContactButton() {
   );
 }
 
-function LiveProjectButton() {
+function LiveProjectButton({ href }: { href?: string }) {
+  const actualHref = href || "#projects";
   return (
     <a
-      href="#projects"
+      href={actualHref}
+      target="_blank"
+      rel="noreferrer"
       className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#D7E2EA] px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#D7E2EA] transition-colors duration-200 hover:bg-[#D7E2EA]/10 sm:px-10 sm:py-3.5 sm:text-base"
     >
-      <span>Live Project</span>
+      <span>View on GitHub</span>
       <ExternalLink className="hidden h-4 w-4 sm:block" aria-hidden="true" />
     </a>
   );
@@ -310,7 +352,7 @@ function HeroSection() {
         className="relative z-0 mt-6 w-full overflow-hidden sm:mt-4 md:-mt-5"
       >
         <h1 className="hero-heading w-full whitespace-nowrap text-center text-[14vw] font-black uppercase leading-none tracking-tight sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw]">
-          Hi, i&apos;m jack
+          Hi, i&apos;m psy zney
         </h1>
       </FadeIn>
 
@@ -338,8 +380,9 @@ function HeroSection() {
             a 3d creator driven by crafting striking and unforgettable projects
           </p>
         </FadeIn>
-        <FadeIn delay={0.5} y={20} onLoad>
-          <ContactButton />
+        <FadeIn delay={0.5} y={20} onLoad className="flex gap-4">
+          <ContactButton href="https://github.com/psy-zney" text="GitHub" />
+          <ContactButton href="https://facebook.com/psy-zney" text="Facebook" />
         </FadeIn>
       </div>
     </section>
@@ -582,7 +625,7 @@ function ProjectCard({
             </h3>
           </div>
           <div className="justify-self-start sm:justify-self-end">
-            <LiveProjectButton />
+            <LiveProjectButton href={(project as any).link} />
           </div>
         </div>
 
