@@ -366,7 +366,7 @@ function HeroSection() {
           >
             <img
               src={portraitUrl}
-              alt="Jack 3D creator portrait"
+              alt="Zney 3D creator portrait"
               className="w-full select-none object-contain"
               draggable={false}
             />
