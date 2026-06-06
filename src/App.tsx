@@ -1,4 +1,4 @@
-import { ArrowUpRight, ExternalLink, Facebook, Github } from 'lucide-react';
+import { ArrowUpRight, ExternalLink, Facebook, Github, Menu, ChevronDown, Mail, Phone } from 'lucide-react';
 import {
   motion,
   type MotionStyle,
@@ -48,17 +48,17 @@ const developerFocus = [
 ];
 
 const developerStats = [
-  { value: '5+', label: 'Years learning and building' },
-  { value: '10+', label: 'Projects shipped across study and personal work' },
-  { value: '24/7', label: 'Bias toward iteration, debugging, and polish' },
-  { value: '1', label: 'Goal: useful software, not decorative pages' },
+  { value: '3+', label: 'Years studying IT and building projects' },
+  { value: '10+', label: 'Projects completed during coursework and personal time' },
+  { value: '24/7', label: 'Learning new technologies and debugging' },
+  { value: '1', label: 'Goal: become a proficient Software Engineer' },
 ];
 
 const terminalPreview = [
-  { prompt: 'stack', output: 'React, TypeScript, Tailwind, Node.js, Java, SQL' },
-  { prompt: 'focus', output: 'interfaces that feel fast, clear, and maintainable' },
-  { prompt: 'workflow', output: 'design -> code -> test -> refine -> ship' },
-  { prompt: 'current', output: 'building developer-focused products and practical tools' },
+  { prompt: 'stack', output: 'React, TypeScript, Java, C++, Python, SQL' },
+  { prompt: 'focus', output: 'frontend development, AI algorithms, and clean architecture' },
+  { prompt: 'workflow', output: 'learn -> design -> code -> debug -> submit' },
+  { prompt: 'current', output: '3rd-year university student exploring web and AI' },
 ];
 
 const marqueeImages = [
@@ -88,33 +88,33 @@ const marqueeImages = [
 const services = [
   {
     number: '01',
-    name: 'Frontend Engineering',
+    name: 'Full Stack Development',
     description:
-      'Building responsive interfaces in React and TypeScript with strong attention to state flow, component structure, and maintainability.',
+      'Building complete web applications from end to end, handling both robust Backend architecture and interactive Frontend interfaces.',
   },
   {
     number: '02',
-    name: 'UI Implementation',
+    name: 'Algorithm & Logic',
     description:
-      'Turning product ideas or visual references into polished screens that feel fast, consistent, and production-ready.',
+      'Applying data structures, algorithms, and logical problem-solving to optimize code performance and build AI-driven logic.',
   },
   {
     number: '03',
-    name: 'API Integration',
+    name: 'Mobile Development',
     description:
-      'Connecting frontend experiences to backend services, handling async states cleanly, and making data-heavy workflows readable.',
+      'Developing cross-platform and native mobile applications using React Native and Java to deliver seamless user experiences.',
   },
   {
     number: '04',
-    name: 'Performance Cleanup',
+    name: 'Database Design',
     description:
-      'Refining rendering behavior, reducing visual noise, and tightening interactions so the interface stays smooth under real use.',
+      'Structuring relational databases (SQL) to ensure efficient data retrieval and maintain data integrity for web applications.',
   },
   {
     number: '05',
-    name: 'Product Iteration',
+    name: 'Academic Research',
     description:
-      'Working through feedback, edge cases, and UX gaps to move a project from rough prototype to something users can trust.',
+      'Exploring and implementing concepts from computer science coursework into practical, real-world projects.',
   },
 ];
 
@@ -123,66 +123,42 @@ const projects = [
     number: '01',
     category: 'Personal',
     name: 'AI English Learning',
-    images: [
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055344_5eff02e0-87a5-41ce-b64f-eb08da8f33db.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png&w=1280&q=85',
-    ],
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png&w=1280&q=85',
     link: 'https://github.com/psy-zney/ai-english-learning'
   },
   {
     number: '02',
     category: 'University',
     name: 'DoAnOOP',
-    images: [
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055654_911201c5-36d9-4bc6-bac7-331adfce159f.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055723_5ceda0b8-d9c2-4665-b2e3-83ba19ba76d1.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055753_adc5dcbd-a8e6-49c0-b43a-9b030d835cea.png&w=1280&q=85',
-    ],
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055753_adc5dcbd-a8e6-49c0-b43a-9b030d835cea.png&w=1280&q=85',
     link: 'https://github.com/psy-zney/DoAnOOP'
   },
   {
     number: '03',
     category: 'Algorithm',
     name: 'AI Hill Climbing TSP',
-    images: [
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055759_963cfb0b-4bd1-4b0f-9d0a-09bd6cf95b2f.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_060108_438f781a-9846-4dcc-89ab-c4e6cb830f5b.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055818_9d062121-ad7e-46b9-999a-1a6a692ef1ee.png&w=1280&q=85',
-    ],
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055818_9d062121-ad7e-46b9-999a-1a6a692ef1ee.png&w=1280&q=85',
     link: 'https://github.com/psy-zney/AI_Hill_Climbing_TSP'
   },
   {
     number: '04',
     category: 'Personal',
     name: 'Beatsync',
-    images: [
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055344_5eff02e0-87a5-41ce-b64f-eb08da8f33db.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png&w=1280&q=85',
-    ],
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png&w=1280&q=85',
     link: 'https://github.com/psy-zney/beatsync'
   },
   {
     number: '05',
     category: 'Personal',
     name: 'Security',
-    images: [
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055654_911201c5-36d9-4bc6-bac7-331adfce159f.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055723_5ceda0b8-d9c2-4665-b2e3-83ba19ba76d1.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055753_adc5dcbd-a8e6-49c0-b43a-9b030d835cea.png&w=1280&q=85',
-    ],
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055723_5ceda0b8-d9c2-4665-b2e3-83ba19ba76d1.png&w=1280&q=85',
     link: 'https://github.com/psy-zney/Security'
   },
   {
     number: '06',
     category: 'Personal',
     name: 'Mandycrimson',
-    images: [
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055759_963cfb0b-4bd1-4b0f-9d0a-09bd6cf95b2f.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_060108_438f781a-9846-4dcc-89ab-c4e6cb830f5b.png&w=1280&q=85',
-      'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055818_9d062121-ad7e-46b9-999a-1a6a692ef1ee.png&w=1280&q=85',
-    ],
+    image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_060108_438f781a-9846-4dcc-89ab-c4e6cb830f5b.png&w=1280&q=85',
     link: 'https://github.com/psy-zney/mandycrimson'
   }
 ];
@@ -295,6 +271,104 @@ function Magnet({
   );
 }
 
+function HeaderMenu() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+        setContactOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const menuItems = [
+    { label: 'Zney (Main Page)', href: '#' },
+    { label: 'Beatsync', href: 'https://beatsync.zney295.id.vn' },
+    { label: 'Security', href: 'https://zney295.id.vn/Security/' },
+    { label: 'Luckyfoods', href: '#projects' },
+    { label: 'Mandycrimson', href: '#projects' },
+    { label: 'Learning English', href: '#projects' },
+  ];
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:scale-105"
+        aria-label="Menu"
+      >
+        <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-[#D7E2EA]" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full right-0 mt-4 flex flex-col gap-2 rounded-3xl p-3 border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] min-w-[240px] z-50 backdrop-blur-xl bg-[#0c0c0c]/90">
+          {menuItems.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              onClick={() => setIsOpen(false)}
+              className="text-white hover:bg-white/10 px-4 py-3 rounded-2xl transition-all text-sm font-bold uppercase tracking-widest text-left"
+              {...(item.href.startsWith('http') ? { target: "_blank", rel: "noreferrer" } : {})}
+            >
+              {item.label}
+            </a>
+          ))}
+          
+          <div className="relative">
+            <button
+              onClick={() => setContactOpen(!contactOpen)}
+              className="w-full flex items-center justify-between text-white hover:bg-white/10 px-4 py-3 rounded-2xl transition-all text-sm font-bold uppercase tracking-widest"
+            >
+              Contact
+              <ChevronDown className={`w-4 h-4 transition-transform ${contactOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {contactOpen && (
+              <div className="flex flex-col gap-2 p-2 mt-1 bg-white/5 rounded-2xl">
+                <a
+                  href="https://www.facebook.com/psyotic.zney/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white hover:bg-white/20 px-4 py-2 rounded-xl transition-all flex items-center gap-3 text-xs font-bold uppercase tracking-widest"
+                >
+                  <Facebook className="w-4 h-4" /> Facebook
+                </a>
+                <a
+                  href="https://github.com/psy-zney"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white hover:bg-white/20 px-4 py-2 rounded-xl transition-all flex items-center gap-3 text-xs font-bold uppercase tracking-widest"
+                >
+                  <Github className="w-4 h-4" /> GitHub
+                </a>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=lequangkhanh295@gmail.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white hover:bg-white/20 px-4 py-2 rounded-xl transition-all flex items-center gap-3 text-xs font-bold uppercase tracking-widest"
+                >
+                  <Mail className="w-4 h-4" /> Gmail
+                </a>
+                <a
+                  href="tel:0394426827"
+                  className="text-white hover:bg-white/20 px-4 py-2 rounded-xl transition-all flex items-center gap-3 text-xs font-bold uppercase tracking-widest"
+                >
+                  <Phone className="w-4 h-4" /> 0394426827
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ContactButton() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -343,6 +417,22 @@ function ContactButton() {
           >
             <Github className="w-5 h-5" />
             GitHub
+          </a>
+          <a
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=lequangkhanh295@gmail.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-white hover:bg-white/20 px-4 py-3 rounded-2xl transition-all flex items-center justify-center gap-3 text-sm font-bold uppercase tracking-widest"
+          >
+            <Mail className="w-5 h-5" />
+            Gmail
+          </a>
+          <a
+            href="tel:0394426827"
+            className="text-white hover:bg-white/20 px-4 py-3 rounded-2xl transition-all flex items-center justify-center gap-3 text-sm font-bold uppercase tracking-widest"
+          >
+            <Phone className="w-5 h-5" />
+            0394426827 (Zalo)
           </a>
         </div>
       )}
@@ -446,16 +536,17 @@ function HeroSection() {
         onLoad
         className="z-20 px-6 pt-6 md:px-10 md:pt-8"
       >
-        <div className="flex w-full items-center justify-between text-sm font-medium uppercase tracking-wider text-[#D7E2EA] md:text-lg lg:text-[1.4rem]">
-          {['About', 'Price', 'Projects', 'Contact'].map((item) => (
+        <div className="flex w-full items-center justify-between gap-1 text-[10px] sm:gap-2 sm:text-sm font-medium uppercase tracking-wider text-[#D7E2EA] md:text-lg lg:text-[1.4rem]">
+          {['About', 'Tech', 'Projects'].map((item) => (
             <a
               key={item}
               href={`#${item.toLowerCase()}`}
-              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:scale-105"
+              className="px-3 py-1.5 sm:px-6 sm:py-2.5 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:scale-105"
             >
               {item}
             </a>
           ))}
+          <HeaderMenu />
         </div>
       </FadeIn>
 
@@ -648,7 +739,7 @@ function AboutSection() {
               Developer profile
             </span>
             <div className="space-y-4">
-              <h2 className="max-w-3xl text-[clamp(3rem,8vw,6.8rem)] font-black uppercase leading-[0.92] tracking-tight text-[#f2f7fb]">
+              <h2 className="max-w-3xl text-[clamp(2.5rem,6vw,5rem)] font-black uppercase leading-[0.92] tracking-tight text-[#f2f7fb]">
                 I build products that are clear, fast, and ready to ship.
               </h2>
               <p className="max-w-2xl text-[clamp(1rem,1.8vw,1.28rem)] leading-relaxed text-[#c3d0d8]">
@@ -716,7 +807,7 @@ function AboutSection() {
               <div>
                 <span className="text-[#38bdf8]">$ whoami</span>
                 <p className="mt-1 text-[#f2f7fb]">
-                  Frontend-focused developer with a product mindset.
+                  3rd-year IT student passionate about frontend development and AI.
                 </p>
               </div>
 
@@ -732,9 +823,9 @@ function AboutSection() {
                   Current priorities
                 </p>
                 <ul className="mt-3 space-y-2 text-sm text-[#d7e2ea]">
-                  <li>Build UI that scales past the first demo.</li>
-                  <li>Reduce visual noise, keep interaction obvious.</li>
-                  <li>Write code that another developer can extend quickly.</li>
+                  <li>Learn advanced frontend frameworks.</li>
+                  <li>Improve problem-solving and algorithmic skills.</li>
+                  <li>Build projects that solve real-world problems.</li>
                 </ul>
               </div>
             </div>
@@ -748,12 +839,12 @@ function AboutSection() {
 function ServicesSection() {
   return (
     <section
-      id="price"
+      id="tech"
       className="rounded-t-[40px] bg-white px-5 py-20 text-[#0C0C0C] sm:rounded-t-[50px] sm:px-8 sm:py-24 md:rounded-t-[60px] md:px-10 md:py-32"
     >
       <FadeIn>
-        <h2 className="mb-16 text-center text-[clamp(3rem,12vw,160px)] font-black uppercase leading-none tracking-tight sm:mb-20 md:mb-28">
-          Services
+        <h2 className="mb-16 text-center text-[clamp(2.5rem,10vw,140px)] font-black uppercase leading-none tracking-tight sm:mb-20 md:mb-28">
+          Tech & Skills
         </h2>
       </FadeIn>
 
@@ -794,10 +885,10 @@ function ProjectCard({
     target: ref,
     offset: ['start end', 'start start'],
   });
-  const targetScale = 1 - (totalCards - 1 - index) * 0.03;
+  const targetScale = 1 - (totalCards - 1 - index) * 0.05;
   const scale = useTransform(scrollYProgress, [0, 1], [1, targetScale]);
   const cardStyle: MotionStyle & { '--card-offset': string } = {
-    '--card-offset': `${index * 28}px`,
+    '--card-offset': `${index * 35}px`,
     scale,
     transformOrigin: 'top center',
   };
@@ -805,8 +896,8 @@ function ProjectCard({
   return (
     <motion.article
       ref={ref}
-      className="sticky top-[calc(6rem+var(--card-offset))] mb-12 overflow-hidden rounded-[40px] border-2 border-white/30 bg-[#0C0C0C] p-4 sm:rounded-[50px] sm:p-6 md:top-[calc(8rem+var(--card-offset))] md:mb-20 md:rounded-[60px] md:p-8"
-      style={{ ...cardStyle, minHeight: '85vh' }}
+      className="sticky top-[calc(4rem+var(--card-offset))] mb-12 overflow-hidden rounded-[30px] border border-white/20 bg-[#0C0C0C] p-4 sm:rounded-[40px] sm:p-6 md:top-[calc(5rem+var(--card-offset))] md:mb-16 md:rounded-[50px] md:p-8"
+      style={{ ...cardStyle }}
     >
         <div className="mb-6 grid items-end gap-4 text-[#D7E2EA] sm:grid-cols-[auto_1fr_auto] md:mb-8">
           <span className="text-[clamp(3rem,10vw,140px)] font-black uppercase leading-none">
@@ -825,26 +916,12 @@ function ProjectCard({
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-[40fr_60fr]">
-          <div className="grid gap-3">
-            <img
-              src={project.images[0]}
-              alt={`${project.name} preview 1`}
-              loading="lazy"
-              className="h-[clamp(130px,16vw,230px)] w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
-            />
-            <img
-              src={project.images[1]}
-              alt={`${project.name} preview 2`}
-              loading="lazy"
-              className="h-[clamp(160px,22vw,340px)] w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
-            />
-          </div>
+        <div className="mt-6 w-full">
           <img
-            src={project.images[2]}
-            alt={`${project.name} preview 3`}
+            src={(project as any).image}
+            alt={`${project.name} preview`}
             loading="lazy"
-            className="h-[clamp(300px,40vw,582px)] w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
+            className="h-[clamp(200px,35vw,450px)] w-full rounded-[24px] object-cover sm:rounded-[32px] md:rounded-[40px] border border-white/10"
           />
         </div>
       </motion.article>
@@ -855,7 +932,7 @@ function ProjectsSection() {
   return (
     <section
       id="projects"
-      className="relative z-10 -mt-10 rounded-t-[40px] bg-[#0C0C0C] px-5 py-20 sm:-mt-12 sm:rounded-t-[50px] sm:px-8 sm:py-24 md:-mt-14 md:rounded-t-[60px] md:px-10 md:py-32"
+      className="relative z-10 -mt-10 rounded-t-[40px] bg-[#0C0C0C] px-5 pb-32 pt-20 sm:-mt-12 sm:rounded-t-[50px] sm:px-8 sm:pb-40 sm:pt-24 md:-mt-14 md:rounded-t-[60px] md:px-10 md:pb-64 md:pt-32"
     >
       <FadeIn>
         <h2 className="hero-heading mb-16 text-center text-[clamp(3rem,12vw,160px)] font-black uppercase leading-none tracking-tight sm:mb-20 md:mb-28">
