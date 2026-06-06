@@ -291,9 +291,9 @@ function HeaderMenu() {
     { label: 'Zney (Main Page)', href: '#' },
     { label: 'Beatsync', href: 'https://beatsync.zney295.id.vn' },
     { label: 'Security', href: 'https://zney295.id.vn/Security/' },
-    { label: 'Luckyfoods', href: '#projects' },
-    { label: 'Mandycrimson', href: '#projects' },
-    { label: 'Learning English', href: '#projects' },
+    { label: 'Luckyfoods', href: 'https://github.com/psy-zney/luckyfoods' },
+    { label: 'Mandycrimson', href: 'https://zney295.id.vn/mandycrimson/' },
+    { label: 'Learning English', href: 'https://github.com/psy-zney/ai-english-learning' },
   ];
 
   return (
@@ -319,7 +319,7 @@ function HeaderMenu() {
               {item.label}
             </a>
           ))}
-          
+
           <div className="relative">
             <button
               onClick={() => setContactOpen(!contactOpen)}
@@ -556,7 +556,7 @@ function HeroSection() {
         onLoad
         className="relative z-0 mt-6 w-full overflow-hidden sm:mt-4 md:-mt-5"
       >
-        <h1 
+        <h1
           className="hero-heading w-full whitespace-nowrap text-center text-[14vw] font-black uppercase leading-none tracking-tight sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw] transition-colors duration-300"
           onMouseEnter={() => setIsTitleHovered(true)}
           onMouseMove={(e) => {
@@ -568,7 +568,7 @@ function HeroSection() {
           }}
           onMouseLeave={() => setIsTitleHovered(false)}
           style={{
-            backgroundImage: isTitleHovered 
+            backgroundImage: isTitleHovered
               ? 'radial-gradient(circle 250px at var(--mouse-x, 50%) var(--mouse-y, 50%), #38bdf8 0%, #d7e2ea 100%)'
               : 'linear-gradient(180deg, #9ca3af 0%, #ffffff 100%)',
             WebkitBackgroundClip: 'text',
@@ -899,32 +899,32 @@ function ProjectCard({
       className="sticky top-[calc(4rem+var(--card-offset))] mb-12 overflow-hidden rounded-[30px] border border-white/20 bg-[#0C0C0C] p-4 sm:rounded-[40px] sm:p-6 md:top-[calc(5rem+var(--card-offset))] md:mb-16 md:rounded-[50px] md:p-8"
       style={{ ...cardStyle }}
     >
-        <div className="mb-6 grid items-end gap-4 text-[#D7E2EA] sm:grid-cols-[auto_1fr_auto] md:mb-8">
-          <span className="text-[clamp(3rem,10vw,140px)] font-black uppercase leading-none">
-            {project.number}
-          </span>
-          <div className="min-w-0">
-            <p className="mb-2 text-xs font-medium uppercase tracking-widest opacity-70 sm:text-sm">
-              {project.category}
-            </p>
-            <h3 className="text-[clamp(1.8rem,5vw,5rem)] font-black uppercase leading-none tracking-tight">
-              {project.name}
-            </h3>
-          </div>
-          <div className="justify-self-start sm:justify-self-end">
-            <LiveProjectButton href={(project as any).link} />
-          </div>
+      <div className="mb-6 grid items-end gap-4 text-[#D7E2EA] sm:grid-cols-[auto_1fr_auto] md:mb-8">
+        <span className="text-[clamp(3rem,10vw,140px)] font-black uppercase leading-none">
+          {project.number}
+        </span>
+        <div className="min-w-0">
+          <p className="mb-2 text-xs font-medium uppercase tracking-widest opacity-70 sm:text-sm">
+            {project.category}
+          </p>
+          <h3 className="text-[clamp(1.8rem,5vw,5rem)] font-black uppercase leading-none tracking-tight">
+            {project.name}
+          </h3>
         </div>
+        <div className="justify-self-start sm:justify-self-end">
+          <LiveProjectButton href={(project as any).link} />
+        </div>
+      </div>
 
-        <div className="mt-6 w-full">
-          <img
-            src={(project as any).image}
-            alt={`${project.name} preview`}
-            loading="lazy"
-            className="h-[clamp(200px,35vw,450px)] w-full rounded-[24px] object-cover sm:rounded-[32px] md:rounded-[40px] border border-white/10"
-          />
-        </div>
-      </motion.article>
+      <div className="mt-6 w-full">
+        <img
+          src={(project as any).image}
+          alt={`${project.name} preview`}
+          loading="lazy"
+          className="h-[clamp(200px,35vw,450px)] w-full rounded-[24px] object-cover sm:rounded-[32px] md:rounded-[40px] border border-white/10"
+        />
+      </div>
+    </motion.article>
   );
 }
 
