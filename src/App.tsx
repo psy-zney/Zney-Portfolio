@@ -1,10 +1,9 @@
-import { ArrowUpRight, ExternalLink } from 'lucide-react';
+import { ArrowUpRight, ExternalLink, Facebook, Github } from 'lucide-react';
 import {
   motion,
   type MotionStyle,
   useScroll,
   useTransform,
-  type MotionValue,
   type Transition,
 } from 'framer-motion';
 import {
@@ -39,35 +38,27 @@ const heroExpressions = [
   },
 ];
 
-const aboutImages = [
-  {
-    src: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png',
-    className:
-      'top-[4%] left-[1%] sm:left-[2%] md:left-[4%] w-[120px] sm:w-[160px] md:w-[210px]',
-    delay: 0.1,
-    x: -80,
-  },
-  {
-    src: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png',
-    className:
-      'bottom-[8%] left-[3%] sm:left-[6%] md:left-[10%] w-[100px] sm:w-[140px] md:w-[180px]',
-    delay: 0.25,
-    x: -80,
-  },
-  {
-    src: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png',
-    className:
-      'top-[4%] right-[1%] sm:right-[2%] md:right-[4%] w-[120px] sm:w-[160px] md:w-[210px]',
-    delay: 0.15,
-    x: 80,
-  },
-  {
-    src: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png',
-    className:
-      'bottom-[8%] right-[3%] sm:right-[6%] md:right-[10%] w-[130px] sm:w-[170px] md:w-[220px]',
-    delay: 0.3,
-    x: 80,
-  },
+const developerFocus = [
+  'Frontend architecture',
+  'React and TypeScript',
+  'API integration',
+  'Performance tuning',
+  'Product-minded UI',
+  'Shipping end to end',
+];
+
+const developerStats = [
+  { value: '5+', label: 'Years learning and building' },
+  { value: '10+', label: 'Projects shipped across study and personal work' },
+  { value: '24/7', label: 'Bias toward iteration, debugging, and polish' },
+  { value: '1', label: 'Goal: useful software, not decorative pages' },
+];
+
+const terminalPreview = [
+  { prompt: 'stack', output: 'React, TypeScript, Tailwind, Node.js, Java, SQL' },
+  { prompt: 'focus', output: 'interfaces that feel fast, clear, and maintainable' },
+  { prompt: 'workflow', output: 'design -> code -> test -> refine -> ship' },
+  { prompt: 'current', output: 'building developer-focused products and practical tools' },
 ];
 
 const marqueeImages = [
@@ -97,33 +88,33 @@ const marqueeImages = [
 const services = [
   {
     number: '01',
-    name: '3D Modeling',
+    name: 'Frontend Engineering',
     description:
-      'Creation of detailed objects, characters, or environments tailored to specific client needs, ideal for games, products, and visualizations.',
+      'Building responsive interfaces in React and TypeScript with strong attention to state flow, component structure, and maintainability.',
   },
   {
     number: '02',
-    name: 'Rendering',
+    name: 'UI Implementation',
     description:
-      'High-quality, photorealistic renders that showcase designs with custom lighting, textures, and materials to bring concepts to life.',
+      'Turning product ideas or visual references into polished screens that feel fast, consistent, and production-ready.',
   },
   {
     number: '03',
-    name: 'Motion Design',
+    name: 'API Integration',
     description:
-      'Dynamic animations and motion graphics that add energy and storytelling to brands, products, and digital experiences.',
+      'Connecting frontend experiences to backend services, handling async states cleanly, and making data-heavy workflows readable.',
   },
   {
     number: '04',
-    name: 'Branding',
+    name: 'Performance Cleanup',
     description:
-      'Crafting cohesive visual identities -- from logos to full brand systems -- that communicate a clear and memorable presence.',
+      'Refining rendering behavior, reducing visual noise, and tightening interactions so the interface stays smooth under real use.',
   },
   {
     number: '05',
-    name: 'Web Design',
+    name: 'Product Iteration',
     description:
-      'Designing clean, modern, and conversion-focused websites with attention to layout, typography, and user experience.',
+      'Working through feedback, edge cases, and UX gaps to move a project from rough prototype to something users can trust.',
   },
 ];
 
@@ -322,13 +313,7 @@ function ContactButton() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white outline outline-2 outline-offset-[-3px] outline-white sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base transition-transform hover:scale-105"
-        style={{
-          background:
-            'linear-gradient(123deg, #18011F 7%, #B600A8 37%, #7621B0 72%, #BE4C00 100%)',
-          boxShadow:
-            '0px 4px 4px rgba(181, 1, 167, 0.25), 4px 4px 12px #7721B1 inset',
-        }}
+        className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base transition-all duration-300 hover:scale-105 bg-white/10 backdrop-blur-lg border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] hover:bg-white/20 hover:border-white/30"
       >
         <span>Contact Me</span>
         <ArrowUpRight
@@ -338,26 +323,25 @@ function ContactButton() {
       </button>
 
       {isOpen && (
-        <div 
-          className="absolute top-full mt-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded-3xl p-3 border border-white/20 shadow-2xl min-w-[220px] z-50 backdrop-blur-md"
-          style={{
-            background: 'linear-gradient(123deg, rgba(24,1,31,0.95) 7%, rgba(182,0,168,0.95) 37%, rgba(118,33,176,0.95) 72%, rgba(190,76,0,0.95) 100%)',
-          }}
+        <div
+          className="absolute top-full mt-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 rounded-3xl p-3 border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] min-w-[220px] z-50 backdrop-blur-xl bg-white/10"
         >
           <a
             href="https://www.facebook.com/psyotic.zney/"
             target="_blank"
             rel="noreferrer"
-            className="text-white hover:bg-white/20 px-4 py-3 rounded-2xl transition-all text-center text-sm font-bold uppercase tracking-widest"
+            className="text-white hover:bg-white/20 px-4 py-3 rounded-2xl transition-all flex items-center justify-center gap-3 text-sm font-bold uppercase tracking-widest"
           >
+            <Facebook className="w-5 h-5" />
             Facebook
           </a>
           <a
             href="https://github.com/psy-zney"
             target="_blank"
             rel="noreferrer"
-            className="text-white hover:bg-white/20 px-4 py-3 rounded-2xl transition-all text-center text-sm font-bold uppercase tracking-widest"
+            className="text-white hover:bg-white/20 px-4 py-3 rounded-2xl transition-all flex items-center justify-center gap-3 text-sm font-bold uppercase tracking-widest"
           >
+            <Github className="w-5 h-5" />
             GitHub
           </a>
         </div>
@@ -383,6 +367,7 @@ function LiveProjectButton({ href }: { href?: string }) {
 
 function HeroSection() {
   const [activeExpression, setActiveExpression] = useState(0);
+  const [isTitleHovered, setIsTitleHovered] = useState(false);
   const avatarRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -466,7 +451,7 @@ function HeroSection() {
             <a
               key={item}
               href={`#${item.toLowerCase()}`}
-              className="transition-opacity duration-200 hover:opacity-70"
+              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:scale-105"
             >
               {item}
             </a>
@@ -480,7 +465,27 @@ function HeroSection() {
         onLoad
         className="relative z-0 mt-6 w-full overflow-hidden sm:mt-4 md:-mt-5"
       >
-        <h1 className="hero-heading w-full whitespace-nowrap text-center text-[14vw] font-black uppercase leading-none tracking-tight sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw]">
+        <h1 
+          className="hero-heading w-full whitespace-nowrap text-center text-[14vw] font-black uppercase leading-none tracking-tight sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw] transition-colors duration-300"
+          onMouseEnter={() => setIsTitleHovered(true)}
+          onMouseMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+            e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+          }}
+          onMouseLeave={() => setIsTitleHovered(false)}
+          style={{
+            backgroundImage: isTitleHovered 
+              ? 'radial-gradient(circle 250px at var(--mouse-x, 50%) var(--mouse-y, 50%), #38bdf8 0%, #d7e2ea 100%)'
+              : 'linear-gradient(180deg, #9ca3af 0%, #ffffff 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            color: 'transparent',
+          }}
+        >
           Hi, i&apos;m zney
         </h1>
       </FadeIn>
@@ -548,7 +553,7 @@ function HeroSection() {
       <div className="relative z-20 mt-auto flex items-end justify-between gap-6 px-6 pb-7 sm:pb-8 md:px-10 md:pb-10">
         <FadeIn delay={0.35} y={20} onLoad>
           <p className="max-w-[160px] text-[clamp(0.75rem,1.4vw,1.5rem)] font-light uppercase leading-snug tracking-wide text-[#D7E2EA] sm:max-w-[220px] md:max-w-[260px]">
-            a 3d creator driven by crafting striking and unforgettable projects
+            a developer who started coding to solve small problems, then became the problem
           </p>
         </FadeIn>
         <FadeIn delay={0.5} y={20} onLoad>
@@ -628,92 +633,113 @@ function MarqueeRow({
   );
 }
 
-function AnimatedText({ text }: { text: string }) {
-  const ref = useRef<HTMLParagraphElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start 0.8', 'end 0.2'],
-  });
-
-  return (
-    <p
-      ref={ref}
-      className="relative max-w-[560px] text-center text-[clamp(1rem,2vw,1.35rem)] font-medium leading-relaxed text-[#D7E2EA]"
-      aria-label={text}
-    >
-      {text.split('').map((character, index) => (
-        <AnimatedCharacter
-          key={`${character}-${index}`}
-          character={character}
-          index={index}
-          total={text.length}
-          progress={scrollYProgress}
-        />
-      ))}
-    </p>
-  );
-}
-
-function AnimatedCharacter({
-  character,
-  index,
-  total,
-  progress,
-}: {
-  character: string;
-  index: number;
-  total: number;
-  progress: MotionValue<number>;
-}) {
-  const start = index / total;
-  const end = Math.min(start + 0.12, 1);
-  const opacity = useTransform(progress, [start, end], [0.2, 1]);
-
-  return (
-    <span className="relative inline-block" aria-hidden="true">
-      <span className="opacity-0">{character === ' ' ? '\u00A0' : character}</span>
-      <motion.span
-        className="absolute inset-0"
-        style={{ opacity }}
-      >
-        {character === ' ' ? '\u00A0' : character}
-      </motion.span>
-    </span>
-  );
-}
-
 function AboutSection() {
   return (
     <section
       id="about"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0C0C0C] px-5 py-20 sm:px-8 md:px-10"
+      className="relative overflow-hidden bg-[#0C0C0C] px-5 py-20 sm:px-8 md:px-10 md:py-28"
     >
-      {aboutImages.map((image) => (
-        <FadeIn
-          key={image.src}
-          delay={image.delay}
-          duration={0.9}
-          x={image.x}
-          y={0}
-          className={`pointer-events-none absolute z-0 ${image.className}`}
-        >
-          <img src={image.src} alt="" loading="lazy" className="w-full" />
-        </FadeIn>
-      ))}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),_transparent_32%),linear-gradient(rgba(255,255,255,0.05)_1px,_transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,_transparent_1px)] bg-[length:100%_100%,28px_28px,28px_28px] bg-[position:0_0,0_0,0_0] opacity-40" />
 
-      <div className="relative z-10 flex flex-col items-center gap-10 sm:gap-14 md:gap-16">
-        <FadeIn y={40}>
-          <h2 className="hero-heading text-center text-[clamp(3rem,12vw,160px)] font-black uppercase leading-none tracking-tight">
-            About me
-          </h2>
+      <div className="relative z-10 mx-auto grid max-w-6xl items-start gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)] lg:gap-16">
+        <FadeIn y={40} className="flex flex-col gap-8">
+          <div className="space-y-5">
+            <span className="inline-flex w-fit items-center rounded-full border border-[#d7e2ea]/15 bg-white/[0.04] px-4 py-2 text-[0.72rem] font-medium uppercase tracking-[0.24em] text-[#8fc7de]">
+              Developer profile
+            </span>
+            <div className="space-y-4">
+              <h2 className="max-w-3xl text-[clamp(3rem,8vw,6.8rem)] font-black uppercase leading-[0.92] tracking-tight text-[#f2f7fb]">
+                I build products that are clear, fast, and ready to ship.
+              </h2>
+              <p className="max-w-2xl text-[clamp(1rem,1.8vw,1.28rem)] leading-relaxed text-[#c3d0d8]">
+                I work across frontend, backend integration, and product UX. The goal is simple: turn messy requirements into interfaces that feel stable, readable, and useful in real use.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {developerFocus.map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-[#d7e2ea]/12 bg-white/[0.03] px-4 py-2 text-sm font-medium text-[#d7e2ea]"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {developerStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-[24px] border border-white/10 bg-white/[0.035] p-5"
+              >
+                <p className="text-3xl font-black uppercase text-[#f2f7fb]">
+                  {stat.value}
+                </p>
+                <p className="mt-2 max-w-[24ch] text-sm leading-relaxed text-[#9cb0bb]">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <FadeIn delay={0.15} y={20}>
+              <ContactButton />
+            </FadeIn>
+            <FadeIn delay={0.2} y={20}>
+              <a
+                href="#projects"
+                className="inline-flex items-center justify-center rounded-full border border-[#d7e2ea]/18 px-6 py-3 text-sm font-medium uppercase tracking-[0.18em] text-[#d7e2ea] transition-colors duration-200 hover:bg-white/[0.06]"
+              >
+                See projects
+              </a>
+            </FadeIn>
+          </div>
         </FadeIn>
 
-        <div className="flex flex-col items-center gap-16 sm:gap-20 md:gap-24">
-          <AnimatedText text="With more than five years of experience in design, i focus on branding, web design, and user experience, i truly enjoy working with businesses that aim to stand out and present their best image. Let's build something incredible together!" />
-          <FadeIn delay={0.2} y={20}>
-            <ContactButton />
-          </FadeIn>
-        </div>
+        <FadeIn delay={0.1} y={40} className="lg:pt-6">
+          <div className="overflow-hidden rounded-[28px] border border-[#d7e2ea]/12 bg-[#11161a] shadow-[0_24px_90px_rgba(0,0,0,0.35)]">
+            <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#f97316]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#facc15]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
+              </div>
+              <span className="text-xs uppercase tracking-[0.24em] text-[#7c8e98]">
+                dev-summary.ts
+              </span>
+            </div>
+
+            <div className="space-y-4 px-5 py-5 font-mono text-sm leading-7 text-[#d7e2ea] sm:px-6 sm:py-6">
+              <div>
+                <span className="text-[#38bdf8]">$ whoami</span>
+                <p className="mt-1 text-[#f2f7fb]">
+                  Frontend-focused developer with a product mindset.
+                </p>
+              </div>
+
+              {terminalPreview.map((line) => (
+                <div key={line.prompt} className="grid gap-1">
+                  <span className="text-[#38bdf8]">$ {line.prompt}</span>
+                  <span className="text-[#9fb2bc]">{line.output}</span>
+                </div>
+              ))}
+
+              <div className="rounded-[20px] border border-[#38bdf8]/20 bg-[#0c1013] p-4">
+                <p className="text-xs uppercase tracking-[0.24em] text-[#7c8e98]">
+                  Current priorities
+                </p>
+                <ul className="mt-3 space-y-2 text-sm text-[#d7e2ea]">
+                  <li>Build UI that scales past the first demo.</li>
+                  <li>Reduce visual noise, keep interaction obvious.</li>
+                  <li>Write code that another developer can extend quickly.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
       </div>
     </section>
   );
@@ -777,11 +803,11 @@ function ProjectCard({
   };
 
   return (
-    <div ref={ref} className="h-[85vh]">
-      <motion.article
-        className="sticky top-[calc(6rem+var(--card-offset))] overflow-hidden rounded-[40px] border-2 border-[#D7E2EA] bg-[#0C0C0C] p-4 sm:rounded-[50px] sm:p-6 md:top-[calc(8rem+var(--card-offset))] md:rounded-[60px] md:p-8"
-        style={cardStyle}
-      >
+    <motion.article
+      ref={ref}
+      className="sticky top-[calc(6rem+var(--card-offset))] mb-12 overflow-hidden rounded-[40px] border-2 border-white/30 bg-[#0C0C0C] p-4 sm:rounded-[50px] sm:p-6 md:top-[calc(8rem+var(--card-offset))] md:mb-20 md:rounded-[60px] md:p-8"
+      style={{ ...cardStyle, minHeight: '85vh' }}
+    >
         <div className="mb-6 grid items-end gap-4 text-[#D7E2EA] sm:grid-cols-[auto_1fr_auto] md:mb-8">
           <span className="text-[clamp(3rem,10vw,140px)] font-black uppercase leading-none">
             {project.number}
@@ -822,7 +848,6 @@ function ProjectCard({
           />
         </div>
       </motion.article>
-    </div>
   );
 }
 
@@ -863,3 +888,5 @@ export default function App() {
     </main>
   );
 }
+
+
