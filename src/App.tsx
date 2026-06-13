@@ -124,7 +124,7 @@ const projects = [
     category: 'Personal',
     name: 'AI English Learning',
     image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png&w=1280&q=85',
-    link: 'https://study.zney295.id.vn'
+    link: 'https://github.com/psy-zney/ai-english-learning'
   },
   {
     number: '02',
@@ -145,7 +145,7 @@ const projects = [
     category: 'Personal',
     name: 'Beatsync',
     image: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png&w=1280&q=85',
-    link: 'https://beatsync.zney295.id.vn'
+    link: 'https://github.com/psy-zney/beatsync'
   },
   {
     number: '05',
@@ -293,7 +293,7 @@ function HeaderMenu() {
     { label: 'Security', href: 'https://zney295.id.vn/Security/' },
     { label: 'Luckyfoods', href: 'https://github.com/psy-zney/luckyfoods' },
     { label: 'Mandycrimson', href: 'https://zney295.id.vn/mandycrimson/' },
-    { label: 'Learning English', href: 'https://github.com/psy-zney/ai-english-learning' },
+    { label: 'Learning English', href: 'https://study.zney295.id.vn' },
   ];
 
   return (
@@ -442,7 +442,6 @@ function ContactButton() {
 
 function LiveProjectButton({ href }: { href?: string }) {
   const actualHref = href || "#projects";
-  const isGithub = actualHref.includes('github.com');
   return (
     <a
       href={actualHref}
@@ -450,7 +449,7 @@ function LiveProjectButton({ href }: { href?: string }) {
       rel="noreferrer"
       className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#D7E2EA] px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#D7E2EA] transition-colors duration-200 hover:bg-[#D7E2EA]/10 sm:px-10 sm:py-3.5 sm:text-base"
     >
-      <span>{isGithub ? 'View on GitHub' : 'Live Demo'}</span>
+      <span>View on GitHub</span>
       <ExternalLink className="hidden h-4 w-4 sm:block" aria-hidden="true" />
     </a>
   );
