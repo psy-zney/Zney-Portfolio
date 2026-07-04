@@ -651,38 +651,37 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
   onFinishRef.current = onFinish;
 
   useEffect(() => {
-    const MIN_DURATION = 1800; // Always animate for at least 1.8s
+    const MIN_DURATION = 2400; // Ensure at least 2.4s of smooth counting
     const TICK = 16;           // ~60fps
     const startTime = performance.now();
     let displayed = 0;
-    let loadingDone = false;
     let finished = false;
 
     const timer = setInterval(() => {
       if (finished) return;
 
       const elapsed = performance.now() - startTime;
-      // Smooth timer track: eased 0→100 over MIN_DURATION, capped at 95 until loading done
-      const smoothRaw = Math.min(100, (elapsed / MIN_DURATION) * 100);
-      // If loading is already done (cached), still cap at 95 until we've animated for a bit
-      const isLoaded = !activeRef.current || progressRef.current >= 100;
-      if (isLoaded) loadingDone = true;
+      const timeRatio = Math.min(1, elapsed / MIN_DURATION);
+      // Cubic ease-out: rapid start, gentle deceleration
+      const easedTime = 1 - Math.pow(1 - timeRatio, 3);
+      const simulated = easedTime * 100;
 
-      // Cap smooth at 95% while loading isn't done yet to avoid false finish
-      const smoothCap = loadingDone ? 100 : 95;
-      const smooth = Math.min(smoothCap, smoothRaw);
-
-      // Displayed is the max of smooth animation and actual Three.js progress
-      const actual = loadingDone ? 100 : progressRef.current;
-      displayed = Math.min(100, Math.max(displayed, smooth, actual));
-      setDisplayProgress(displayed);
-
-      // Only finish when smooth animation has truly reached 100 AND loading is done
-      if (displayed >= 100 && loadingDone) {
+      // Only consider real loading complete after 1000ms OR if explicitly reaching 100%
+      const isRealLoaded = progressRef.current >= 100 || (elapsed > 1000 && !activeRef.current && progressRef.current > 0) || (elapsed > 3500 && !activeRef.current);
+      
+      const target = isRealLoaded ? Math.max(simulated, progressRef.current) : Math.min(98, Math.max(simulated, progressRef.current));
+      
+      // Smoothly step displayed toward target
+      displayed = Math.min(100, displayed + Math.max(0.5, (target - displayed) * 0.15));
+      
+      if (isRealLoaded && elapsed >= MIN_DURATION && displayed >= 99.2) {
+        displayed = 100;
         finished = true;
         clearInterval(timer);
-        setTimeout(() => onFinishRef.current(), 300);
+        setTimeout(() => onFinishRef.current(), 350);
       }
+      
+      setDisplayProgress(displayed);
     }, TICK);
 
     return () => { clearInterval(timer); finished = true; };
@@ -765,7 +764,7 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
               height: '1px',
               background: '#ffffff',
               width: `${displayProgress}%`,
-              transition: 'width 150ms linear',
+              transition: 'none',
             }}
           />
           {/* Glowing head of progress bar */}
@@ -780,7 +779,7 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
               borderRadius: '2px',
               boxShadow: '0 0 8px 2px rgba(255,255,255,0.6)',
               transform: 'translateX(-50%)',
-              transition: 'left 150ms linear',
+              transition: 'none',
             }}
           />
         </div>
