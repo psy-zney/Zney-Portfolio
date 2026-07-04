@@ -181,7 +181,7 @@ interface ModelContentProps {
 }
 
 function ModelContent({ hoveredItem, onHoverItem, onSelectItem, activeModal }: ModelContentProps) {
-  const gltf = useGLTF('/main.glb');
+  const gltf = useGLTF('./main.glb');
   const modelGroupRef = useRef<THREE.Group>(null);
 
   const [itemPositions, setItemPositions] = useState<Record<ItemType, THREE.Vector3>>({
@@ -884,4 +884,6 @@ export function ModelAnalyzer({ onBackToIntro, lang = 'vie' }: ModelAnalyzerProp
     </div>
   );
 }
+
+useGLTF.preload('./main.glb');
 
