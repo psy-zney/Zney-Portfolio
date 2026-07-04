@@ -588,10 +588,13 @@ function ModalLanyard({ onClose }: { onClose: () => void }) {
 
 function ModalBookshelf({ onClose }: { onClose: () => void }) {
   const repos = [
-    { name: '3D-Desk-Workspace-Portfolio', stars: '1.4k', forks: '280', lang: 'TypeScript / Three.js', desc: 'Interactive real-time 3D desk portfolio built with React Three Fiber & WebGL.' },
-    { name: 'AI-Autonomous-Agent-Engine', stars: '950', forks: '140', lang: 'Python / LLM', desc: 'Autonomous AI software architecture and codebase analysis engine.' },
-    { name: 'Cyberpunk-Neon-Shader-Lib', stars: '820', forks: '110', lang: 'GLSL / WebGL', desc: 'Lightweight real-time neon lighting and GLSL post-processing shader library.' },
-    { name: 'Next-Quantum-UI-Design-System', stars: '1.1k', forks: '190', lang: 'React / TailwindCSS', desc: 'Agency-grade glassmorphic design system for modern enterprise dashboards.' }
+    { name: 'psy-zney.github.io', stars: '15', forks: '4', lang: 'TypeScript / Three.js', desc: 'Interactive real-time 3D desk & hacker glitch portfolio built with React Three Fiber & WebGL.' },
+    { name: 'beatsync', stars: '24', forks: '7', lang: 'TypeScript / WebRTC', desc: 'Listen to music in real-time sync with friends across interactive web rooms.' },
+    { name: 'Security', stars: '18', forks: '5', lang: 'TypeScript / Service', desc: 'Cloud relay server & Windows security monitoring service for PC/Laptop protection.' },
+    { name: 'LearningEnglish', stars: '12', forks: '3', lang: 'TypeScript / AI', desc: 'Personal English study web app with AI checking tense, meaning & sentence structure.' },
+    { name: 'AI_Hill_Climbing_TSP', stars: '10', forks: '4', lang: 'Python / AI', desc: 'Artificial Intelligence optimization algorithms for Traveling Salesperson Problem using Hill Climbing.' },
+    { name: 'mandycrimson', stars: '9', forks: '2', lang: 'TypeScript / FullStack', desc: 'Modern full-stack products catalog and e-commerce display web application.' },
+    { name: 'robo-game', stars: '8', forks: '2', lang: 'JavaScript / Game', desc: 'Interactive browser-based robot combat game built with vanilla JavaScript.' }
   ];
 
   return (
