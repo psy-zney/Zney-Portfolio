@@ -283,11 +283,16 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         .lang-btn:hover { border-color:#111111; color:#111111; }
         .social-a { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:1px solid #EAEAEA; border-radius:6px; color:#787774; text-decoration:none; transition:border-color 200ms, color 200ms; }
         .social-a:hover { border-color:#111111; color:#111111; }
+        @media (max-width: 640px) {
+          .page-shell { padding: 40px 16px 60px !important; }
+          .bento-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {/* Page shell */}
       <div
         ref={containerRef}
+        className="page-shell"
         style={{ position: 'relative', zIndex: 1, maxWidth: '760px', margin: '0 auto', padding: '60px 24px 80px' }}
       >
         {/* Top bar */}
@@ -348,7 +353,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         </div>
 
         {/* Bento grid: Core tech + Languages */}
-        <div data-reveal style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '48px' }}>
+        <div data-reveal className="bento-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '48px' }}>
           {/* Core Tech */}
           <div className="card">
             <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }}>
