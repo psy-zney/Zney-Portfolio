@@ -2,3 +2,5 @@ node_modules/
 dist/
 *.tsbuildinfo
 tmp_*.png
+.agents/
+skills-lock.json

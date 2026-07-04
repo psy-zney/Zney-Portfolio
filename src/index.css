@@ -4,36 +4,44 @@
 
 * {
   box-sizing: border-box;
+}
+
+html, body, #root {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #141923;
+  color: #eadfcd;
+  font-family: Outfit, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
-  background: #0c0c0c;
-  color: #d7e2ea;
-  font-family: 'Kanit', sans-serif;
+/* Custom Wave Text Loader — monochrome */
+.loader {
+  width: fit-content;
+  font-size: 36px;
+  line-height: 1.5;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #0000;
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: 1.2px #ffffff;
+  background:
+    radial-gradient(1.13em at 50% 1.6em, #ffffff 99%, #0000 101%) calc(50% - 1.6em) 0/3.2em 100% text,
+    radial-gradient(1.13em at 50% -0.8em, #0000 99%, #ffffff 101%) 50% .8em/3.2em 100% repeat-x text;
+  animation: l9 2s linear infinite;
+}
+.loader:before {
+  content: "Loading...";
+}
+@keyframes l9 {
+  to { background-position: calc(50% + 1.6em) 0, calc(50% + 3.2em) .8em; }
 }
 
-body {
-  overflow-x: hidden;
+/* Star particle keyframes for space background */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%       { opacity: 0.8;  transform: scale(1.4); }
 }
 
-button,
-a {
-  font: inherit;
-}
-
-img {
-  display: block;
-}
-
-.hero-heading {
-  background: linear-gradient(180deg, #ffffff 0%, #7ee8fa 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 12px rgba(126, 232, 250, 0.6));
-}
