@@ -1,7 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, Environment, ContactShadows, useProgress, Html } from '@react-three/drei';
-import * as THREE from 'three';
 import {
   FileText,
   CreditCard,
@@ -24,358 +21,6 @@ import {
 } from 'lucide-react';
 
 export type ItemType = 'paper' | 'lanyard' | 'bookshelf';
-
-const ITEM_CONFIG: Record<ItemType, { title: string; buttonText: string; color: string; bgGlow: string }> = {
-  paper: {
-    title: '📄 Curriculum Vitae (A4 Paper)',
-    buttonText: 'CV',
-    color: '#38bdf8', // Neon Cyan
-    bgGlow: 'rgba(56, 189, 248, 0.25)'
-  },
-  lanyard: {
-    title: '🪪 Developer Info & Socials',
-    buttonText: 'Info',
-    color: '#f59e0b', // Neon Amber Gold
-    bgGlow: 'rgba(245, 158, 11, 0.25)'
-  },
-  bookshelf: {
-    title: '📚 Open Source Projects & Repos',
-    buttonText: 'Projects', // Concise, professional agency term for the bookshelf
-    color: '#2f4786ff', // Soft Neon Purple
-    bgGlow: 'rgba(192, 132, 252, 0.25)'
-  }
-};
-
-function getItemType(name: string): ItemType | null {
-  const n = name.toLowerCase();
-  if (n.includes('paper') || n.includes('note') || n.includes('stackofpaper')) return 'paper';
-  if (n.includes('lanyard') || n.includes('key') || n.includes('card') || n.includes('id_')) return 'lanyard';
-  if (n.includes('book') || n.includes('shelf') || n.includes('bookshelf')) return 'bookshelf';
-  return null;
-}
-
-function Loader() {
-  const { progress } = useProgress();
-  return (
-    <Html center>
-      <div className="flex flex-col items-center justify-center p-8 bg-slate-950/95 backdrop-blur-2xl rounded-3xl border border-sky-500/30 shadow-[0_0_50px_rgba(56,189,248,0.2)] text-white min-w-[340px] pointer-events-none select-none">
-        <div className="loader mb-4"></div>
-        <div className="w-full bg-slate-800/80 h-2.5 rounded-full overflow-hidden mt-2 border border-slate-700/80 p-0.5">
-          <div
-            className="bg-gradient-to-r from-sky-400 via-cyan-300 to-indigo-500 h-full transition-all duration-300 rounded-full shadow-[0_0_12px_#38bdf8]"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="flex justify-between w-full text-xs font-mono mt-3 text-slate-300">
-          <span>3D SCENE: MAIN.GLB</span>
-          <span className="text-sky-400 font-bold">{progress.toFixed(0)}%</span>
-        </div>
-      </div>
-    </Html>
-  );
-}
-
-/**
- * POVControls: First-person sitting perspective looking at computer screen.
- */
-function POVControls({
-  headPosition = [5.0, 10.0, 0.5],
-  lookTarget = [1.5, 9.5, 0],
-  sensitivity = 0.0008
-}: {
-  headPosition?: [number, number, number];
-  lookTarget?: [number, number, number];
-  sensitivity?: number;
-}) {
-  const { camera, gl } = useThree();
-  const isDragging = useRef(false);
-  const previousMousePosition = useRef({ x: 0, y: 0 });
-
-  const initialAngles = React.useMemo(() => {
-    const dx = lookTarget[0] - headPosition[0];
-    const dy = lookTarget[1] - headPosition[1];
-    const dz = lookTarget[2] - headPosition[2];
-    const horizDist = Math.sqrt(dx * dx + dz * dz);
-
-    const yaw = Math.atan2(-dx, -dz);
-    const pitch = Math.atan2(dy, horizDist);
-    return { yaw, pitch };
-  }, [headPosition[0], headPosition[1], headPosition[2], lookTarget[0], lookTarget[1], lookTarget[2]]);
-
-  const targetYaw = useRef(initialAngles.yaw);
-  const targetPitch = useRef(initialAngles.pitch);
-
-  const currentYaw = useRef(initialAngles.yaw);
-  const currentPitch = useRef(initialAngles.pitch);
-
-  useEffect(() => {
-    targetYaw.current = initialAngles.yaw;
-    targetPitch.current = initialAngles.pitch;
-    currentYaw.current = initialAngles.yaw;
-    currentPitch.current = initialAngles.pitch;
-  }, [initialAngles]);
-
-  useEffect(() => {
-    const domElement = gl.domElement;
-
-    const handlePointerDown = (e: PointerEvent) => {
-      if (e.button !== 0) return;
-      isDragging.current = true;
-      previousMousePosition.current = { x: e.clientX, y: e.clientY };
-      try {
-        domElement.setPointerCapture(e.pointerId);
-      } catch { }
-    };
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!isDragging.current) return;
-      const deltaX = e.clientX - previousMousePosition.current.x;
-      const deltaY = e.clientY - previousMousePosition.current.y;
-      previousMousePosition.current = { x: e.clientX, y: e.clientY };
-
-      targetYaw.current += deltaX * sensitivity;
-      targetPitch.current += deltaY * sensitivity;
-
-      targetYaw.current = Math.max(initialAngles.yaw - Math.PI / 1.3, Math.min(initialAngles.yaw + Math.PI / 1.3, targetYaw.current));
-      targetPitch.current = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 3, targetPitch.current));
-    };
-
-    const handlePointerUp = (e: PointerEvent) => {
-      isDragging.current = false;
-      try {
-        domElement.releasePointerCapture(e.pointerId);
-      } catch { }
-    };
-
-    domElement.addEventListener('pointerdown', handlePointerDown);
-    domElement.addEventListener('pointermove', handlePointerMove);
-    domElement.addEventListener('pointerup', handlePointerUp);
-    domElement.addEventListener('pointercancel', handlePointerUp);
-
-    return () => {
-      domElement.removeEventListener('pointerdown', handlePointerDown);
-      domElement.removeEventListener('pointermove', handlePointerMove);
-      domElement.removeEventListener('pointerup', handlePointerUp);
-      domElement.removeEventListener('pointercancel', handlePointerUp);
-    };
-  }, [gl, sensitivity, initialAngles]);
-
-  useFrame(() => {
-    camera.position.set(headPosition[0], headPosition[1], headPosition[2]);
-
-    currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, targetYaw.current, 0.12);
-    currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch.current, 0.12);
-
-    const euler = new THREE.Euler(currentPitch.current, currentYaw.current, 0, 'YXZ');
-    camera.quaternion.setFromEuler(euler);
-  });
-
-  return null;
-}
-
-interface ModelContentProps {
-  hoveredItem: ItemType | null;
-  onHoverItem: (item: ItemType | null) => void;
-  onSelectItem: (item: ItemType) => void;
-  activeModal: ItemType | null;
-}
-
-function ModelContent({ hoveredItem, onHoverItem, onSelectItem, activeModal }: ModelContentProps) {
-  const gltf = useGLTF('./main.glb');
-  const modelGroupRef = useRef<THREE.Group>(null);
-
-  const [itemPositions, setItemPositions] = useState<Record<ItemType, THREE.Vector3>>({
-    paper: new THREE.Vector3(14.6, 0.8, 0.5),
-    lanyard: new THREE.Vector3(0.0, 0.15, 0.0),
-    bookshelf: new THREE.Vector3(-2.0, 3.2, -1.0)
-  });
-
-  useEffect(() => {
-    if (!gltf.scene) return;
-    const newPos: Record<ItemType, THREE.Vector3> = {
-      paper: new THREE.Vector3(14.6, 0.8, 0.5),
-      lanyard: new THREE.Vector3(0.0, 0.15, 0.0),
-      bookshelf: new THREE.Vector3(-2.0, 3.2, -1.0)
-    };
-
-    gltf.scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-
-        if (mesh.material) {
-          const mat = mesh.material as THREE.MeshStandardMaterial;
-          if (!mesh.userData.origEmissive) {
-            mesh.userData.origEmissive = mat.emissive ? mat.emissive.clone() : new THREE.Color(0x000000);
-            mesh.userData.origEmissiveIntensity = mat.emissiveIntensity ?? 0;
-          }
-        }
-      }
-
-      const itemType = getItemType(child.name);
-      if (itemType) {
-        const box = new THREE.Box3().setFromObject(child);
-        if (!box.isEmpty()) {
-          const center = new THREE.Vector3();
-          box.getCenter(center);
-          if (itemType === 'paper') center.y += 0.08;      // Hugging directly on top of paper
-          if (itemType === 'lanyard') center.y += 0.06;    // Hugging directly on top of ID lanyard
-          if (itemType === 'bookshelf') center.y += 0.15;  // Hugging neatly on bookshelf shelf
-          newPos[itemType] = center;
-        }
-      }
-    });
-
-    setItemPositions(newPos);
-  }, [gltf.scene]);
-
-  // Subtle Luminescence & Edges Wireframe Outline on Hover
-  useEffect(() => {
-    if (!gltf.scene) return;
-
-    gltf.scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-        const mat = mesh.material as THREE.MeshStandardMaterial;
-        if (!mat || !mesh.userData.origEmissive) return;
-
-        const itemType = getItemType(mesh.name) || getItemType(mesh.parent?.name || '') || getItemType(mesh.parent?.parent?.name || '');
-
-        const existingEdge = mesh.getObjectByName('hover_edge_outline');
-        if (existingEdge) {
-          mesh.remove(existingEdge);
-          (existingEdge as THREE.LineSegments).geometry.dispose();
-        }
-
-        if (itemType && itemType === hoveredItem && !activeModal) {
-          // Subtle, soft luminescence (not overwhelming)
-          mat.emissive.set(ITEM_CONFIG[itemType].color);
-          mat.emissiveIntensity = 0.16;
-
-          // Crisp neon line outline along physical 3D geometry edges
-          try {
-            const edgesGeo = new THREE.EdgesGeometry(mesh.geometry, 25);
-            const edgesMat = new THREE.LineBasicMaterial({
-              color: ITEM_CONFIG[itemType].color,
-              linewidth: 2,
-              transparent: true,
-              opacity: 0.85
-            });
-            const line = new THREE.LineSegments(edgesGeo, edgesMat);
-            line.name = 'hover_edge_outline';
-            mesh.add(line);
-          } catch { }
-        } else {
-          mat.emissive.copy(mesh.userData.origEmissive);
-          mat.emissiveIntensity = mesh.userData.origEmissiveIntensity;
-        }
-      }
-    });
-  }, [hoveredItem, activeModal, gltf.scene]);
-
-  const handlePointerMove = (e: any) => {
-    if (activeModal) return;
-    e.stopPropagation();
-    const hitMesh = e.object;
-    const itemType = getItemType(hitMesh.name) || getItemType(hitMesh.parent?.name || '') || getItemType(hitMesh.parent?.parent?.name || '');
-    if (itemType !== hoveredItem) {
-      onHoverItem(itemType);
-      document.body.style.cursor = itemType ? 'pointer' : 'grab';
-    }
-  };
-
-  const handlePointerOver = (e: any) => {
-    if (activeModal) return;
-    e.stopPropagation();
-    const hitMesh = e.object;
-    const itemType = getItemType(hitMesh.name) || getItemType(hitMesh.parent?.name || '') || getItemType(hitMesh.parent?.parent?.name || '');
-    if (itemType) {
-      onHoverItem(itemType);
-      document.body.style.cursor = 'pointer';
-    } else {
-      onHoverItem(null);
-      document.body.style.cursor = 'grab';
-    }
-  };
-
-  const handlePointerOut = (e: any) => {
-    e.stopPropagation();
-    onHoverItem(null);
-    document.body.style.cursor = 'grab';
-  };
-
-  const handleClick = (e: any) => {
-    if (activeModal) return;
-    e.stopPropagation();
-    const hitMesh = e.object;
-    const itemType = getItemType(hitMesh.name) || getItemType(hitMesh.parent?.name || '') || getItemType(hitMesh.parent?.parent?.name || '');
-    if (itemType) {
-      onSelectItem(itemType);
-    }
-  };
-
-  return (
-    <group ref={modelGroupRef} onPointerMove={handlePointerMove} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
-      <primitive object={gltf.scene} />
-
-      {/* Ultra-compact minimalist labels hugging objects (Ẩn toàn bộ khi đang mở bất kỳ modal nào) */}
-      {!activeModal && (Object.keys(ITEM_CONFIG) as ItemType[]).map((key) => {
-        const pos = itemPositions[key];
-        const isHovered = hoveredItem === key;
-        const config = ITEM_CONFIG[key];
-
-        return (
-          <Html
-            key={key}
-            position={[pos.x, pos.y, pos.z]}
-            center
-            distanceFactor={12}
-            zIndexRange={[100, 0]}
-          >
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectItem(key);
-              }}
-              onMouseEnter={() => {
-                onHoverItem(key);
-                document.body.style.cursor = 'pointer';
-              }}
-              onMouseLeave={() => {
-                onHoverItem(null);
-                document.body.style.cursor = 'grab';
-              }}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md font-sans text-[11px] font-semibold transition-all duration-200 cursor-pointer select-none whitespace-nowrap backdrop-blur-md border shadow-md ${isHovered
-                ? 'scale-105 opacity-100 ring-1 ring-white/30'
-                : 'scale-100 opacity-80 hover:opacity-100'
-                }`}
-              style={{
-                backgroundColor: isHovered ? 'rgba(15, 23, 42, 0.92)' : 'rgba(15, 23, 42, 0.75)',
-                borderColor: isHovered ? config.color : 'rgba(255, 255, 255, 0.15)',
-                color: '#f8fafc',
-                boxShadow: isHovered ? `0 0 15px ${config.bgGlow}` : `0 2px 6px rgba(0,0,0,0.4)`
-              }}
-            >
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span
-                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                  style={{ backgroundColor: config.color }}
-                />
-                <span
-                  className="relative inline-flex rounded-full h-2 w-2"
-                  style={{ backgroundColor: config.color }}
-                />
-              </span>
-
-              <span className="tracking-wide">{config.buttonText}</span>
-            </div>
-          </Html>
-        );
-      })}
-    </group>
-  );
-}
 
 // ==================== INTERACTIVE MODALS ====================
 
@@ -588,74 +233,292 @@ function ModalLanyard({ onClose }: { onClose: () => void }) {
 
 function ModalBookshelf({ onClose }: { onClose: () => void }) {
   const repos = [
-    { name: 'psy-zney.github.io', stars: '15', forks: '4', lang: 'TypeScript / Three.js', desc: 'Interactive real-time 3D desk & hacker glitch portfolio built with React Three Fiber & WebGL.' },
-    { name: 'beatsync', stars: '24', forks: '7', lang: 'TypeScript / WebRTC', desc: 'Listen to music in real-time sync with friends across interactive web rooms.' },
-    { name: 'Security', stars: '18', forks: '5', lang: 'TypeScript / Service', desc: 'Cloud relay server & Windows security monitoring service for PC/Laptop protection.' },
-    { name: 'LearningEnglish', stars: '12', forks: '3', lang: 'TypeScript / AI', desc: 'Personal English study web app with AI checking tense, meaning & sentence structure.' },
-    { name: 'AI_Hill_Climbing_TSP', stars: '10', forks: '4', lang: 'Python / AI', desc: 'Artificial Intelligence optimization algorithms for Traveling Salesperson Problem using Hill Climbing.' },
-    { name: 'mandycrimson', stars: '9', forks: '2', lang: 'TypeScript / FullStack', desc: 'Modern full-stack products catalog and e-commerce display web application.' },
-    { name: 'robo-game', stars: '8', forks: '2', lang: 'JavaScript / Game', desc: 'Interactive browser-based robot combat game built with vanilla JavaScript.' }
+    {
+      name: 'psy-zney.github.io',
+      lang: 'TypeScript • Three.js • WebGL',
+      stars: '15',
+      forks: '4',
+      desc: 'Interactive real-time 3D desk & hacker glitch portfolio built with React Three Fiber, custom shaders & WebGL acceleration.',
+      url: 'https://github.com/psy-zney/psy-zney.github.io',
+      featured: true,
+      tag: '● ACTIVE LIVE PORTFOLIO',
+    },
+    {
+      name: 'beatsync',
+      lang: 'TypeScript • WebRTC • Audio',
+      stars: '24',
+      forks: '7',
+      desc: 'Real-time collaborative music listening rooms with sub-millisecond audio sync across distributed web clients.',
+      url: 'https://github.com/psy-zney/beatsync',
+      motif: 'audio',
+    },
+    {
+      name: 'Security',
+      lang: 'TypeScript • Windows Service',
+      stars: '18',
+      forks: '5',
+      desc: 'Cloud relay server & automated Windows security monitoring daemon for proactive PC/Laptop threat protection.',
+      url: 'https://github.com/psy-zney/Security',
+      motif: 'security',
+    },
+    {
+      name: 'LearningEnglish',
+      lang: 'TypeScript • OpenAI API',
+      stars: '12',
+      forks: '3',
+      desc: 'Intelligent language acquisition app featuring automated AI tense verification, sentence structure parsing & vocabulary retention.',
+      url: 'https://github.com/psy-zney/LearningEnglish',
+      motif: 'ai',
+    },
+    {
+      name: 'AI_Hill_Climbing_TSP',
+      lang: 'Python • Optimization AI',
+      stars: '10',
+      forks: '4',
+      desc: 'Advanced Artificial Intelligence heuristic algorithms solving the Traveling Salesperson Problem using stochastic Hill Climbing.',
+      url: 'https://github.com/psy-zney/AI_Hill_Climbing_TSP',
+      motif: 'python',
+    },
+    {
+      name: 'mandycrimson',
+      lang: 'TypeScript • FullStack Web',
+      stars: '9',
+      forks: '2',
+      desc: 'Modern high-performance e-commerce product catalog and interactive presentation platform with headless architecture.',
+      url: 'https://github.com/psy-zney/mandycrimson',
+      motif: 'web',
+    },
   ];
 
   return (
-    <div className="bg-slate-900/95 border border-purple-500/40 rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-[0_0_50px_rgba(168,85,247,0.2)] backdrop-blur-xl text-slate-100 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto">
-      <div className="flex justify-between items-start border-b border-slate-700/80 pb-5 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-            <BookOpen size={28} />
+    <div
+      style={{
+        background: 'rgba(15, 23, 42, 0.94)',
+        border: '1px solid rgba(255, 255, 255, 0.14)',
+        borderRadius: '24px',
+        padding: '32px',
+        maxWidth: '860px',
+        width: '100%',
+        margin: '0 16px',
+        boxShadow: '0 30px 100px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+        backdropFilter: 'blur(28px)',
+        color: '#F8FAFC',
+        fontFamily: "'Outfit', 'SF Pro Display', -apple-system, sans-serif",
+        maxHeight: '88vh',
+        overflowY: 'auto',
+        position: 'relative',
+      }}
+      className="animate-in fade-in zoom-in-95 duration-250 select-none custom-scrollbar"
+    >
+      <style>{`
+        @keyframes eq-pulse-1 { 0%, 100% { height: 6px; } 50% { height: 18px; } }
+        @keyframes eq-pulse-2 { 0%, 100% { height: 16px; } 50% { height: 8px; } }
+        @keyframes eq-pulse-3 { 0%, 100% { height: 10px; } 50% { height: 20px; } }
+        .eq-bar-1 { animation: eq-pulse-1 0.8s infinite ease-in-out; }
+        .eq-bar-2 { animation: eq-pulse-2 0.6s infinite ease-in-out 0.2s; }
+        .eq-bar-3 { animation: eq-pulse-3 0.9s infinite ease-in-out 0.4s; }
+      `}</style>
+
+      {/* Header section with agency typographic hierarchy */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)', border: '1px solid rgba(168, 85, 247, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C084FC', boxShadow: '0 0 20px rgba(168, 85, 247, 0.2)' }}>
+            <BookOpen size={22} />
           </div>
           <div>
-            <h3 className="text-xl font-bold tracking-wide text-white">OPEN SOURCE PROJECTS & REPOS</h3>
-            <p className="text-xs text-purple-400 font-mono mt-0.5">Bookshelf Archive - GitHub Repositories</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#FFFFFF', letterSpacing: '-0.01em' }}>
+                OPEN SOURCE ARCHIVE
+              </h3>
+              <span style={{ fontSize: '10px', fontFamily: "'JetBrains Mono', monospace", background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', padding: '2px 8px', borderRadius: '100px', border: '1px solid rgba(56, 189, 248, 0.3)', fontWeight: 600 }}>
+                @psy-zney
+              </span>
+            </div>
+            <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, marginTop: '2px', fontFamily: "'JetBrains Mono', monospace" }}>
+              Selected Engineering Repositories & Experimental Systems
+            </p>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition">
-          <X size={20} />
-        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <a
+            href="https://github.com/psy-zney"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '12px',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#FFFFFF',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              padding: '8px 14px',
+              borderRadius: '10px',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontWeight: 600,
+              transition: 'all 200ms',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.color = '#0F172A'; e.currentTarget.style.borderColor = '#FFFFFF'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; e.currentTarget.style.color = '#FFFFFF'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'; }}
+          >
+            <Github size={14} />
+            <span>GitHub Profile</span>
+            <span>↗</span>
+          </a>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '10px',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#94A3B8',
+              cursor: 'pointer',
+              transition: 'all 150ms',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'; e.currentTarget.style.color = '#F87171'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)'; }}
+            title="Đóng bảng dự án"
+          >
+            <X size={18} />
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {repos.map((repo, idx) => (
-          <div key={idx} className="p-4 bg-slate-800/40 hover:bg-slate-800/80 rounded-xl border border-slate-700/60 transition group">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2 font-bold text-sm text-purple-300 group-hover:text-purple-200">
-                <Code2 size={16} />
-                <span>{repo.name}</span>
+      {/* Asymmetric Agency Bento Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+        {repos.map((repo, idx) => {
+          const isFeatured = repo.featured;
+          return (
+            <a
+              key={idx}
+              href={repo.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                gridColumn: isFeatured ? '1 / -1' : 'span 1',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                padding: isFeatured ? '24px' : '20px',
+                background: isFeatured
+                  ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)'
+                  : 'rgba(30, 41, 59, 0.4)',
+                border: isFeatured
+                  ? '1px solid rgba(168, 85, 247, 0.4)'
+                  : '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '16px',
+                textDecoration: 'none',
+                transition: 'all 250ms cubic-bezier(0.16, 1, 0.3, 1)',
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: isFeatured ? '0 10px 30px rgba(168, 85, 247, 0.12)' : 'none',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = isFeatured
+                  ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(30, 27, 75, 0.8) 100%)'
+                  : 'rgba(30, 41, 59, 0.7)';
+                e.currentTarget.style.borderColor = isFeatured ? 'rgba(168, 85, 247, 0.7)' : 'rgba(255, 255, 255, 0.25)';
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 14px 28px rgba(0, 0, 0, 0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = isFeatured
+                  ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)'
+                  : 'rgba(30, 41, 59, 0.4)';
+                e.currentTarget.style.borderColor = isFeatured ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.08)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = isFeatured ? '0 10px 30px rgba(168, 85, 247, 0.12)' : 'none';
+              }}
+            >
+              {/* Background ambient glow for featured card */}
+              {isFeatured && (
+                <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, rgba(0,0,0,0) 70%)', pointerEvents: 'none' }} />
+              )}
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: isFeatured ? '18px' : '15px', fontWeight: 700, color: '#FFFFFF', letterSpacing: '-0.01em' }}>
+                      {repo.name}
+                    </span>
+                    {repo.tag && (
+                      <span style={{ fontSize: '10px', fontFamily: "'JetBrains Mono', monospace", background: 'rgba(34, 197, 94, 0.15)', color: '#4ADE80', padding: '2px 8px', borderRadius: '100px', border: '1px solid rgba(34, 197, 94, 0.3)', fontWeight: 600 }}>
+                        {repo.tag}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Motifs / Metrics right side */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {repo.motif === 'audio' && (
+                      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '18px', padding: '0 6px' }}>
+                        <span className="eq-bar-1" style={{ width: '3px', background: '#38BDF8', borderRadius: '1px' }} />
+                        <span className="eq-bar-2" style={{ width: '3px', background: '#A855F7', borderRadius: '1px' }} />
+                        <span className="eq-bar-3" style={{ width: '3px', background: '#4ADE80', borderRadius: '1px' }} />
+                      </div>
+                    )}
+                    {repo.motif === 'security' && (
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#4ADE80', background: 'rgba(34,197,94,0.1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(34,197,94,0.2)' }}>
+                        $ sudo guard
+                      </span>
+                    )}
+                    {repo.motif === 'python' && (
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#FACC15', background: 'rgba(234,179,8,0.1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(234,179,8,0.2)' }}>
+                        def tsp():
+                      </span>
+                    )}
+                    <span style={{ fontSize: '14px', color: '#94A3B8', transition: 'transform 200ms', display: 'inline-block' }}>↗</span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: isFeatured ? '14px' : '13px', color: '#CBD5E1', lineHeight: 1.6, margin: 0, marginBottom: '20px', maxWidth: isFeatured ? '90%' : '100%', fontWeight: 400 }}>
+                  {repo.desc}
+                </p>
               </div>
-              <div className="flex items-center gap-3 text-xs font-mono text-slate-400">
-                <span className="flex items-center gap-1 text-amber-400"><Star size={13} fill="currentColor" /> {repo.stars}</span>
-                <span className="flex items-center gap-1 text-slate-400"><GitFork size={13} /> {repo.forks}</span>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '14px', marginTop: 'auto' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: repo.lang.includes('Python') ? '#FACC15' : '#38BDF8', boxShadow: repo.lang.includes('Python') ? '0 0 8px #FACC15' : '0 0 8px #38BDF8' }} />
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#94A3B8', fontWeight: 600 }}>
+                    {repo.lang}
+                  </span>
+                </div>
+
+                {repo.stars && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#64748B' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#FACC15' }}>
+                      ★ {repo.stars}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#94A3B8' }}>
+                      ⑂ {repo.forks}
+                    </span>
+                  </div>
+                )}
               </div>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed mb-3">{repo.desc}</p>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-700/40 pt-2.5">
-              <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 font-mono">{repo.lang}</span>
-              <a href={`https://github.com/psy-zney/${repo.name}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sky-400 hover:underline">
-                <span>View Source</span>
-                <ExternalLink size={12} />
-              </a>
-            </div>
-          </div>
-        ))}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
-  const { progress, active } = useProgress();
   const [displayProgress, setDisplayProgress] = useState(0);
-
-  const progressRef = useRef(progress);
-  const activeRef = useRef(active);
   const onFinishRef = useRef(onFinish);
-  progressRef.current = progress;
-  activeRef.current = active;
   onFinishRef.current = onFinish;
 
   useEffect(() => {
-    const MIN_DURATION = 2400; // Ensure at least 2.4s of smooth counting
-    const TICK = 16;           // ~60fps
+    const TOTAL_DURATION = 2400; // 2.4 seconds of ultra-smooth, even counting
+    const TICK = 16;             // ~60fps
     const startTime = performance.now();
     let displayed = 0;
     let finished = false;
@@ -664,27 +527,21 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
       if (finished) return;
 
       const elapsed = performance.now() - startTime;
-      const timeRatio = Math.min(1, elapsed / MIN_DURATION);
-      // Cubic ease-out: rapid start, gentle deceleration
-      const easedTime = 1 - Math.pow(1 - timeRatio, 3);
-      const simulated = easedTime * 100;
+      
+      // Calculate even, linear progress over time (0 to 100%)
+      const targetProgress = Math.min(100, (elapsed / TOTAL_DURATION) * 100);
+      
+      // Smooth interpolation so numbers tick up evenly step-by-step (1% -> 2% -> 3%...) without big chunk jumps
+      displayed += (targetProgress - displayed) * 0.2;
+      if (displayed > 99.8) displayed = 100;
 
-      // Only consider real loading complete after 1000ms OR if explicitly reaching 100%
-      const isRealLoaded = progressRef.current >= 100 || (elapsed > 1000 && !activeRef.current && progressRef.current > 0) || (elapsed > 3500 && !activeRef.current);
-      
-      const target = isRealLoaded ? Math.max(simulated, progressRef.current) : Math.min(98, Math.max(simulated, progressRef.current));
-      
-      // Smoothly step displayed toward target
-      displayed = Math.min(100, displayed + Math.max(0.5, (target - displayed) * 0.15));
-      
-      if (isRealLoaded && elapsed >= MIN_DURATION && displayed >= 99.2) {
-        displayed = 100;
+      setDisplayProgress(displayed);
+
+      if (displayed >= 100 && elapsed >= TOTAL_DURATION) {
         finished = true;
         clearInterval(timer);
         setTimeout(() => onFinishRef.current(), 350);
       }
-      
-      setDisplayProgress(displayed);
     }, TICK);
 
     return () => { clearInterval(timer); finished = true; };
@@ -717,6 +574,17 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
         overflow: 'hidden',
       }}
     >
+      <style>{`
+        @keyframes progress-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.8; box-shadow: 0 0 8px 2px rgba(255,255,255,0.6); }
+          50% { transform: translateX(-50%) scale(1.3); opacity: 1; box-shadow: 0 0 16px 4px rgba(255,255,255,0.9); }
+        }
+      `}</style>
+
       {/* Star particles */}
       {stars.map((s) => (
         <span
@@ -756,18 +624,23 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
         <div
           style={{
             width: '100%',
-            height: '1px',
+            height: '2px',
             background: 'rgba(255,255,255,0.12)',
             position: 'relative',
             overflow: 'visible',
+            borderRadius: '1px'
           }}
         >
           <div
             style={{
-              height: '1px',
-              background: '#ffffff',
+              height: '2px',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, #ffffff 50%, rgba(255,255,255,0.3) 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'progress-shimmer 1.2s infinite linear',
               width: `${displayProgress}%`,
               transition: 'none',
+              borderRadius: '1px',
+              boxShadow: '0 0 10px rgba(255,255,255,0.4)'
             }}
           />
           {/* Glowing head of progress bar */}
@@ -776,12 +649,11 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
               position: 'absolute',
               top: '-3px',
               left: `${displayProgress}%`,
-              width: '4px',
-              height: '7px',
+              width: '5px',
+              height: '8px',
               background: '#ffffff',
               borderRadius: '2px',
-              boxShadow: '0 0 8px 2px rgba(255,255,255,0.6)',
-              transform: 'translateX(-50%)',
+              animation: 'pulse-glow 1s infinite ease-in-out',
               transition: 'none',
             }}
           />
@@ -791,9 +663,10 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
         <span
           style={{
             fontFamily: "'JetBrains Mono', 'Courier New', monospace",
-            fontSize: '11px',
+            fontSize: '12px',
+            fontWeight: 600,
             letterSpacing: '0.12em',
-            color: 'rgba(255,255,255,0.35)',
+            color: 'rgba(255,255,255,0.65)',
             textTransform: 'uppercase',
           }}
         >
@@ -812,73 +685,234 @@ interface ModelAnalyzerProps {
 }
 
 export function ModelAnalyzer({ onBackToIntro, lang = 'vie' }: ModelAnalyzerProps) {
-  const povPosition: [number, number, number] = [5.0, 10.0, 0.5];
-  const [hoveredItem, setHoveredItem] = useState<ItemType | null>(null);
   const [activeModal, setActiveModal] = useState<ItemType | null>(null);
   const [isAppLoading, setIsAppLoading] = useState(true);
+  const [hoveredCard, setHoveredCard] = useState<ItemType | null>(null);
 
   return (
-    <div
-      className="w-full h-full relative bg-gradient-to-b from-[#0f141d] via-[#141a26] to-[#0c1017]"
-      onMouseLeave={() => {
-        setHoveredItem(null);
-        document.body.style.cursor = 'grab';
-      }}
-    >
-      {isAppLoading && <InitialPageLoader onFinish={() => setIsAppLoading(false)} />}
-      
-      {/* Top Left Button: Return to Intro Landing Page */}
-      {onBackToIntro && !isAppLoading && (
-        <button
-          onClick={onBackToIntro}
-          className="absolute top-6 left-6 z-40 px-4 py-2.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 shadow-[0_0_20px_rgba(0,0,0,0.5)] backdrop-blur-xl flex items-center gap-2 text-xs font-mono font-bold transition-all duration-300 cursor-pointer hover:scale-105"
-        >
-          <span>←</span>
-          <span>{lang === 'eng' ? 'Back to Intro' : 'Trang Giới Thiệu'}</span>
-        </button>
-      )}
-
-      <Canvas
-        shadows
-        camera={{ position: povPosition, fov: 50, near: 0.1, far: 200 }}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
-        onPointerMissed={() => {
-          setHoveredItem(null);
-          document.body.style.cursor = 'grab';
+    <div className="w-full h-full relative bg-[#0c1017] overflow-y-auto overflow-x-hidden flex flex-col justify-between p-6 md:p-10 select-none font-sans text-slate-100">
+      {/* 2.5D Isometric Cyber Grid Background */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: '-50%',
+          width: '200%',
+          height: '200%',
+          backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 60%), linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
+          backgroundSize: '100% 100%, 50px 50px, 50px 50px',
+          transform: 'perspective(1000px) rotateX(60deg) translateY(-100px) translateZ(-200px)',
+          pointerEvents: 'none',
+          opacity: 0.7,
+          zIndex: 0
         }}
-      >
-        <ambientLight intensity={0.7} />
-        <directionalLight
-          position={[15, 25, 15]}
-          intensity={1.5}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-bias={-0.0001}
-        />
-        <pointLight position={[-10, 10, -10]} intensity={0.5} color="#60a5fa" />
-        <pointLight position={[10, 5, -10]} intensity={0.5} color="#f59e0b" />
+      />
 
-        <React.Suspense fallback={<Loader />}>
-          <ModelContent
-            hoveredItem={hoveredItem}
-            onHoverItem={setHoveredItem}
-            onSelectItem={(item) => {
-              setActiveModal(item);
-              if (item) setHoveredItem(null);
+      {isAppLoading && <InitialPageLoader onFinish={() => setIsAppLoading(false)} />}
+
+      {/* TOP CYBER HUD BAR */}
+      <div className="relative z-30 flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-5 bg-slate-950/60 backdrop-blur-md px-6 py-4 rounded-2xl border border-slate-800/80 shadow-lg">
+        {/* Left: Back button */}
+        {onBackToIntro && !isAppLoading && (
+          <button
+            onClick={onBackToIntro}
+            className="px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 shadow-md flex items-center gap-2 text-xs font-mono font-bold transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
+          >
+            <span>←</span>
+            <span>{lang === 'eng' ? 'Back to Intro' : 'Trang Giới Thiệu'}</span>
+          </button>
+        )}
+
+        {/* Center: Glowing Status */}
+        <div className="flex items-center gap-3 bg-slate-900/90 px-4 py-2 rounded-full border border-sky-500/30 shadow-[0_0_15px_rgba(56,189,248,0.15)]">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+          <span className="text-xs font-mono font-bold tracking-wider text-slate-200 uppercase">
+            {lang === 'eng' ? '2.5D Isometric Workstation // Zero-Lag 60FPS' : 'Trạm Làm Việc 2.5D Cyberpunk // Siêu Mượt 60FPS'}
+          </span>
+        </div>
+
+        {/* Right: System Stats */}
+        <div className="hidden md:flex items-center gap-4 text-xs font-mono text-slate-400 bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-800">
+          <span className="text-sky-400">FPS: <strong className="text-white">60.0</strong></span>
+          <span className="text-purple-400">3D ASSETS: <strong className="text-white">0 KB</strong></span>
+          <span className="text-emerald-400">STATUS: <strong className="text-white">ACTIVE</strong></span>
+        </div>
+      </div>
+
+      {/* CENTRAL 2.5D WORKSTATION CARDS AREA */}
+      <div className="relative z-20 flex-1 flex flex-col items-center justify-center my-8 max-w-7xl mx-auto w-full">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight font-sans mb-3 drop-shadow-md">
+            {lang === 'eng' ? 'Interactive Holographic Workstation' : 'Trạm Làm Việc Không Gian 2.5D'}
+          </h2>
+          <p className="text-sm md:text-base text-slate-400 max-w-xl mx-auto font-sans leading-relaxed">
+            {lang === 'eng'
+              ? 'Select an isometric workstation module below to inspect engineering blueprints, developer identity credentials, and open source archives.'
+              : 'Chọn một trạm mô-đun 2.5D bên dưới để khám phá hồ sơ kỹ thuật, thông tin cá nhân và kho dự án mã nguồn mở.'}
+          </p>
+        </div>
+
+        {/* The 3 Isometric Desk Cards Container */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 w-full px-2 md:px-6" style={{ perspective: '1200px' }}>
+          {/* CARD 1: CV & Timeline */}
+          <div
+            onClick={() => setActiveModal('paper')}
+            onMouseEnter={() => setHoveredCard('paper')}
+            onMouseLeave={() => setHoveredCard(null)}
+            className="group relative bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-950/90 border border-sky-500/30 rounded-2xl p-6 md:p-8 cursor-pointer transition-all duration-300 transform hover:-translate-y-3 hover:scale-[1.02] hover:border-sky-400 shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_0_35px_rgba(56,189,248,0.25)] flex flex-col justify-between overflow-hidden"
+            style={{
+              transformStyle: 'preserve-3d',
+              transform: hoveredCard === 'paper' ? 'translateY(-10px) rotateX(4deg) rotateY(-4deg)' : 'translateY(0) rotateX(0) rotateY(0)'
             }}
-            activeModal={activeModal}
-          />
-          <ContactShadows position={[0, -0.01, 0]} opacity={0.6} scale={40} blur={2} far={10} />
-          <Environment preset="city" />
-        </React.Suspense>
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-sky-500/20 transition-all" />
+            
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 group-hover:scale-110 transition-transform">
+                  <FileText size={28} />
+                </div>
+                <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-sky-950/60 text-sky-300 border border-sky-500/30">
+                  A4_BLUEPRINT // CV
+                </span>
+              </div>
 
-        <POVControls headPosition={povPosition} lookTarget={[1.5, 9.5, 0]} />
-      </Canvas>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3 font-sans group-hover:text-sky-300 transition-colors">
+                {lang === 'eng' ? 'Curriculum Vitae & Timeline' : 'Hồ Sơ Năng Lực & Kinh Nghiệm'}
+              </h3>
+              
+              <p className="text-sm text-slate-300 leading-relaxed mb-6 font-sans">
+                {lang === 'eng'
+                  ? 'Comprehensive interactive resume detailing full-stack web engineering, algorithm design, and system security experience.'
+                  : 'Khám phá chi tiết hành trình kỹ sư phát triển phần mềm, thuật toán trí tuệ nhân tạo và kiến trúc bảo mật hệ thống.'}
+              </p>
+
+              {/* Code preview decoration */}
+              <div className="bg-slate-950/80 rounded-xl p-3 border border-slate-800 font-mono text-[11px] text-sky-300/80 mb-6 space-y-1">
+                <div className="flex items-center gap-2"><span className="text-emerald-400">❯</span> <span>const dev = new FullStackEngineer();</span></div>
+                <div className="flex items-center gap-2"><span className="text-emerald-400">❯</span> <span>dev.skills = ['React', 'TS', '2.5D', 'AI'];</span></div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 text-xs font-mono font-bold text-sky-400 group-hover:translate-x-1 transition-transform">
+              <span>{lang === 'eng' ? '[ LAUNCH CV CONSOLE ]' : '[ MỞ HỒ SƠ CHI TIẾT ]'}</span>
+              <span className="text-base">↗</span>
+            </div>
+          </div>
+
+          {/* CARD 2: ID Lanyard Badge */}
+          <div
+            onClick={() => setActiveModal('lanyard')}
+            onMouseEnter={() => setHoveredCard('lanyard')}
+            onMouseLeave={() => setHoveredCard(null)}
+            className="group relative bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-950/90 border border-amber-500/30 rounded-2xl p-6 md:p-8 cursor-pointer transition-all duration-300 transform hover:-translate-y-3 hover:scale-[1.02] hover:border-amber-400 shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_0_35px_rgba(245,158,11,0.25)] flex flex-col justify-between overflow-hidden"
+            style={{
+              transformStyle: 'preserve-3d',
+              transform: hoveredCard === 'lanyard' ? 'translateY(-10px) rotateX(4deg)' : 'translateY(0) rotateX(0)'
+            }}
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all" />
+            
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:scale-110 transition-transform">
+                  <UserCheck size={28} />
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/60 border border-amber-500/30">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="text-[11px] font-mono font-bold text-amber-300">ONLINE // ID_BADGE</span>
+                </div>
+              </div>
+
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3 font-sans group-hover:text-amber-300 transition-colors">
+                {lang === 'eng' ? 'Developer Identity & Socials' : 'Thẻ Nhận Diện & Liên Hệ'}
+              </h3>
+              
+              <p className="text-sm text-slate-300 leading-relaxed mb-6 font-sans">
+                {lang === 'eng'
+                  ? 'Interactive Discord Lanyard card with real-time online status indicator, custom credentials, and direct contact channels.'
+                  : 'Thẻ ID Lanyard tích hợp trạng thái trực tuyến thời gian thực từ Discord cùng mạng lưới kết nối mạng xã hội và GitHub.'}
+              </p>
+
+              {/* Barcode motif decoration */}
+              <div className="bg-slate-950/80 rounded-xl p-3 border border-slate-800 flex items-center justify-between font-mono text-[11px] text-amber-400/80 mb-6">
+                <div className="tracking-widest font-bold">||| || ||| | |||| ||</div>
+                <span>ID: PSY-ZNEY-2026</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 text-xs font-mono font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
+              <span>{lang === 'eng' ? '[ ACCESS ID LANYARD ]' : '[ XEM THẺ ĐEO DISCORD ]'}</span>
+              <span className="text-base">↗</span>
+            </div>
+          </div>
+
+          {/* CARD 3: Open Source Bookshelf */}
+          <div
+            onClick={() => setActiveModal('bookshelf')}
+            onMouseEnter={() => setHoveredCard('bookshelf')}
+            onMouseLeave={() => setHoveredCard(null)}
+            className="group relative bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-950/90 border border-purple-500/30 rounded-2xl p-6 md:p-8 cursor-pointer transition-all duration-300 transform hover:-translate-y-3 hover:scale-[1.02] hover:border-purple-400 shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_0_35px_rgba(168,85,247,0.25)] flex flex-col justify-between overflow-hidden"
+            style={{
+              transformStyle: 'preserve-3d',
+              transform: hoveredCard === 'bookshelf' ? 'translateY(-10px) rotateX(4deg) rotateY(4deg)' : 'translateY(0) rotateX(0) rotateY(0)'
+            }}
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all" />
+            
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform">
+                  <BookOpen size={28} />
+                </div>
+                <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-500/30">
+                  REPO_ARCHIVE // BENTO
+                </span>
+              </div>
+
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3 font-sans group-hover:text-purple-300 transition-colors">
+                {lang === 'eng' ? 'Open Source Project Bookshelf' : 'Kệ Sách & Kho Dự Án'}
+              </h3>
+              
+              <p className="text-sm text-slate-300 leading-relaxed mb-6 font-sans">
+                {lang === 'eng'
+                  ? 'Agency-grade asymmetric bento grid archiving full-stack applications, AI heuristic algorithms, and WebRTC collaborative music rooms.'
+                  : 'Kệ sách Bento Grid chuẩn Agency tổng hợp các dự án mã nguồn mở, thuật toán AI tối ưu và phòng nghe nhạc đồng bộ thời gian thực.'}
+              </p>
+
+              {/* Equalizer motif decoration */}
+              <div className="bg-slate-950/80 rounded-xl p-3 border border-slate-800 flex items-center justify-between font-mono text-[11px] text-purple-400/80 mb-6">
+                <span className="text-emerald-400">$ sudo guard --live</span>
+                <div className="flex items-end gap-1" style={{ height: '16px' }}>
+                  <span className="eq-bar-1 w-1 h-3 bg-sky-400 rounded-full" />
+                  <span className="eq-bar-2 w-1 h-4 bg-purple-400 rounded-full" />
+                  <span className="eq-bar-3 w-1 h-2 bg-emerald-400 rounded-full" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 text-xs font-mono font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
+              <span>{lang === 'eng' ? '[ EXPLORE REPOSITORIES ]' : '[ KHÁM PHÁ KHO MÃ NGUỒN ]'}</span>
+              <span className="text-base">↗</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER CYBER BAR */}
+      <div className="relative z-20 border-t border-slate-800/80 pt-4 mt-auto flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-400 bg-slate-950/60 px-6 py-3 rounded-2xl border border-slate-800/60">
+        <div className="flex items-center gap-2">
+          <span className="text-sky-400 font-bold">@psy-zney</span>
+          <span>// 2.5D ISOMETRIC CYBER DESK ARCHITECTURE</span>
+        </div>
+        <div className="flex items-center gap-6">
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" /> <span>3D GLB PAYLOAD: 0 MB</span></span>
+          <span className="hidden sm:inline">ENGINE: REACT 18 + VITE + TAILWIND</span>
+        </div>
+      </div>
 
       {/* MODAL OVERLAYS */}
       {activeModal && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-200">
           {activeModal === 'paper' && <ModalCV onClose={() => setActiveModal(null)} />}
           {activeModal === 'lanyard' && <ModalLanyard onClose={() => setActiveModal(null)} />}
           {activeModal === 'bookshelf' && <ModalBookshelf onClose={() => setActiveModal(null)} />}
@@ -887,6 +921,4 @@ export function ModelAnalyzer({ onBackToIntro, lang = 'vie' }: ModelAnalyzerProp
     </div>
   );
 }
-
-useGLTF.preload('./main.glb');
 

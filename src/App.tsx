@@ -68,7 +68,7 @@ export default function App() {
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-[#0f141d] font-sans text-slate-100 select-none">
-      <MobileLandscapeOverlay lang={lang} />
+      {viewMode === 'workspace' && <MobileLandscapeOverlay lang={lang} />}
       {viewMode === 'intro' ? (
         <IntroPage
           onEnterWorkspace={() => setViewMode('workspace')}
