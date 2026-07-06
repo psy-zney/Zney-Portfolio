@@ -217,6 +217,7 @@ function POVControls({
   const isTransitioning = useRef(false);
   const previousMousePosition = useRef({ x: 0, y: 0 });
   const animatedTarget = useRef(new THREE.Vector3(...lookTarget));
+  const controlsMountedRef = useRef(false);
   const transitionRef = useRef<{
     startPosition: THREE.Vector3;
     endPosition: THREE.Vector3;
@@ -286,6 +287,13 @@ function POVControls({
   }, [gl, initialAngles, sensitivity, zoomed]);
 
   useEffect(() => {
+    if (!controlsMountedRef.current) {
+      controlsMountedRef.current = true;
+      camera.position.set(headPosition[0], headPosition[1], headPosition[2]);
+      animatedTarget.current.set(lookTarget[0], lookTarget[1], lookTarget[2]);
+      camera.lookAt(animatedTarget.current);
+      return;
+    }
     if (zoomed && !focusPoint) return;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const duration = reducedMotion ? 0.01 : 1.5;
@@ -314,7 +322,7 @@ function POVControls({
     };
   }, [camera, focusPoint, focusSize, headPosition, lookTarget, onZoomComplete, zoomed]);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     const transition = transitionRef.current;
     if (transition) {
       const linear = Math.min(1, (performance.now() - transition.startTime) / Math.max(1, transition.duration));
@@ -338,8 +346,9 @@ function POVControls({
     }
 
     camera.position.set(headPosition[0], headPosition[1], headPosition[2]);
-    currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, targetYaw.current, 0.12);
-    currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch.current, 0.12);
+    const smoothing = 1 - Math.exp(-Math.min(delta, 0.05) * 14);
+    currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, targetYaw.current, smoothing);
+    currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch.current, smoothing);
     const euler = new THREE.Euler(currentPitch.current, currentYaw.current, 0, 'YXZ');
     camera.quaternion.setFromEuler(euler);
   });
@@ -359,6 +368,8 @@ interface ModelContentProps {
 function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, activeModal, interactionsDisabled }: ModelContentProps) {
   const gltf = useGLTF('./main.glb');
   const modelGroupRef = useRef<THREE.Group>(null);
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const pointerDraggedRef = useRef(false);
 
   const [itemPositions, setItemPositions] = useState<Record<ItemType, THREE.Vector3>>({
     paper: new THREE.Vector3(14.6, 0.8, 0.5),
@@ -430,8 +441,25 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
     });
   }, [hoveredItem, activeModal, interactionsDisabled, gltf.scene]);
 
+  const handlePointerDown = (e: any) => {
+    if (activeModal || interactionsDisabled || e.button !== 0) return;
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+    pointerDraggedRef.current = false;
+  };
+
   const handlePointerMove = (e: any) => {
     if (activeModal || interactionsDisabled) return;
+    const start = pointerStartRef.current;
+    if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 5) {
+      pointerDraggedRef.current = true;
+    }
+    if (pointerDraggedRef.current || (typeof e.delta === 'number' && e.delta > 5)) {
+      e.stopPropagation();
+      onHoverItem(null);
+      onHoverObject(null);
+      document.body.style.cursor = 'grabbing';
+      return;
+    }
     e.stopPropagation();
     const hitMesh = e.object;
     const itemType = getItemType(hitMesh.name) || getItemType(hitMesh.parent?.name || '') || getItemType(hitMesh.parent?.parent?.name || '');
@@ -468,6 +496,11 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
   const handleClick = (e: any) => {
     if (activeModal || interactionsDisabled) return;
     e.stopPropagation();
+    pointerStartRef.current = null;
+    if (pointerDraggedRef.current || (typeof e.delta === 'number' && e.delta > 5)) {
+      pointerDraggedRef.current = false;
+      return;
+    }
     const hitMesh = e.object;
     const itemType = getItemType(hitMesh.name) || getItemType(hitMesh.parent?.name || '') || getItemType(hitMesh.parent?.parent?.name || '');
     if (itemType) {
@@ -476,7 +509,7 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
   };
 
   return (
-    <group ref={modelGroupRef} onPointerMove={interactionsDisabled ? undefined : handlePointerMove} onPointerOver={interactionsDisabled ? undefined : handlePointerOver} onPointerOut={interactionsDisabled ? undefined : handlePointerOut} onClick={interactionsDisabled ? undefined : handleClick}>
+    <group ref={modelGroupRef} onPointerDown={interactionsDisabled ? undefined : handlePointerDown} onPointerMove={interactionsDisabled ? undefined : handlePointerMove} onPointerOver={interactionsDisabled ? undefined : handlePointerOver} onPointerOut={interactionsDisabled ? undefined : handlePointerOut} onClick={interactionsDisabled ? undefined : handleClick}>
       <primitive object={gltf.scene} />
 
       {/* Ultra-compact minimalist labels hugging objects (Ẩn toàn bộ khi đang mở bất kỳ modal nào) */}
@@ -490,7 +523,7 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
             key={key}
             position={[pos.x, pos.y, pos.z]}
             center
-            distanceFactor={key === 'screen' ? 7 : 12}
+            distanceFactor={key === 'screen' ? 5 : 12}
             zIndexRange={[100, 0]}
           >
             <div
@@ -506,7 +539,7 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
                 onHoverItem(null);
                 document.body.style.cursor = 'grab';
               }}
-              className={`flex items-center rounded-md font-sans font-semibold transition-all duration-200 cursor-pointer select-none whitespace-nowrap backdrop-blur-md border shadow-md ${key === 'screen' ? 'gap-1 px-1.5 py-0.5 text-[9px]' : 'gap-1.5 px-2.5 py-1 text-[11px]'} ${isHovered
+              className={`flex items-center rounded-md font-sans font-semibold transition-all duration-200 cursor-pointer select-none whitespace-nowrap backdrop-blur-md border shadow-md ${key === 'screen' ? 'gap-1 px-1 py-px text-[8px]' : 'gap-1.5 px-2.5 py-1 text-[11px]'} ${isHovered
                 ? 'scale-105 opacity-100 ring-1 ring-white/30'
                 : 'scale-100 opacity-80 hover:opacity-100'
                 }`}
@@ -816,6 +849,10 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
   useEffect(() => {
     const MIN_VISIBLE_MS = 1400;
     const COMPLETION_HOLD_MS = 260;
+    const introAudio = new Audio('./Intro.mp3');
+    introAudio.preload = 'auto';
+    introAudio.loop = true;
+    introAudio.volume = 0;
     const startTime = performance.now();
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let animationFrame = 0;
@@ -825,6 +862,40 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
     let trackWidth = trackRef.current?.clientWidth ?? 0;
     let lastRounded = -1;
     let finished = false;
+    let audioStarted = false;
+    let audioFadeFrame = 0;
+
+    const fadeAudioTo = (target: number, duration: number) => {
+      window.cancelAnimationFrame(audioFadeFrame);
+      const from = introAudio.volume;
+      const fadeStart = performance.now();
+      const updateVolume = (now: number) => {
+        const fadeProgress = Math.min(1, (now - fadeStart) / Math.max(1, duration));
+        introAudio.volume = from + (target - from) * fadeProgress;
+        if (fadeProgress < 1) audioFadeFrame = window.requestAnimationFrame(updateVolume);
+      };
+      audioFadeFrame = window.requestAnimationFrame(updateVolume);
+    };
+
+    const startIntroAudio = () => {
+      if (audioStarted) return;
+      void introAudio.play()
+        .then(() => {
+          if (finished) {
+            introAudio.pause();
+            return;
+          }
+          audioStarted = true;
+          window.removeEventListener('pointerdown', startIntroAudio);
+          window.removeEventListener('keydown', startIntroAudio);
+          fadeAudioTo(0.42, 420);
+        })
+        .catch(() => undefined);
+    };
+
+    window.addEventListener('pointerdown', startIntroAudio, { once: true });
+    window.addEventListener('keydown', startIntroAudio, { once: true });
+    startIntroAudio();
 
     const resizeObserver = new ResizeObserver((entries) => {
       trackWidth = entries[0]?.contentRect.width ?? trackRef.current?.clientWidth ?? 0;
@@ -869,6 +940,7 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
 
       if (displayed >= 99.99 && complete && elapsed >= MIN_VISIBLE_MS) {
         finished = true;
+        fadeAudioTo(0, COMPLETION_HOLD_MS);
         completionTimer = window.setTimeout(() => onFinishRef.current(), COMPLETION_HOLD_MS);
         return;
       }
@@ -882,7 +954,12 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
     return () => {
       finished = true;
       window.cancelAnimationFrame(animationFrame);
+      window.cancelAnimationFrame(audioFadeFrame);
       window.clearTimeout(completionTimer);
+      window.removeEventListener('pointerdown', startIntroAudio);
+      window.removeEventListener('keydown', startIntroAudio);
+      introAudio.pause();
+      introAudio.currentTime = 0;
       resizeObserver.disconnect();
     };
   }, []);
@@ -987,9 +1064,9 @@ interface ModelAnalyzerProps {
   lang?: 'vie' | 'eng';
 }
 
-export function ModelAnalyzer({ onBackToIntro, lang = 'vie' }: ModelAnalyzerProps) {
-  const povPosition: [number, number, number] = [5.0, 10.0, 0.5];
-  const lookTarget: [number, number, number] = [1.5, 9.5, 0];
+export function ModelAnalyzer({ onBackToIntro, lang = 'eng' }: ModelAnalyzerProps) {
+  const povPosition = React.useMemo<[number, number, number]>(() => [5.0, 10.0, 0.5], []);
+  const lookTarget = React.useMemo<[number, number, number]>(() => [1.5, 9.5, 0], []);
   const [hoveredItem, setHoveredItem] = useState<ItemType | null>(null);
   const [outlineTarget, setOutlineTarget] = useState<THREE.Object3D | null>(null);
   const [activeModal, setActiveModal] = useState<ItemType | null>(null);

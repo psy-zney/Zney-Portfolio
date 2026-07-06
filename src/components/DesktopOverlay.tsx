@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 type KeySpec = { label: string; code: string; width?: number };
 
@@ -40,16 +40,47 @@ const LEFT_PAW_CODES = new Set([
   'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG',
   'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB',
   'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5',
-  'ShiftLeft', 'ControlLeft', 'AltLeft', 'Tab', 'CapsLock'
+  'ShiftLeft', 'ControlLeft', 'AltLeft', 'Tab', 'CapsLock', 'Escape'
 ]);
 
-type LedMode = 'violet' | 'cyan' | 'rose' | 'rainbow' | 'off';
+const KEY_CODES = new Set(KEY_ROWS.flatMap((row) => row.map((key) => key.code)));
+const KEY_COORDINATES = new Map(KEY_ROWS.flatMap((row, rowIndex) =>
+  row.map((key, columnIndex) => [key.code, { row: rowIndex, column: columnIndex }] as const)
+));
+const GAME_COLUMNS = 10;
+const GAME_ROWS = 5;
+const CAT_PIXELS = ['10001', '11111', '10101', '11111', '01110'];
+const ORB_PIXELS = ['00100', '01110', '11111', '01110', '00100'];
+
+type MechanicalSoundPackConfig = {
+  sound: string;
+  defines: Record<string, [number, number]>;
+};
+
+const MECHANICAL_SOUND_PACK_BASE = './sounds/cherrymx-black-pbt';
+const CODE_TO_SCAN_CODE: Record<string, string> = {
+  Escape: '1',
+  Digit1: '2', Digit2: '3', Digit3: '4', Digit4: '5', Digit5: '6',
+  Digit6: '7', Digit7: '8', Digit8: '9', Digit9: '10', Digit0: '11',
+  Backspace: '14', Tab: '15',
+  KeyQ: '16', KeyW: '17', KeyE: '18', KeyR: '19', KeyT: '20',
+  KeyY: '21', KeyU: '22', KeyI: '23', KeyO: '24', KeyP: '25',
+  Enter: '28', ControlLeft: '29',
+  KeyA: '30', KeyS: '31', KeyD: '32', KeyF: '33', KeyG: '34',
+  KeyH: '35', KeyJ: '36', KeyK: '37', KeyL: '38',
+  ShiftLeft: '42', Backslash: '43',
+  KeyZ: '44', KeyX: '45', KeyC: '46', KeyV: '47',
+  KeyB: '48', KeyN: '49', KeyM: '50',
+  ShiftRight: '54', AltLeft: '56', Space: '57', CapsLock: '58',
+  ControlRight: '3613', AltRight: '3640',
+};
+
+type LedMode = 'wave' | 'reactive' | 'ripple' | 'off';
 
 const LED_MODES: Array<{ id: LedMode; label: string; color: string }> = [
-  { id: 'violet', label: 'Violet', color: '#8b5cf6' },
-  { id: 'cyan', label: 'Cyan', color: '#22d3ee' },
-  { id: 'rose', label: 'Rose', color: '#f472b6' },
-  { id: 'rainbow', label: 'Rainbow', color: '#a78bfa' },
+  { id: 'wave', label: 'Wave', color: '#8b5cf6' },
+  { id: 'reactive', label: 'Press', color: '#f472b6' },
+  { id: 'ripple', label: 'Ripple', color: '#22d3ee' },
   { id: 'off', label: 'Off', color: 'transparent' },
 ];
 
@@ -60,120 +91,178 @@ interface DesktopOverlayProps {
 
 export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(() => new Set());
-  const [typedText, setTypedText] = useState('');
-  const [allSelected, setAllSelected] = useState(false);
+  const [playerPosition, setPlayerPosition] = useState({ x: 1, y: 3 });
+  const [orbPosition, setOrbPosition] = useState({ x: 7, y: 1 });
+  const [gameScore, setGameScore] = useState(0);
+  const [gameMoves, setGameMoves] = useState(0);
   const [mouseButton, setMouseButton] = useState<'left' | 'right' | null>(null);
-  const [ledMode, setLedMode] = useState<LedMode>('violet');
-  const [ledBrightness, setLedBrightness] = useState(72);
+  const [ledMode, setLedMode] = useState<LedMode>('wave');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const pointerRef = useRef<HTMLDivElement>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
+  const keyboardShellRef = useRef<HTMLDivElement>(null);
+  const pawsLayerRef = useRef<HTMLDivElement>(null);
+  const leftPawRef = useRef<HTMLDivElement>(null);
+  const rightPawRef = useRef<HTMLDivElement>(null);
+  const keyNodeRefs = useRef(new Map<string, HTMLDivElement>());
   const audioContextRef = useRef<AudioContext | null>(null);
-  const typedTextRef = useRef(typedText);
-  const allSelectedRef = useRef(allSelected);
-  const clickBufferRef = useRef<AudioBuffer | null>(null);
+  const playerPositionRef = useRef(playerPosition);
+  const orbPositionRef = useRef(orbPosition);
+  const gameScoreRef = useRef(gameScore);
+  const fallbackClickBufferRef = useRef<AudioBuffer | null>(null);
+  const mechanicalPackBufferRef = useRef<AudioBuffer | null>(null);
+  const mechanicalPackConfigRef = useRef<MechanicalSoundPackConfig | null>(null);
   const soundEnabledRef = useRef(soundEnabled);
+  const ledModeRef = useRef<LedMode>(ledMode);
+  const ledColorRef = useRef(LED_MODES[0].color);
   soundEnabledRef.current = soundEnabled;
-  typedTextRef.current = typedText;
-  allSelectedRef.current = allSelected;
+  ledModeRef.current = ledMode;
+  playerPositionRef.current = playerPosition;
+  orbPositionRef.current = orbPosition;
+  gameScoreRef.current = gameScore;
 
-  const playMechanicalClick = React.useCallback(() => {
-    if (!soundEnabledRef.current || typeof AudioContext === 'undefined') return;
+  const playMechanicalClick = React.useCallback((phase: 'down' | 'up', code: string) => {
+    if (phase === 'up' || !soundEnabledRef.current || typeof AudioContext === 'undefined') return;
 
     const context = audioContextRef.current ?? new AudioContext();
     audioContextRef.current = context;
     if (context.state === 'suspended') void context.resume();
 
-    if (!clickBufferRef.current) {
-      const sampleCount = Math.floor(context.sampleRate * 0.022);
+    const scanCode = CODE_TO_SCAN_CODE[code];
+    const definition = scanCode ? mechanicalPackConfigRef.current?.defines[scanCode] : undefined;
+    const soundPackBuffer = mechanicalPackBufferRef.current;
+    if (soundPackBuffer && definition) {
+      const [offsetMs, durationMs] = definition;
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = soundPackBuffer;
+      gain.gain.setValueAtTime(0.72, context.currentTime);
+      source.connect(gain).connect(context.destination);
+      source.start(context.currentTime, offsetMs / 1000, durationMs / 1000);
+      return;
+    }
+
+    if (!fallbackClickBufferRef.current) {
+      const sampleCount = Math.floor(context.sampleRate * 0.04);
       const buffer = context.createBuffer(1, sampleCount, context.sampleRate);
       const samples = buffer.getChannelData(0);
       for (let index = 0; index < sampleCount; index += 1) {
         const envelope = 1 - index / sampleCount;
         samples[index] = (Math.random() * 2 - 1) * envelope * envelope;
       }
-      clickBufferRef.current = buffer;
+      fallbackClickBufferRef.current = buffer;
     }
 
     const now = context.currentTime;
+    const isLargeKey = code === 'Space' || code === 'Enter' || code === 'Backspace';
     const noise = context.createBufferSource();
     const noiseFilter = context.createBiquadFilter();
     const noiseGain = context.createGain();
-    noise.buffer = clickBufferRef.current;
+    noise.buffer = fallbackClickBufferRef.current;
     noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.value = 1800 + Math.random() * 350;
-    noiseFilter.Q.value = 0.8;
-    noiseGain.gain.setValueAtTime(0.045, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.028);
+    noiseFilter.frequency.value = 1850 + Math.random() * 520;
+    noiseFilter.Q.value = 1.15;
+    noiseGain.gain.setValueAtTime(0.075, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.034);
     noise.connect(noiseFilter).connect(noiseGain).connect(context.destination);
 
     const switchTone = context.createOscillator();
     const toneGain = context.createGain();
-    switchTone.type = 'square';
-    switchTone.frequency.setValueAtTime(145 + Math.random() * 24, now);
-    switchTone.frequency.exponentialRampToValueAtTime(90, now + 0.045);
-    toneGain.gain.setValueAtTime(0.022, now);
-    toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+    switchTone.type = 'triangle';
+    switchTone.frequency.setValueAtTime((isLargeKey ? 92 : 126) + Math.random() * 18, now);
+    switchTone.frequency.exponentialRampToValueAtTime(68, now + 0.052);
+    toneGain.gain.setValueAtTime(isLargeKey ? 0.046 : 0.034, now);
+    toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.054);
     switchTone.connect(toneGain).connect(context.destination);
 
     noise.start(now);
-    noise.stop(now + 0.03);
+    noise.stop(now + 0.038);
     switchTone.start(now);
-    switchTone.stop(now + 0.055);
+    switchTone.stop(now + 0.058);
+  }, []);
+
+  const triggerLedRipple = React.useCallback((code: string) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const origin = KEY_COORDINATES.get(code);
+    if (!origin) return;
+    const color = ledColorRef.current;
+
+    keyNodeRefs.current.forEach((node, keyCode) => {
+      const point = KEY_COORDINATES.get(keyCode);
+      if (!point) return;
+      const distance = Math.abs(point.row - origin.row) + Math.abs(point.column - origin.column);
+      if (distance > 3) return;
+      const glow = Math.max(5, 15 - distance * 3);
+      node.animate(
+        [
+          { filter: 'brightness(1)' },
+          { filter: 'brightness(1.9) drop-shadow(0 0 ' + glow + 'px ' + color + ')' },
+          { filter: 'brightness(1)' },
+        ],
+        { duration: 430, delay: distance * 52, easing: 'cubic-bezier(.16, 1, .3, 1)' }
+      );
+    });
+  }, []);
+
+  const movePixelPlayer = React.useCallback((code: string) => {
+    const movement: Record<string, { x: number; y: number }> = {
+      KeyW: { x: 0, y: -1 },
+      KeyA: { x: -1, y: 0 },
+      KeyS: { x: 0, y: 1 },
+      KeyD: { x: 1, y: 0 },
+    };
+    const direction = movement[code];
+    if (!direction && code !== 'Space') return;
+
+    setGameMoves((value) => value + 1);
+    setPlayerPosition((current) => {
+      const orb = orbPositionRef.current;
+      const step = code === 'Space'
+        ? { x: Math.sign(orb.x - current.x), y: Math.sign(orb.y - current.y) }
+        : direction!;
+      const next = {
+        x: Math.max(0, Math.min(GAME_COLUMNS - 1, current.x + step.x)),
+        y: Math.max(0, Math.min(GAME_ROWS - 1, current.y + step.y)),
+      };
+
+      if (next.x === orb.x && next.y === orb.y) {
+        const nextScore = gameScoreRef.current + 1;
+        gameScoreRef.current = nextScore;
+        setGameScore(nextScore);
+        const nextOrb = {
+          x: (next.x + 3 + nextScore * 2) % GAME_COLUMNS,
+          y: (next.y + 2 + nextScore) % GAME_ROWS,
+        };
+        if (nextOrb.x === next.x && nextOrb.y === next.y) nextOrb.x = (nextOrb.x + 4) % GAME_COLUMNS;
+        orbPositionRef.current = nextOrb;
+        setOrbPosition(nextOrb);
+      }
+
+      playerPositionRef.current = next;
+      return next;
+    });
   }, []);
 
   useEffect(() => {
-    const clearSelection = () => {
-      allSelectedRef.current = false;
-      setAllSelected(false);
-    };
-
     const keyDown = (event: KeyboardEvent) => {
       if ((event.target as HTMLElement).closest('[data-native-cursor]')) return;
 
       const modifierPressed = event.ctrlKey || event.metaKey;
-      if (event.code === 'Space' || event.code === 'Tab' || event.code === 'Backspace') {
+      if (event.code === 'Space' || event.code === 'Tab' || event.code === 'Backspace'
+        || (modifierPressed && (event.code === 'KeyA' || event.code === 'KeyV'))) {
         event.preventDefault();
       }
 
-      setPressedKeys((current) => new Set(current).add(event.code));
-
-      if (modifierPressed && event.code === 'KeyA') {
-        event.preventDefault();
-        if (!event.repeat) playMechanicalClick();
-        const hasText = typedTextRef.current.length > 0;
-        allSelectedRef.current = hasText;
-        setAllSelected(hasText);
-        return;
-      }
-
-      if (modifierPressed && event.code === 'KeyV') {
-        if (!event.repeat) playMechanicalClick();
-        return;
+      if (KEY_CODES.has(event.code)) {
+        setPressedKeys((current) => new Set(current).add(event.code));
+        if (!event.repeat || event.code === 'Backspace') {
+          playMechanicalClick('down', event.code);
+          if (ledModeRef.current === 'ripple') triggerLedRipple(event.code);
+        }
       }
 
       if (modifierPressed) return;
-
-      if (event.code === 'Backspace') {
-        playMechanicalClick();
-        const removeAll = allSelectedRef.current;
-        clearSelection();
-        setTypedText((value) => removeAll ? '' : value.slice(0, -1));
-        return;
-      }
-
-      if (event.repeat) return;
-      playMechanicalClick();
-
-      if (event.key.length === 1) {
-        const replaceSelection = allSelectedRef.current;
-        clearSelection();
-        setTypedText((value) => (replaceSelection ? event.key : value + event.key).slice(-96));
-      } else if (event.code === 'Enter') {
-        const replaceSelection = allSelectedRef.current;
-        clearSelection();
-        setTypedText((value) => (replaceSelection ? '\n' : value + '\n').slice(-96));
-      }
+      if (!event.repeat || event.code !== 'Space') movePixelPlayer(event.code);
     };
 
     const keyUp = (event: KeyboardEvent) => {
@@ -184,28 +273,47 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
       });
     };
 
-    const paste = (event: ClipboardEvent) => {
-      if ((event.target as HTMLElement).closest('[data-native-cursor]')) return;
-      const clipboardText = event.clipboardData?.getData('text/plain') ?? '';
-      if (!clipboardText) return;
-      event.preventDefault();
-      const replaceSelection = allSelectedRef.current;
-      clearSelection();
-      setTypedText((value) => (replaceSelection ? clipboardText : value + clipboardText).slice(-96));
-    };
-
     const clearKeys = () => setPressedKeys(new Set());
     window.addEventListener('keydown', keyDown);
     window.addEventListener('keyup', keyUp);
-    window.addEventListener('paste', paste);
     window.addEventListener('blur', clearKeys);
     return () => {
       window.removeEventListener('keydown', keyDown);
       window.removeEventListener('keyup', keyUp);
-      window.removeEventListener('paste', paste);
       window.removeEventListener('blur', clearKeys);
     };
-  }, [playMechanicalClick]);
+  }, [movePixelPlayer, playMechanicalClick, triggerLedRipple]);
+
+  useEffect(() => {
+    if (typeof AudioContext === 'undefined') return;
+    const controller = new AbortController();
+    let cancelled = false;
+
+    const loadSoundPack = async () => {
+      try {
+        const configResponse = await fetch(MECHANICAL_SOUND_PACK_BASE + '/config.json', { signal: controller.signal });
+        if (!configResponse.ok) throw new Error('Unable to load mechanical sound pack config');
+        const config = await configResponse.json() as MechanicalSoundPackConfig;
+        const soundResponse = await fetch(MECHANICAL_SOUND_PACK_BASE + '/' + config.sound, { signal: controller.signal });
+        if (!soundResponse.ok) throw new Error('Unable to load mechanical sound pack audio');
+        const audioData = await soundResponse.arrayBuffer();
+        const context = audioContextRef.current ?? new AudioContext();
+        audioContextRef.current = context;
+        const decoded = await context.decodeAudioData(audioData);
+        if (cancelled) return;
+        mechanicalPackConfigRef.current = config;
+        mechanicalPackBufferRef.current = decoded;
+      } catch {
+        // The generated switch sound remains available as a format/network fallback.
+      }
+    };
+
+    void loadSoundPack();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -226,27 +334,53 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
   };
 
   const activeLed = LED_MODES.find((mode) => mode.id === ledMode) ?? LED_MODES[0];
+  ledColorRef.current = activeLed.color;
   const ledStyle = {
     '--keyboard-led': activeLed.color,
-    '--led-strength': ledMode === 'off' ? '0%' : ledBrightness + '%',
-    '--led-blur': 5 + ledBrightness * 0.12 + 'px',
+    '--led-strength': ledMode === 'off' ? '0%' : '76%',
+    '--led-blur': '14px',
   } as React.CSSProperties;
 
   const pressedCodes = Array.from(pressedKeys);
   const leftPressedCodes = pressedCodes.filter((code) => LEFT_PAW_CODES.has(code));
-  const rightPressedCodes = pressedCodes.filter((code) => !LEFT_PAW_CODES.has(code));
-  const pawLiftFor = (codes: string[]) => {
-    const rows = codes
-      .map((code) => KEY_ROWS.findIndex((row) => row.some((key) => key.code === code)))
-      .filter((row) => row >= 0);
-    const highestRow = rows.length ? Math.min(...rows) : 4;
-    return [-132, -105, -78, -50, -27][highestRow] + 'px';
-  };
-  const leftPawPressed = leftPressedCodes.length > 0;
-  const rightPawPressed = rightPressedCodes.length > 0;
-  const leftPawStyle = { '--paw-lift': pawLiftFor(leftPressedCodes) } as React.CSSProperties;
-  const rightPawStyle = { '--paw-lift': pawLiftFor(rightPressedCodes) } as React.CSSProperties;
+  const rightPressedCodes = pressedCodes.filter((code) => KEY_CODES.has(code) && !LEFT_PAW_CODES.has(code));
+  const leftActiveCode = leftPressedCodes[leftPressedCodes.length - 1];
+  const rightActiveCode = rightPressedCodes[rightPressedCodes.length - 1];
+  const leftPawPressed = Boolean(leftActiveCode);
+  const rightPawPressed = Boolean(rightActiveCode);
   const isVie = lang === 'vie';
+
+  useLayoutEffect(() => {
+    const shell = keyboardShellRef.current;
+    const layer = pawsLayerRef.current;
+    if (!shell || !layer) return;
+
+    const positionPaw = (paw: HTMLDivElement | null, code?: string) => {
+      if (!paw || !code) return;
+      const keyNode = keyNodeRefs.current.get(code);
+      const pad = paw.querySelector<HTMLElement>('.cat-pad');
+      if (!keyNode || !pad) return;
+
+      const keyCenterX = keyNode.offsetLeft + keyNode.offsetWidth / 2;
+      const keyCenterY = keyNode.offsetTop + keyNode.offsetHeight / 2 + 4 + keyNode.offsetHeight * 0.01;
+      const baseX = layer.offsetLeft + paw.offsetLeft + paw.offsetWidth / 2;
+      const baseY = layer.offsetTop + paw.offsetTop + paw.offsetHeight;
+      const contactY = pad.offsetTop + pad.offsetHeight * 0.61;
+      const naturalReach = Math.max(1, paw.offsetHeight - contactY);
+      const deltaX = keyCenterX - baseX;
+      const deltaY = keyCenterY - baseY;
+      const reach = Math.hypot(deltaX, deltaY);
+      const reachScale = reach / naturalReach;
+      const angle = Math.atan2(deltaX, -deltaY) * 180 / Math.PI;
+
+      paw.style.setProperty('--paw-angle', angle + 'deg');
+      paw.style.setProperty('--paw-reach-scale', String(reachScale));
+      paw.style.setProperty('--paw-pad-counter-scale', String(1 / reachScale));
+    };
+
+    positionPaw(leftPawRef.current, leftActiveCode);
+    positionPaw(rightPawRef.current, rightActiveCode);
+  }, [leftActiveCode, rightActiveCode]);
 
   return (
     <div className="desktop-overlay" aria-label={isVie ? 'Không gian desktop tương tác' : 'Interactive desktop workspace'}>
@@ -270,41 +404,69 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
         </header>
 
         <main className="desktop-monitor">
-          <nav className="desktop-dock" aria-label="Workspace tools">
-            {['01', '02', '03', '04'].map((item, index) => (
-              <button key={item} type="button" className={index === 0 ? 'is-active' : ''} data-native-cursor>{item}</button>
-            ))}
+          <nav className="desktop-dock" aria-label="Pixel arcade">
+            <button type="button" className="is-active" data-native-cursor>PX</button>
           </nav>
 
           <section className="desktop-content">
             <div className="desktop-heading">
-              <p>{isVie ? 'Không gian đang hoạt động' : 'Active workspace'}</p>
-              <h1>{isVie ? 'Gõ để đánh thức hệ thống.' : 'Type to wake the system.'}</h1>
+              <p>PIXEL ARCADE ONLINE</p>
+              <h1>Catch the signal. Wake the grid.</h1>
             </div>
 
-            <div className="terminal-grid">
-              <article className="terminal-panel terminal-main">
-                <div className="terminal-bar"><span>INPUT STREAM</span><span>{String(typedText.length).padStart(2, '0')} CHAR</span></div>
-                <pre className={typedText ? 'has-input' : ''}>
-                  {typedText ? (
-                    <span className={allSelected ? 'terminal-selection' : ''}>{typedText}</span>
-                  ) : (
-                    isVie ? 'Bắt đầu gõ trên bàn phím của bạn...' : 'Start typing on your keyboard...'
-                  )}
-                  <span className="terminal-caret" />
-                </pre>
+            <div className="terminal-grid pixel-terminal-grid">
+              <article className="terminal-panel pixel-game">
+                <div className="terminal-bar">
+                  <span>NEKO BYTE RUN</span>
+                  <span>SCORE {String(gameScore).padStart(3, '0')}</span>
+                </div>
+                <div
+                  className="pixel-stage"
+                  role="application"
+                  aria-label="Move the pixel cat with W A S D. Press Space to dash toward the signal."
+                  style={{ '--game-columns': GAME_COLUMNS, '--game-rows': GAME_ROWS } as React.CSSProperties}
+                >
+                  <div className="pixel-grid-lines" aria-hidden="true" />
+                  <div
+                    className="pixel-entity pixel-orb"
+                    style={{ '--game-x': (orbPosition.x * 100) + '%', '--game-y': (orbPosition.y * 100) + '%' } as React.CSSProperties}
+                    aria-label="Signal target"
+                  >
+                    <span className="pixel-sprite pixel-orb-sprite" aria-hidden="true">
+                      {ORB_PIXELS.flatMap((row, rowIndex) => row.split('').map((pixel, columnIndex) => (
+                        <i key={'orb-' + rowIndex + '-' + columnIndex} className={pixel === '1' ? 'is-filled' : ''} />
+                      )))}
+                    </span>
+                  </div>
+                  <div
+                    className="pixel-entity pixel-player"
+                    style={{ '--game-x': (playerPosition.x * 100) + '%', '--game-y': (playerPosition.y * 100) + '%' } as React.CSSProperties}
+                    aria-label="Pixel cat"
+                  >
+                    <span className="pixel-sprite pixel-cat-sprite" aria-hidden="true">
+                      {CAT_PIXELS.flatMap((row, rowIndex) => row.split('').map((pixel, columnIndex) => (
+                        <i key={'cat-' + rowIndex + '-' + columnIndex} className={pixel === '1' ? 'is-filled' : ''} />
+                      )))}
+                    </span>
+                  </div>
+                  <div className="pixel-game-hud">
+                    <span>WASD MOVE</span>
+                    <span>SPACE DASH</span>
+                    <span>{String(gameMoves).padStart(3, '0')} STEPS</span>
+                  </div>
+                </div>
               </article>
 
               <aside className="terminal-panel system-panel">
-                <div className="terminal-bar"><span>SYSTEM</span><span>READY</span></div>
+                <div className="terminal-bar"><span>ARCADE</span><span>READY</span></div>
                 <dl>
-                  <div><dt>RENDER</dt><dd>THREE.JS</dd></div>
-                  <div><dt>INPUT</dt><dd>LIVE</dd></div>
-                  <div><dt>LATENCY</dt><dd>LOCAL</dd></div>
+                  <div><dt>PLAYER</dt><dd>NEKO-01</dd></div>
+                  <div><dt>CORES</dt><dd>{String(gameScore).padStart(2, '0')}</dd></div>
+                  <div><dt>INPUT</dt><dd>WASD</dd></div>
                 </dl>
                 <div className="led-controller">
                   <div className="led-controller-heading">
-                    <span>KEYBOARD LED</span>
+                    <span>KEYBOARD FX</span>
                     <button
                       type="button"
                       className={'sound-toggle ' + (soundEnabled ? 'is-on' : '')}
@@ -315,36 +477,23 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
                       {soundEnabled ? 'SOUND ON' : 'SOUND OFF'}
                     </button>
                   </div>
-                  <div className="led-presets" aria-label="Keyboard LED color">
+                  <div className="led-presets" aria-label="Keyboard LED effect">
                     {LED_MODES.map((mode) => (
                       <button
                         key={mode.id}
                         type="button"
                         className={ledMode === mode.id ? 'is-active' : ''}
                         onClick={() => setLedMode(mode.id)}
-                        aria-label={mode.label}
+                        aria-label={mode.label + ' LED effect'}
                         aria-pressed={ledMode === mode.id}
-                        title={mode.label}
                         data-mode={mode.id}
                         data-native-cursor
                       >
                         <span style={{ background: mode.color }} />
+                        <b>{mode.label}</b>
                       </button>
                     ))}
                   </div>
-                  <label className="led-brightness">
-                    <span>BRIGHTNESS</span>
-                    <input
-                      type="range"
-                      min="15"
-                      max="100"
-                      value={ledBrightness}
-                      onChange={(event) => setLedBrightness(Number(event.target.value))}
-                      disabled={ledMode === 'off'}
-                      data-native-cursor
-                    />
-                    <output>{ledBrightness}%</output>
-                  </label>
                 </div>
               </aside>
             </div>
@@ -352,21 +501,23 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
         </main>
 
         <section className="device-deck" data-led-mode={ledMode} style={ledStyle} aria-label={isVie ? 'Bàn phím và chuột mô phỏng' : 'Simulated keyboard and mouse'}>
-          <div className="keyboard-shell">
+          <div ref={keyboardShellRef} className="keyboard-shell">
             <div className="keyboard-grid">
               {KEY_ROWS.map((row, rowIndex) => (
                 <div className="keyboard-row" key={rowIndex}>
                   {row.map((key, keyIndex) => (
                     <div
                       key={`${key.code}-${keyIndex}`}
+                      ref={(node) => {
+                        if (node) keyNodeRefs.current.set(key.code, node);
+                        else keyNodeRefs.current.delete(key.code);
+                      }}
                       className={`key-node ${pressedKeys.has(key.code) ? 'key-pressed' : ''}`}
                       style={{
                         '--key-width': key.width ?? 1,
                         '--key-index': rowIndex * 16 + keyIndex,
                         '--key-delay': -((rowIndex * 16 + keyIndex) * 52) + 'ms',
-                        '--key-led': ledMode === 'rainbow'
-                          ? 'hsl(' + ((rowIndex * 16 + keyIndex) * 29 % 360) + ' 88% 64%)'
-                          : activeLed.color,
+                        '--key-led': activeLed.color,
                       } as React.CSSProperties}
                     >{key.label}</div>
                   ))}
@@ -374,8 +525,8 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
               ))}
             </div>
 
-            <div className="cat-paws" aria-hidden="true">
-              <div className={'cat-paw cat-paw-left ' + (leftPawPressed ? 'is-pressing' : '')} style={leftPawStyle}>
+            <div ref={pawsLayerRef} className="cat-paws" aria-hidden="true">
+              <div ref={leftPawRef} className={'cat-paw cat-paw-left ' + (leftPawPressed ? 'is-pressing' : '')}>
                 <span className="cat-arm" />
                 <span className="cat-pad">
                   <i className="cat-toe toe-one" />
@@ -384,7 +535,7 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
                   <i className="cat-bean" />
                 </span>
               </div>
-              <div className={'cat-paw cat-paw-right ' + (rightPawPressed ? 'is-pressing' : '')} style={rightPawStyle}>
+              <div ref={rightPawRef} className={'cat-paw cat-paw-right ' + (rightPawPressed ? 'is-pressing' : '')}>
                 <span className="cat-arm" />
                 <span className="cat-pad">
                   <i className="cat-toe toe-one" />

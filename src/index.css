@@ -16,7 +16,7 @@ html, body, #root {
   font-family: Outfit, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Custom Wave Text Loader — monochrome */
+/* Custom Wave Text Loader - monochrome */
 .wave-loader {
   width: fit-content;
   font-size: 36px;
@@ -605,6 +605,8 @@ html, body, #root {
   border: 1px solid rgba(255, 255, 255, .46);
   border-radius: 48% 48% 44% 44% / 56% 56% 42% 42%;
   background: linear-gradient(150deg, #eeeaf8, #c8c1df 74%);
+  transform-origin: 50% 61%;
+  transition: transform 90ms cubic-bezier(.2, .82, .2, 1);
   box-shadow:
     inset 7px 7px 10px rgba(255, 255, 255, .24),
     inset -7px -6px 10px rgba(74, 61, 113, .13),
@@ -671,14 +673,14 @@ html, body, #root {
   border-radius: 50% 50% 44% 44%;
 }
 
-.cat-paw-left.is-pressing {
-  animation: none;
-  transform: translateY(var(--paw-lift, -27px)) rotate(6deg) scaleY(.94);
-}
-
+.cat-paw-left.is-pressing,
 .cat-paw-right.is-pressing {
   animation: none;
-  transform: translateY(var(--paw-lift, -27px)) rotate(-6deg) scaleY(.94);
+  transform: rotate(var(--paw-angle, 0deg)) scaleY(var(--paw-reach-scale, 1));
+}
+
+.cat-paw.is-pressing .cat-pad {
+  transform: scaleY(var(--paw-pad-counter-scale, 1));
 }
 
 @keyframes cat-left-type {
@@ -875,8 +877,7 @@ html, body, #root {
   border-top: 1px solid rgba(255, 255, 255, .07);
 }
 
-.led-controller-heading,
-.led-brightness {
+.led-controller-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -907,18 +908,22 @@ html, body, #root {
 
 .led-presets {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
-  margin: 10px 0;
+  margin: 10px 0 0;
 }
 
 .led-presets button {
-  position: relative;
-  display: grid;
-  place-items: center;
-  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  min-width: 0;
+  height: 29px;
+  padding: 0 7px;
   border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 6px;
+  color: rgba(255, 255, 255, .42);
   background: rgba(255, 255, 255, .025);
   cursor: pointer;
   transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
@@ -931,47 +936,31 @@ html, body, #root {
 
 .led-presets button.is-active {
   border-color: var(--keyboard-led);
+  color: #f7f5fb;
   background: color-mix(in srgb, var(--keyboard-led) 12%, transparent);
 }
 
 .led-presets button span {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  box-shadow: 0 0 8px currentColor;
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  box-shadow: 0 0 7px currentColor;
 }
 
-.led-presets button[data-mode="rainbow"] span {
-  background: conic-gradient(#f472b6, #facc15, #4ade80, #22d3ee, #8b5cf6, #f472b6) !important;
+.led-presets button b {
+  overflow: hidden;
+  font: 600 7px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
 .led-presets button[data-mode="off"] span {
   border: 1px solid rgba(255, 255, 255, .22);
-  background:
-    linear-gradient(45deg, transparent 43%, rgba(255, 255, 255, .38) 44% 56%, transparent 57%) !important;
+  background: transparent !important;
   box-shadow: none;
 }
-
-.led-brightness input {
-  width: 58%;
-  height: 3px;
-  margin: 0;
-  accent-color: var(--keyboard-led);
-  cursor: pointer;
-}
-
-.led-brightness input:disabled {
-  cursor: not-allowed;
-  opacity: .25;
-}
-
-.led-brightness output {
-  min-width: 28px;
-  color: rgba(255, 255, 255, .58);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
 .system-panel {
   overflow-y: auto;
   scrollbar-width: none;
@@ -1135,7 +1124,7 @@ html, body, #root {
 }
 /* LED chase and illuminated key legends */
 .cat-paw {
-  transition: transform 95ms cubic-bezier(.2, .8, .2, 1);
+  transition: transform 90ms cubic-bezier(.2, .82, .2, 1);
 }
 
 .cat-paw-left {
@@ -1148,7 +1137,7 @@ html, body, #root {
   transform: translateY(16px) rotate(-9deg);
 }
 
-.device-deck:not([data-led-mode="off"]) .key-node {
+.device-deck[data-led-mode="wave"] .key-node {
   color: color-mix(in srgb, #ffffff 58%, var(--key-led));
   text-shadow:
     0 0 4px color-mix(in srgb, var(--key-led) var(--led-strength), transparent),
@@ -1157,7 +1146,7 @@ html, body, #root {
   animation-delay: var(--key-delay);
 }
 
-.device-deck:not([data-led-mode="off"]) .key-node::after {
+.device-deck[data-led-mode="wave"] .key-node::after {
   animation: key-led-chase 1.65s ease-in-out infinite;
   animation-delay: var(--key-delay);
 }
@@ -1187,12 +1176,159 @@ html, body, #root {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cat-paw {
+  .cat-paw,
+  .cat-pad {
     transition: none;
   }
 
-  .device-deck:not([data-led-mode="off"]) .key-node,
-  .device-deck:not([data-led-mode="off"]) .key-node::after {
+  .device-deck[data-led-mode="wave"] .key-node,
+  .device-deck[data-led-mode="wave"] .key-node::after {
+    animation: none;
+  }
+}
+/* Pixel mini-game and event-driven keyboard lighting */
+.pixel-terminal-grid {
+  height: min(292px, 52%);
+}
+
+.pixel-game {
+  position: relative;
+  background:
+    linear-gradient(rgba(34, 211, 238, .035), rgba(139, 92, 246, .025)),
+    #05070c;
+}
+
+.pixel-stage {
+  position: relative;
+  height: calc(100% - 34px);
+  min-height: 128px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 72% 20%, rgba(34, 211, 238, .1), transparent 22%),
+    linear-gradient(180deg, rgba(139, 92, 246, .06), transparent 52%);
+}
+
+.pixel-grid-lines {
+  position: absolute;
+  inset: 0;
+  opacity: .36;
+  background-image:
+    linear-gradient(rgba(167, 139, 250, .12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167, 139, 250, .12) 1px, transparent 1px);
+  background-size:
+    calc(100% / var(--game-columns)) calc(100% / var(--game-rows)),
+    calc(100% / var(--game-columns)) calc(100% / var(--game-rows));
+}
+
+.pixel-entity {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: calc(100% / var(--game-columns));
+  height: calc(100% / var(--game-rows));
+  transform: translate3d(var(--game-x), var(--game-y), 0);
+  transition: transform 110ms steps(2, end);
+  will-change: transform;
+}
+
+.pixel-sprite {
+  display: grid;
+  grid-template-columns: repeat(5, 4px);
+  grid-template-rows: repeat(5, 4px);
+  filter: drop-shadow(0 0 7px currentColor);
+}
+
+.pixel-sprite i {
+  width: 4px;
+  height: 4px;
+  background: transparent;
+}
+
+.pixel-sprite i.is-filled {
+  background: currentColor;
+}
+
+.pixel-cat-sprite {
+  color: #f7f5fb;
+}
+
+.pixel-orb-sprite {
+  color: #22d3ee;
+  animation: pixel-orb-pulse 760ms steps(2, end) infinite;
+}
+
+.pixel-game-hud {
+  position: absolute;
+  right: 9px;
+  bottom: 8px;
+  left: 9px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: rgba(255, 255, 255, .38);
+  font: 600 7px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .08em;
+}
+
+.device-deck[data-led-mode="wave"] .keyboard-shell::after {
+  background: linear-gradient(90deg, #8b5cf6, #22d3ee, #f472b6, #8b5cf6);
+  background-size: 260% 100%;
+  animation: keyboard-strip-wave 1.35s linear infinite;
+}
+
+.device-deck[data-led-mode="reactive"] .key-node,
+.device-deck[data-led-mode="ripple"] .key-node {
+  color: rgba(255, 255, 255, .45);
+  text-shadow: none;
+  animation: none;
+  box-shadow:
+    0 5px 0 #050507,
+    0 7px 7px rgba(0, 0, 0, .5),
+    inset 0 1px rgba(255, 255, 255, .1),
+    inset 0 -2px rgba(0, 0, 0, .38);
+}
+
+.device-deck[data-led-mode="reactive"] .key-node::after,
+.device-deck[data-led-mode="ripple"] .key-node::after {
+  opacity: .12;
+  animation: none;
+}
+
+.device-deck[data-led-mode="reactive"] .key-node.key-pressed,
+.device-deck[data-led-mode="ripple"] .key-node.key-pressed {
+  color: #ffffff;
+  text-shadow: 0 0 6px var(--key-led);
+  box-shadow:
+    0 1px 0 #050507,
+    0 2px 4px rgba(0, 0, 0, .48),
+    0 0 20px color-mix(in srgb, var(--key-led) 82%, transparent),
+    inset 0 1px rgba(255, 255, 255, .18);
+}
+
+.device-deck[data-led-mode="reactive"] .key-node.key-pressed::after,
+.device-deck[data-led-mode="ripple"] .key-node.key-pressed::after {
+  opacity: 1;
+}
+
+@keyframes keyboard-strip-wave {
+  from { background-position: 0 50%; }
+  to { background-position: 260% 50%; }
+}
+
+@keyframes pixel-orb-pulse {
+  0%, 100% { opacity: .42; transform: scale(.8); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-entity {
+    transition: none;
+  }
+
+  .pixel-orb-sprite,
+  .device-deck[data-led-mode="wave"] .keyboard-shell::after {
     animation: none;
   }
 }

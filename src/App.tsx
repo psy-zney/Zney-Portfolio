@@ -53,7 +53,7 @@ function MobileLandscapeOverlay({ lang }: { lang: 'vie' | 'eng' }) {
 
 export default function App() {
   const [viewMode, setViewMode] = useState<ViewMode>(readViewMode);
-  const [lang, setLang] = useState<'vie' | 'eng'>('vie');
+  const [lang, setLang] = useState<'vie' | 'eng'>('eng');
 
   const toggleLang = () => setLang((prev) => (prev === 'vie' ? 'eng' : 'vie'));
 
