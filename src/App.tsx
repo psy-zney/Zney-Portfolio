@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { ModelAnalyzer } from './components/ModelAnalyzer';
 import { IntroPage } from './components/IntroPage';
 
+type ViewMode = 'intro' | 'workspace';
+
+function readViewMode(): ViewMode {
+  return window.location.hash === '#/workspace' ? 'workspace' : 'intro';
+}
+
 function MobileLandscapeOverlay({ lang }: { lang: 'vie' | 'eng' }) {
   const [isPortraitMobile, setIsPortraitMobile] = useState(false);
 
@@ -46,13 +52,31 @@ function MobileLandscapeOverlay({ lang }: { lang: 'vie' | 'eng' }) {
 }
 
 export default function App() {
-  const [viewMode, setViewMode] = useState<'intro' | 'workspace'>('intro');
+  const [viewMode, setViewMode] = useState<ViewMode>(readViewMode);
   const [lang, setLang] = useState<'vie' | 'eng'>('vie');
 
   const toggleLang = () => setLang((prev) => (prev === 'vie' ? 'eng' : 'vie'));
 
+  const navigateTo = (mode: ViewMode) => {
+    const nextUrl = mode === 'workspace'
+      ? `${window.location.pathname}${window.location.search}#/workspace`
+      : `${window.location.pathname}${window.location.search}`;
+    window.history.pushState({ viewMode: mode }, '', nextUrl);
+    setViewMode(mode);
+  };
+
   useEffect(() => {
-    document.title = 'zney - Portfolio';
+    const syncViewFromUrl = () => setViewMode(readViewMode());
+    window.addEventListener('popstate', syncViewFromUrl);
+    window.addEventListener('hashchange', syncViewFromUrl);
+    return () => {
+      window.removeEventListener('popstate', syncViewFromUrl);
+      window.removeEventListener('hashchange', syncViewFromUrl);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.title = viewMode === 'workspace' ? 'Workspace | zney' : 'zney - Portfolio';
     const favicon = document.getElementById('favicon') as HTMLLinkElement || document.querySelector("link[rel*='icon']");
     if (favicon) {
       favicon.href = viewMode === 'intro' ? './black-hole.png' : './hacker.png';
@@ -71,13 +95,13 @@ export default function App() {
       {viewMode === 'workspace' && <MobileLandscapeOverlay lang={lang} />}
       {viewMode === 'intro' ? (
         <IntroPage
-          onEnterWorkspace={() => setViewMode('workspace')}
+          onEnterWorkspace={() => navigateTo('workspace')}
           lang={lang}
           onToggleLang={toggleLang}
         />
       ) : (
         <ModelAnalyzer
-          onBackToIntro={() => setViewMode('intro')}
+          onBackToIntro={() => navigateTo('intro')}
           lang={lang}
         />
       )}
