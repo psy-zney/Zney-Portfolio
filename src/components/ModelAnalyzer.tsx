@@ -6,7 +6,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { DesktopOverlay } from './DesktopOverlay';
-import { getPreloadedIntroAudio } from '../utils/audioPreloader';
+import { getPreloadedIntroAudio, resumeAudioContextIfNeeded } from '../utils/audioPreloader';
 import {
   FileText,
   CreditCard,
@@ -172,8 +172,59 @@ function WaveLoaderText({ className = '' }: { className?: string }) {
   return <div className={'wave-loader ' + className} aria-hidden="true" />;
 }
 
+function useSmoothFallbackProgress() {
+  const { progress, active } = useProgress();
+  const [smooth, setSmooth] = useState(0);
+  const progressRef = useRef(progress);
+  const activeRef = useRef(active);
+  progressRef.current = progress;
+  activeRef.current = active;
+
+  useEffect(() => {
+    const startTime = performance.now();
+    let frame = 0;
+    let displayed = 0;
+    let prevTime = startTime;
+
+    const animate = (now: number) => {
+      const delta = Math.min(64, Math.max(0, now - prevTime));
+      prevTime = now;
+      const elapsed = now - startTime;
+      const actual = Math.max(0, Math.min(100, progressRef.current));
+      const complete = !activeRef.current && actual >= 99.9;
+
+      const simulated = Math.min(92, 92 * (1 - Math.exp(-elapsed / 450)));
+      let target = Math.max(actual, simulated);
+      if (complete) target = 100;
+
+      // Thuật toán đếm bước đều đặn (chạy đẹp 0 -> 100 nhảy số mượt, không nhảy đột ngột)
+      const maxStep = (complete ? 0.22 : 0.14) * delta;
+      const minStep = (complete ? 0.12 : 0.03) * delta;
+      let step = (target - displayed) * (complete ? 0.15 : 0.08);
+      step = Math.max(minStep, Math.min(maxStep, step));
+
+      if (displayed + step > target) step = target - displayed;
+      displayed += step;
+
+      if (complete && 100 - displayed < 0.2) {
+        displayed = 100;
+      }
+
+      setSmooth(displayed);
+
+      if (!(complete && displayed >= 100)) {
+        frame = requestAnimationFrame(animate);
+      }
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return smooth;
+}
+
 function Loader() {
-  const { progress } = useProgress();
+  const progress = useSmoothFallbackProgress();
   return (
     <Html center>
       <div className="flex flex-col items-center justify-center p-8 bg-slate-950/95 backdrop-blur-2xl rounded-3xl border border-sky-500/30 shadow-[0_0_50px_rgba(56,189,248,0.2)] text-white min-w-[340px] pointer-events-none select-none">
@@ -1035,12 +1086,13 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
   onFinishRef.current = onFinish;
 
   useEffect(() => {
-    const MIN_VISIBLE_MS = 1400;
-    const COMPLETION_HOLD_MS = 260;
+    const MIN_VISIBLE_MS = 600;
+    const COMPLETION_HOLD_MS = 160;
     const introAudio = getPreloadedIntroAudio();
     introAudio.preload = 'auto';
     introAudio.loop = true;
-    introAudio.volume = 0;
+    introAudio.muted = false;
+    introAudio.volume = 1;
     const startTime = performance.now();
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let animationFrame = 0;
@@ -1067,6 +1119,9 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
 
     const startIntroAudio = () => {
       if (audioStarted) return;
+      resumeAudioContextIfNeeded();
+      introAudio.muted = false;
+      introAudio.volume = 1;
       void introAudio.play()
         .then(() => {
           if (finished) {
@@ -1076,7 +1131,6 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
           audioStarted = true;
           window.removeEventListener('pointerdown', startIntroAudio);
           window.removeEventListener('keydown', startIntroAudio);
-          fadeAudioTo(1, 220);
         })
         .catch(() => undefined);
     };
@@ -1112,21 +1166,27 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
       const actual = Math.max(0, Math.min(100, progressRef.current));
       const complete = !activeRef.current && actual >= 99.9;
 
-      let target = actual;
-      if (activeRef.current) target = Math.min(target, 99.4);
-      if (complete && elapsed < MIN_VISIBLE_MS) target = Math.min(target, 96);
+      const simulated = Math.min(92, 92 * (1 - Math.exp(-elapsed / 450)));
+      let target = Math.max(actual, simulated);
+      if (complete) target = 100;
+      else if (activeRef.current) target = Math.min(target, 99.4);
 
-      const responseMs = complete ? 105 : 180;
-      const smoothing = reducedMotion ? 1 : 1 - Math.exp(-delta / responseMs);
-      displayed += (target - displayed) * smoothing;
+      // Thuật toán đếm bước đều đặn (chạy đẹp 0 -> 100 nhảy số mượt, không nhảy đột ngột)
+      const maxStep = (complete ? 0.22 : 0.14) * delta;
+      const minStep = (complete ? 0.12 : 0.03) * delta;
+      let step = (target - displayed) * (complete ? 0.15 : 0.08);
+      step = Math.max(minStep, Math.min(maxStep, step));
 
-      if (complete && elapsed >= MIN_VISIBLE_MS && 100 - displayed < 0.08) {
+      if (displayed + step > target) step = target - displayed;
+      displayed += step;
+
+      if (complete && elapsed >= MIN_VISIBLE_MS && 100 - displayed < 0.2) {
         displayed = 100;
       }
 
       paint(displayed);
 
-      if (displayed >= 99.99 && complete && elapsed >= MIN_VISIBLE_MS) {
+      if (displayed >= 99.95 && complete && elapsed >= MIN_VISIBLE_MS) {
         finished = true;
         fadeAudioTo(0, COMPLETION_HOLD_MS);
         completionTimer = window.setTimeout(() => onFinishRef.current(), COMPLETION_HOLD_MS);

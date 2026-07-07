@@ -2,6 +2,53 @@ let cachedBlobUrl: string | null = null;
 let sharedAudioInstance: HTMLAudioElement | null = null;
 let preloadPromise: Promise<string> | null = null;
 
+let audioCtx: AudioContext | null = null;
+let gainNode: GainNode | null = null;
+let sourceNode: MediaElementAudioSourceNode | null = null;
+
+/**
+ * Sử dụng Web Audio API (GainNode) để khuếch đại âm lượng Intro.mp3 to và rõ ràng hơn,
+ * vượt qua giới hạn volume 1.0 cơ bản của HTMLAudioElement.
+ */
+function setupAudioGainBoost(audio: HTMLAudioElement): void {
+  try {
+    if (typeof window === 'undefined') return;
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      audioCtx = new AudioContextClass();
+    }
+    if (!sourceNode && audioCtx) {
+      sourceNode = audioCtx.createMediaElementSource(audio);
+      gainNode = audioCtx.createGain();
+      gainNode.gain.value = 3.2; // Khuếch đại âm lượng lên ~3.2 lần (+10 dB)
+      sourceNode.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      void audioCtx.resume().catch(() => undefined);
+    }
+  } catch (err) {
+    console.warn('Không thể thiết lập Web Audio GainNode:', err);
+  }
+}
+
+export function resumeAudioContextIfNeeded(): void {
+  if (audioCtx && audioCtx.state === 'suspended') {
+    void audioCtx.resume().catch(() => undefined);
+  }
+}
+
+if (typeof window !== 'undefined') {
+  const handleGesture = () => {
+    resumeAudioContextIfNeeded();
+  };
+  window.addEventListener('pointerdown', handleGesture, { passive: true });
+  window.addEventListener('keydown', handleGesture, { passive: true });
+  window.addEventListener('click', handleGesture, { passive: true });
+  window.addEventListener('touchstart', handleGesture, { passive: true });
+}
+
 /**
  * Preload Intro.mp3 vào RAM ngay từ thời điểm ứng dụng (trang web) khởi chạy.
  * Lưu file dưới dạng Blob in-memory và giải mã sẵn vào buffer,
@@ -33,7 +80,7 @@ export function preloadIntroAudio(): Promise<string> {
       sharedAudioInstance.preload = 'auto';
       sharedAudioInstance.loop = true;
       if (sharedAudioInstance.paused) {
-        sharedAudioInstance.volume = 0;
+        sharedAudioInstance.volume = 1;
         sharedAudioInstance.load();
       }
 
@@ -58,10 +105,12 @@ export function getPreloadedIntroAudio(): HTMLAudioElement {
     sharedAudioInstance.load();
   }
 
+  setupAudioGainBoost(sharedAudioInstance);
+
   sharedAudioInstance.preload = 'auto';
   sharedAudioInstance.loop = true;
   if (sharedAudioInstance.paused) {
-    sharedAudioInstance.volume = 0;
+    sharedAudioInstance.volume = 1;
   }
 
   if (sharedAudioInstance.paused) {
@@ -97,6 +146,7 @@ void preloadIntroAudio();
 
 export function startIntroAudioFromGesture(targetVolume = 1): void {
   const audio = getPreloadedIntroAudio();
+  resumeAudioContextIfNeeded();
   audio.loop = true;
   audio.muted = false;
   audio.volume = Math.max(audio.volume, Math.min(1, targetVolume));
