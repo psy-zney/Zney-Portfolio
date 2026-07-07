@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ModelAnalyzer } from './components/ModelAnalyzer';
 import { IntroPage } from './components/IntroPage';
+import { preloadIntroAudio, startIntroAudioFromGesture } from './utils/audioPreloader';
 
 type ViewMode = 'intro' | 'workspace';
 
@@ -66,6 +67,7 @@ export default function App() {
   };
 
   useEffect(() => {
+    preloadIntroAudio();
     const syncViewFromUrl = () => setViewMode(readViewMode());
     window.addEventListener('popstate', syncViewFromUrl);
     window.addEventListener('hashchange', syncViewFromUrl);
@@ -95,7 +97,10 @@ export default function App() {
       {viewMode === 'workspace' && <MobileLandscapeOverlay lang={lang} />}
       {viewMode === 'intro' ? (
         <IntroPage
-          onEnterWorkspace={() => navigateTo('workspace')}
+          onEnterWorkspace={() => {
+            startIntroAudioFromGesture(0.9);
+            navigateTo('workspace');
+          }}
           lang={lang}
           onToggleLang={toggleLang}
         />

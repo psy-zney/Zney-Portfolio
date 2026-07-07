@@ -6,6 +6,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { DesktopOverlay } from './DesktopOverlay';
+import { getPreloadedIntroAudio } from '../utils/audioPreloader';
 import {
   FileText,
   CreditCard,
@@ -370,12 +371,199 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
   const modelGroupRef = useRef<THREE.Group>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const pointerDraggedRef = useRef(false);
+  const screenGifTextureRef = useRef<THREE.CanvasTexture | null>(null);
+  const screenGifImageRef = useRef<HTMLImageElement | null>(null);
+  const screenGifCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const screenGifFramesRef = useRef<Array<{ image: CanvasImageSource; duration: number }> | null>(null);
+  const screenGifStartTimeRef = useRef(0);
 
   const [itemPositions, setItemPositions] = useState<Record<ItemType, THREE.Vector3>>({
     paper: new THREE.Vector3(14.6, 0.8, 0.5),
     lanyard: new THREE.Vector3(0.0, 0.15, 0.0),
     bookshelf: new THREE.Vector3(-2.0, 3.2, -1.0),
     screen: new THREE.Vector3(1.5, 9.4, -0.2)
+  });
+
+  useEffect(() => {
+    if (!gltf.scene) return;
+
+    const image = new Image();
+    const canvas = document.createElement('canvas');
+    canvas.width = 768;
+    canvas.height = 432;
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.flipY = true;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.NearestFilter;
+    texture.generateMipmaps = false;
+    texture.anisotropy = 8;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+
+    screenGifImageRef.current = image;
+    screenGifCanvasRef.current = canvas;
+    screenGifTextureRef.current = texture;
+
+    const applyScreenTexture = () => {
+      gltf.scene.traverse((child) => {
+        if (!(child as THREE.Mesh).isMesh) return;
+
+        const mesh = child as THREE.Mesh;
+        const itemType = getItemType(mesh.name)
+          || getItemType(mesh.parent?.name || '')
+          || getItemType(mesh.parent?.parent?.name || '');
+
+        if (itemType !== 'screen' || mesh.userData.screenDesktopGifApplied) return;
+
+        const sourceMaterials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const screenMaterials = sourceMaterials.map((source) => {
+          const material = (source as THREE.MeshStandardMaterial).clone();
+          material.map = texture;
+          material.color.set(0xffffff);
+          material.emissive = new THREE.Color(0xddd8ff);
+          material.emissiveMap = texture;
+          material.emissiveIntensity = 0.16;
+          material.metalness = 0;
+          material.roughness = 0.18;
+          material.toneMapped = false;
+          material.needsUpdate = true;
+          return material;
+        });
+
+        mesh.material = Array.isArray(mesh.material) ? screenMaterials : screenMaterials[0];
+        mesh.userData.screenDesktopGifApplied = true;
+        mesh.userData.origEmissive = new THREE.Color(0xddd8ff);
+        mesh.userData.origEmissiveIntensity = 0.16;
+      });
+    };
+
+    image.onload = () => {
+      applyScreenTexture();
+    };
+    image.src = './screenDesktop.gif';
+
+    let cancelled = false;
+    const loadDecodedGifFrames = async () => {
+      const ImageDecoderCtor = (window as unknown as { ImageDecoder?: new (init: { data: ArrayBuffer; type: string }) => {
+        tracks: { ready: Promise<void>; selectedTrack?: { frameCount?: number } };
+        decode: (options: { frameIndex: number }) => Promise<{ image: CanvasImageSource & { duration?: number; close?: () => void } }>;
+        close?: () => void;
+      } }).ImageDecoder;
+
+      if (!ImageDecoderCtor) return;
+
+      try {
+        const response = await fetch('./screenDesktop.gif');
+        const data = await response.arrayBuffer();
+        const decoder = new ImageDecoderCtor({ data, type: 'image/gif' });
+        await decoder.tracks.ready;
+
+        const frameCount = decoder.tracks.selectedTrack?.frameCount ?? 0;
+        if (!frameCount || frameCount > 300) {
+          decoder.close?.();
+          return;
+        }
+
+        const frames: Array<{ image: CanvasImageSource; duration: number }> = [];
+        for (let frameIndex = 0; frameIndex < frameCount && !cancelled; frameIndex += 1) {
+          const decoded = await decoder.decode({ frameIndex });
+          const durationMs = Math.max(24, Math.round((decoded.image.duration ?? 80000) / 1000));
+          frames.push({ image: decoded.image, duration: durationMs });
+        }
+
+        decoder.close?.();
+        if (!cancelled && frames.length > 1) {
+          screenGifFramesRef.current = frames;
+          screenGifStartTimeRef.current = performance.now();
+        } else {
+          frames.forEach((frame) => {
+            const maybeClosable = frame.image as { close?: () => void };
+            maybeClosable.close?.();
+          });
+        }
+      } catch {
+        // Fallback to drawing the animated <img> into canvas each frame.
+      }
+    };
+
+    void loadDecodedGifFrames();
+
+    return () => {
+      cancelled = true;
+      if (screenGifTextureRef.current === texture) screenGifTextureRef.current = null;
+      if (screenGifImageRef.current === image) screenGifImageRef.current = null;
+      if (screenGifCanvasRef.current === canvas) screenGifCanvasRef.current = null;
+      const decodedFrames = screenGifFramesRef.current;
+      if (decodedFrames) {
+        decodedFrames.forEach((frame) => {
+          const maybeClosable = frame.image as { close?: () => void };
+          maybeClosable.close?.();
+        });
+        screenGifFramesRef.current = null;
+      }
+      texture.dispose();
+    };
+  }, [gltf.scene]);
+
+  useFrame(() => {
+    const texture = screenGifTextureRef.current;
+    const image = screenGifImageRef.current;
+    const canvas = screenGifCanvasRef.current;
+    const context = canvas?.getContext('2d');
+    const frames = screenGifFramesRef.current;
+
+    if (!texture || !image || !canvas || !context) return;
+
+    let source: CanvasImageSource = image;
+    let sourceWidth = image.naturalWidth;
+    let sourceHeight = image.naturalHeight;
+
+    if (frames?.length) {
+      const totalDuration = frames.reduce((sum, frame) => sum + frame.duration, 0);
+      const elapsed = (performance.now() - screenGifStartTimeRef.current) % totalDuration;
+      let cursor = 0;
+      const activeFrame = frames.find((frame) => {
+        cursor += frame.duration;
+        return elapsed <= cursor;
+      }) ?? frames[0];
+      source = activeFrame.image;
+      sourceWidth = (activeFrame.image as { displayWidth?: number; width?: number }).displayWidth
+        ?? (activeFrame.image as { width?: number }).width
+        ?? sourceWidth;
+      sourceHeight = (activeFrame.image as { displayHeight?: number; height?: number }).displayHeight
+        ?? (activeFrame.image as { height?: number }).height
+        ?? sourceHeight;
+    }
+
+    if (!sourceWidth || !sourceHeight) return;
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = '#02030a';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    const paddingX = canvas.width * 0.055;
+    const paddingY = canvas.height * 0.055;
+    const targetWidth = canvas.width - paddingX * 2;
+    const targetHeight = canvas.height - paddingY * 2;
+    const sourceRatio = sourceWidth / sourceHeight;
+    const targetRatio = targetWidth / targetHeight;
+    let drawWidth = targetWidth;
+    let drawHeight = targetHeight;
+
+    if (sourceRatio > targetRatio) {
+      drawHeight = targetWidth / sourceRatio;
+    } else {
+      drawWidth = targetHeight * sourceRatio;
+    }
+
+    const x = (canvas.width - drawWidth) / 2;
+    const y = (canvas.height - drawHeight) / 2;
+    context.drawImage(source, x, y, drawWidth, drawHeight);
+    texture.needsUpdate = true;
   });
 
   useEffect(() => {
@@ -849,7 +1037,7 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
   useEffect(() => {
     const MIN_VISIBLE_MS = 1400;
     const COMPLETION_HOLD_MS = 260;
-    const introAudio = new Audio('./Intro.mp3');
+    const introAudio = getPreloadedIntroAudio();
     introAudio.preload = 'auto';
     introAudio.loop = true;
     introAudio.volume = 0;
@@ -888,7 +1076,7 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
           audioStarted = true;
           window.removeEventListener('pointerdown', startIntroAudio);
           window.removeEventListener('keydown', startIntroAudio);
-          fadeAudioTo(0.42, 420);
+          fadeAudioTo(0.82, 260);
         })
         .catch(() => undefined);
     };
