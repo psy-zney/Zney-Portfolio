@@ -81,13 +81,13 @@ export default function App() {
     document.title = viewMode === 'workspace' ? 'Workspace | zney' : 'zney - Portfolio';
     const favicon = document.getElementById('favicon') as HTMLLinkElement || document.querySelector("link[rel*='icon']");
     if (favicon) {
-      favicon.href = viewMode === 'intro' ? './black-hole.png' : './hacker.png';
+      favicon.href = viewMode === 'intro' ? './img/black-hole.png' : './img/hacker.png';
     } else {
       const link = document.createElement('link');
       link.id = 'favicon';
       link.rel = 'icon';
       link.type = 'image/png';
-      link.href = viewMode === 'intro' ? './black-hole.png' : './hacker.png';
+      link.href = viewMode === 'intro' ? './img/black-hole.png' : './img/hacker.png';
       document.head.appendChild(link);
     }
   }, [viewMode]);

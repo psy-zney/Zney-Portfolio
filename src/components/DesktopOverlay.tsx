@@ -57,7 +57,7 @@ type MechanicalSoundPackConfig = {
   defines: Record<string, [number, number]>;
 };
 
-const MECHANICAL_SOUND_PACK_BASE = './sounds/cherrymx-black-pbt';
+const MECHANICAL_SOUND_PACK_BASE = './sound/cherrymx-black-pbt';
 const CODE_TO_SCAN_CODE: Record<string, string> = {
   Escape: '1',
   Digit1: '2', Digit2: '3', Digit3: '4', Digit4: '5', Digit5: '6',

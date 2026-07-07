@@ -67,7 +67,7 @@ function getItemType(name: string): ItemType | null {
 }
 
 function SpaceBackground() {
-  const texture = useTexture('./deep-space-panorama.png');
+  const texture = useTexture('./img/deep-space-panorama.png');
   const { scene } = useThree();
 
   useEffect(() => {
@@ -418,7 +418,7 @@ interface ModelContentProps {
 }
 
 function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, activeModal, interactionsDisabled }: ModelContentProps) {
-  const gltf = useGLTF('./main.glb');
+  const gltf = useGLTF('./model/main.glb');
   const modelGroupRef = useRef<THREE.Group>(null);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const pointerDraggedRef = useRef(false);
@@ -493,7 +493,7 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
     image.onload = () => {
       applyScreenTexture();
     };
-    image.src = './screenDesktop.gif';
+    image.src = './img/screenDesktop.gif';
 
     let cancelled = false;
     const loadDecodedGifFrames = async () => {
@@ -506,7 +506,7 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
       if (!ImageDecoderCtor) return;
 
       try {
-        const response = await fetch('./screenDesktop.gif');
+        const response = await fetch('./img/screenDesktop.gif');
         const data = await response.arrayBuffer();
         const decoder = new ImageDecoderCtor({ data, type: 'image/gif' });
         await decoder.tracks.ready;
@@ -829,7 +829,7 @@ function ModalCV({ onClose }: { onClose: () => void }) {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href="./Le_Quang_Khanh_CV.pdf"
+            href="./file/Le_Quang_Khanh_CV.pdf"
             download="Le_Quang_Khanh_CV.pdf"
             target="_blank"
             rel="noopener noreferrer"
@@ -850,12 +850,12 @@ function ModalCV({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 w-full bg-slate-950 relative overflow-hidden">
         <object
-          data="./Le_Quang_Khanh_CV.pdf"
+          data="./file/Le_Quang_Khanh_CV.pdf"
           type="application/pdf"
           className="w-full h-full border-0"
         >
           <iframe
-            src="./Le_Quang_Khanh_CV.pdf"
+            src="./file/Le_Quang_Khanh_CV.pdf"
             className="w-full h-full border-0"
             title="Le Quang Khanh CV"
           >
@@ -864,7 +864,7 @@ function ModalCV({ onClose }: { onClose: () => void }) {
               <p className="text-base font-semibold text-white mb-2">Trình duyệt không hỗ trợ xem trực tiếp PDF</p>
               <p className="text-sm text-slate-400 mb-6">Vui lòng tải file về máy để xem trọn vẹn tài liệu.</p>
               <a
-                href="./Le_Quang_Khanh_CV.pdf"
+                href="./file/Le_Quang_Khanh_CV.pdf"
                 download="Le_Quang_Khanh_CV.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -1435,5 +1435,5 @@ export function ModelAnalyzer({ onBackToIntro, lang = 'eng' }: ModelAnalyzerProp
   );
 }
 
-useGLTF.preload('./main.glb');
+useGLTF.preload('./model/main.glb');
 

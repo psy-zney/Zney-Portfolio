@@ -64,7 +64,7 @@ export function preloadIntroAudio(): Promise<string> {
 
   preloadPromise = (async () => {
     try {
-      const response = await fetch('./Intro.mp3');
+      const response = await fetch('./sound/Intro.mp3');
       if (!response.ok) {
         throw new Error(`HTTP status ${response.status}`);
       }
@@ -87,7 +87,7 @@ export function preloadIntroAudio(): Promise<string> {
       return cachedBlobUrl;
     } catch (err) {
       console.warn('Không thể tải Intro.mp3 vào RAM, chuyển qua URL trực tiếp:', err);
-      return './Intro.mp3';
+      return './sound/Intro.mp3';
     }
   })();
 
@@ -99,7 +99,7 @@ export function preloadIntroAudio(): Promise<string> {
  */
 export function getPreloadedIntroAudio(): HTMLAudioElement {
   if (!sharedAudioInstance) {
-    sharedAudioInstance = new Audio(cachedBlobUrl || './Intro.mp3');
+    sharedAudioInstance = new Audio(cachedBlobUrl || './sound/Intro.mp3');
   } else if (cachedBlobUrl && sharedAudioInstance.src !== cachedBlobUrl) {
     sharedAudioInstance.src = cachedBlobUrl;
     sharedAudioInstance.load();
@@ -127,7 +127,7 @@ export function getPreloadedIntroAudio(): HTMLAudioElement {
     preloadPromise.then((url) => {
       if (
         url &&
-        url !== './Intro.mp3' &&
+        url !== './sound/Intro.mp3' &&
         sharedAudioInstance &&
         sharedAudioInstance.src !== url &&
         sharedAudioInstance.paused
