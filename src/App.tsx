@@ -98,7 +98,7 @@ export default function App() {
       {viewMode === 'intro' ? (
         <IntroPage
           onEnterWorkspace={() => {
-            startIntroAudioFromGesture(0.9);
+            startIntroAudioFromGesture(1);
             navigateTo('workspace');
           }}
           lang={lang}

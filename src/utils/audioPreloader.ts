@@ -95,7 +95,7 @@ export function getPreloadedIntroAudio(): HTMLAudioElement {
 // Tự động kích hoạt tải vào RAM ngay khi module được import
 void preloadIntroAudio();
 
-export function startIntroAudioFromGesture(targetVolume = 0.9): void {
+export function startIntroAudioFromGesture(targetVolume = 1): void {
   const audio = getPreloadedIntroAudio();
   audio.loop = true;
   audio.muted = false;

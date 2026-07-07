@@ -1076,7 +1076,7 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
           audioStarted = true;
           window.removeEventListener('pointerdown', startIntroAudio);
           window.removeEventListener('keydown', startIntroAudio);
-          fadeAudioTo(0.82, 260);
+          fadeAudioTo(1, 220);
         })
         .catch(() => undefined);
     };

@@ -136,7 +136,7 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
       const source = context.createBufferSource();
       const gain = context.createGain();
       source.buffer = soundPackBuffer;
-      gain.gain.setValueAtTime(0.72, context.currentTime);
+      gain.gain.setValueAtTime(1, context.currentTime);
       source.connect(gain).connect(context.destination);
       source.start(context.currentTime, offsetMs / 1000, durationMs / 1000);
       return;
@@ -162,7 +162,7 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
     noiseFilter.type = 'bandpass';
     noiseFilter.frequency.value = 1850 + Math.random() * 520;
     noiseFilter.Q.value = 1.15;
-    noiseGain.gain.setValueAtTime(0.075, now);
+    noiseGain.gain.setValueAtTime(0.11, now);
     noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.034);
     noise.connect(noiseFilter).connect(noiseGain).connect(context.destination);
 
@@ -171,7 +171,7 @@ export function DesktopOverlay({ onExit, lang }: DesktopOverlayProps) {
     switchTone.type = 'triangle';
     switchTone.frequency.setValueAtTime((isLargeKey ? 92 : 126) + Math.random() * 18, now);
     switchTone.frequency.exponentialRampToValueAtTime(68, now + 0.052);
-    toneGain.gain.setValueAtTime(isLargeKey ? 0.046 : 0.034, now);
+    toneGain.gain.setValueAtTime(isLargeKey ? 0.07 : 0.052, now);
     toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.054);
     switchTone.connect(toneGain).connect(context.destination);
 
