@@ -813,62 +813,68 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
 
 function ModalCV({ onClose }: { onClose: () => void }) {
   return (
-    <div className="bg-slate-900/95 border border-sky-500/40 rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-[0_0_50px_rgba(56,189,248,0.2)] backdrop-blur-xl text-slate-100 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto">
-      <div className="flex justify-between items-start border-b border-slate-700/80 pb-5 mb-6">
+    <div className="bg-slate-950/95 border border-sky-500/40 rounded-2xl max-w-5xl w-full mx-4 shadow-[0_0_60px_rgba(56,189,248,0.25)] backdrop-blur-2xl text-slate-100 animate-in fade-in zoom-in duration-200 h-[88vh] flex flex-col overflow-hidden">
+      <div className="flex justify-between items-center px-6 py-4 bg-slate-900/80 border-b border-sky-500/20 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
-            <FileText size={28} />
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-sky-500/20 to-indigo-500/20 text-sky-400 border border-sky-500/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+            <FileText size={22} />
           </div>
           <div>
-            <h3 className="text-xl font-bold tracking-wide text-white">CURRICULUM VITAE</h3>
-            <p className="text-xs text-sky-400 font-mono mt-0.5">Fullstack 3D Web & Interactive Designer (10+ Years Exp)</p>
+            <h3 className="text-base font-bold tracking-wide text-white flex items-center gap-2">
+              <span>CURRICULUM VITAE</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 font-mono border border-sky-500/20">.PDF</span>
+            </h3>
+            <p className="text-xs text-slate-400">Lê Quang Khánh — Fullstack 3D Web & Interactive Designer</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition">
-          <X size={20} />
-        </button>
+        <div className="flex items-center gap-3">
+          <a
+            href="./Le_Quang_Khanh_CV.pdf"
+            download="Le_Quang_Khanh_CV.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-sky-400 via-cyan-300 to-indigo-400 hover:from-sky-300 hover:to-cyan-200 text-slate-950 font-bold text-xs rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.4)] transition hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
+          >
+            <Download size={15} />
+            <span>Download .PDF</span>
+          </a>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl border border-transparent hover:border-slate-700 transition"
+            title="Close"
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-6 text-sm leading-relaxed text-slate-300">
-        <div className="bg-slate-800/50 p-5 rounded-xl border border-slate-700/50">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-sky-400 mb-2 font-mono">Executive Summary</h4>
-          <p>
-            Creative Director & 3D Web Architect with **10 years of professional experience** crafting high-end digital products, real-time WebGL graphics, and immersive interactive design systems for global brands.
-          </p>
-        </div>
-
-        <div>
-          <h4 className="text-xs font-bold uppercase tracking-wider text-sky-400 mb-3 font-mono">Core Competencies</h4>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              'Three.js / React Three Fiber', 'TypeScript / Next.js / Vite',
-              'GLSL Shaders & Post-processing', 'TailwindCSS & Modern UI/UX',
-              '3D Asset Optimization (Blender)', 'Real-time Audio & Motion Animation'
-            ].map((skill, idx) => (
-              <div key={idx} className="flex items-center gap-2 bg-slate-800/30 px-3 py-2 rounded-lg border border-slate-700/40 text-xs text-slate-200">
-                <CheckCircle2 size={14} className="text-sky-400 shrink-0" />
-                <span>{skill}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="pt-2">
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-sky-500/10 via-slate-800/50 to-transparent rounded-xl border border-sky-500/30">
-            <div>
-              <p className="font-semibold text-white">Official A4 Document (.PDF)</p>
-              <p className="text-xs text-slate-400">Includes complete project history, education, and technical certifications</p>
+      <div className="flex-1 w-full bg-slate-950 relative overflow-hidden">
+        <object
+          data="./Le_Quang_Khanh_CV.pdf"
+          type="application/pdf"
+          className="w-full h-full border-0"
+        >
+          <iframe
+            src="./Le_Quang_Khanh_CV.pdf"
+            className="w-full h-full border-0"
+            title="Le Quang Khanh CV"
+          >
+            <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-slate-900 text-slate-300">
+              <FileText size={48} className="text-sky-400 mb-4 animate-bounce" />
+              <p className="text-base font-semibold text-white mb-2">Trình duyệt không hỗ trợ xem trực tiếp PDF</p>
+              <p className="text-sm text-slate-400 mb-6">Vui lòng tải file về máy để xem trọn vẹn tài liệu.</p>
+              <a
+                href="./Le_Quang_Khanh_CV.pdf"
+                download="Le_Quang_Khanh_CV.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 bg-gradient-to-r from-sky-400 to-cyan-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-sky-500/30 transition hover:scale-105"
+              >
+                Tải CV (.PDF) ngay
+              </a>
             </div>
-            <a
-              href="#download-cv"
-              onClick={(e) => { e.preventDefault(); alert('Starting full CV download (.PDF)...'); }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-sky-500/20 transition cursor-pointer"
-            >
-              <Download size={15} />
-              <span>Download .PDF</span>
-            </a>
-          </div>
-        </div>
+          </iframe>
+        </object>
       </div>
     </div>
   );
