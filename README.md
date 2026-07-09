@@ -23,9 +23,14 @@
 
 <div align="center">
 
-<!-- Refined Minimalist Animated SVG Banner -->
+<!-- Refined Minimalist Animated SVG Banner (via CDN for 100% reliable rendering) -->
 <p align="center">
-  <img src="./public/zney-banner.svg" alt="ZNEY Minimalist Animated Banner" width="100%" />
+  <img src="https://cdn.jsdelivr.net/gh/psy-zney/psy-zney.github.io@main/public/zney-banner.svg" alt="ZNEY Minimalist Banner" width="100%" />
+</p>
+
+<!-- Large Animated Z N E Y Header -->
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=42&duration=3500&pause=1000&color=38BDF8&center=true&vCenter=true&width=700&height=65&lines=Z+++N+++E+++Y;FULL-STACK+WEB+ENGINEER;UEH+IT+STUDENT" alt="ZNEY Animated Title" />
 </p>
 
 <!-- Subtle Minimalist Typing Subtitle -->
