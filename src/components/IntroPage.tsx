@@ -155,6 +155,215 @@ function ZenSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
+function IntroReadmePage({
+  onPrevPage,
+  onFirstPage,
+  isVie,
+}: {
+  onPrevPage: () => void;
+  onFirstPage: () => void;
+  isVie: boolean;
+}) {
+  return (
+    <div style={{ maxWidth: '840px', margin: '0 auto', padding: '40px 24px 130px', fontFamily: "'Helvetica Neue', 'SF Pro Display', 'Switzer', sans-serif", color: '#111111' }}>
+      {/* Top Navigation Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', paddingBottom: '16px', borderBottom: '1px solid #EAEAEA', flexWrap: 'wrap', gap: '12px' }}>
+        <span style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#787774' }}>
+          {isVie ? 'Trang 3 / 3 • Bách khoa README.md' : 'Page 3 / 3 • README.md Documentation'}
+        </span>
+      </div>
+
+      {/* Editorial Document Paper */}
+      <div style={{
+        background: '#FFFFFF',
+        border: '1px solid #EAEAEA',
+        borderRadius: '12px',
+        padding: '44px 48px',
+        boxShadow: '0 12px 36px rgba(0,0,0,0.06)'
+      }}>
+        <div style={{ borderBottom: '2px solid #111111', paddingBottom: '24px', marginBottom: '32px' }}>
+          <span style={{ fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            REPOSITORY ENCYCLOPEDIA • DOCUMENTATION SCAN
+          </span>
+          <h1 style={{ fontSize: '32px', fontWeight: 800, margin: '8px 0 8px', letterSpacing: '-0.02em', color: '#111111' }}>
+            🚀 @psy-zney — Interactive Cyberpunk 3D Creator Portfolio
+          </h1>
+          <p style={{ fontSize: '15px', color: '#444444', fontWeight: 500, margin: 0, lineHeight: 1.6 }}>
+            An agency-grade, highly interactive Cyberpunk 3D Creator Portfolio combining a cinematic Three.js workspace, tactile desktop interactions, bilingual content, custom audio, and a polished arcade-inspired overlay experience.
+          </p>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '18px' }}>
+            {['React 18.3', 'TypeScript 5.5', 'Vite 5.4', 'Tailwind CSS 3.4', 'Three.js / WebGL', 'Web Audio API'].map((t) => (
+              <span key={t} style={{ background: '#111111', color: '#FFFFFF', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Section 1: Architecture & Direction */}
+        <div style={{ marginBottom: '32px' }}>
+          <h2 style={{ fontSize: '13px', fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.08em', color: '#787774', marginBottom: '14px' }}>
+            {isVie ? '01. Kiến trúc Trải nghiệm (Experience Direction)' : '01. Experience Direction'}
+          </h2>
+          <div style={{ background: '#FBFBFA', border: '1px solid #EAEAEA', borderRadius: '8px', padding: '18px 20px', fontSize: '14px', lineHeight: 1.7, color: '#333333' }}>
+            <p style={{ margin: '0 0 10px' }}>
+              The portfolio runs as a hybrid experience: a real-time WebGL workspace powered by <code>main.glb</code>, supported by carefully scoped DOM overlays for high-fidelity UI moments.
+            </p>
+            <ul style={{ margin: 0, paddingLeft: '18px' }}>
+              <li><strong>3D Workspace Foundation:</strong> Loaded from <code>public/main.glb</code> via React Three Fiber & Drei.</li>
+              <li><strong>Animated Monitor Screen:</strong> In-model computer screen uses <code>public/screenDesktop.gif</code> as an animated WebGL canvas texture.</li>
+              <li><strong>Game-Style Interactions:</strong> Raycasting, hover targets, and <code>OutlinePass</code> provide neon outlines for interactive objects.</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Section 2: Key Features */}
+        <div style={{ marginBottom: '32px' }}>
+          <h2 style={{ fontSize: '13px', fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.08em', color: '#787774', marginBottom: '14px' }}>
+            {isVie ? '02. Các Hệ thống Nổi bật (Key Systems & Features)' : '02. Key Systems & Features'}
+          </h2>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+            <div style={{ border: '1px solid #EAEAEA', borderRadius: '8px', padding: '16px 18px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '6px' }}>⌨️ Arcade Desktop & Mech Keyboard</div>
+              <p style={{ fontSize: '13px', color: '#555555', margin: 0, lineHeight: 1.6 }}>
+                Tactile pixel-game desktop interface featuring live mechanical keyboard simulation, cat paw typing animations, and precise shortcut handling (Ctrl/Cmd+A, V).
+              </p>
+            </div>
+
+            <div style={{ border: '1px solid #EAEAEA', borderRadius: '8px', padding: '16px 18px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '6px' }}>🌈 Mechanical Keyboard LED & Audio Pack</div>
+              <p style={{ fontSize: '13px', color: '#555555', margin: 0, lineHeight: 1.6 }}>
+                Dynamic RGB Wave/Press/Ripple LED propagation paired with CherryMX Black PBT Web Audio scan-code audio synthesis.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Technology Stack Table */}
+        <div>
+          <h2 style={{ fontSize: '13px', fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.08em', color: '#787774', marginBottom: '14px' }}>
+            {isVie ? '03. Bảng Công nghệ (Technology Stack)' : '03. Technology Stack'}
+          </h2>
+          <div style={{ border: '1px solid #EAEAEA', borderRadius: '8px', overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #EAEAEA', background: '#FBFBFA' }}>
+                  <th style={{ padding: '10px 14px', fontWeight: 700, width: '38%' }}>Core Framework</th>
+                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>React 18.3 + TypeScript 5.5</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #EAEAEA' }}>
+                  <th style={{ padding: '10px 14px', fontWeight: 700 }}>Build & Bundler</th>
+                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>Vite 5.4</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #EAEAEA', background: '#FBFBFA' }}>
+                  <th style={{ padding: '10px 14px', fontWeight: 700 }}>3D & WebGL Engine</th>
+                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>Three.js + React Three Fiber / Drei</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #EAEAEA' }}>
+                  <th style={{ padding: '10px 14px', fontWeight: 700 }}>Post-Processing & Sound</th>
+                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>EffectComposer, OutlinePass, Web Audio API</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Bottom Centered Page Navigation Icon "<" */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '48px' }}>
+          <button
+            onClick={onPrevPage}
+            title={isVie ? 'Trang trước (CV Scan)' : 'Prev Page (CV Scan)'}
+            style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '9999px',
+              background: '#FFFFFF',
+              color: '#111111',
+              border: '1.5px solid #111111',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+              fontSize: '20px',
+              fontWeight: 700,
+            }}
+          >
+            <span>&lt;</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IntroFullCVPage({
+  onBackToIntro,
+  onNextPage,
+  isVie,
+}: {
+  onBackToIntro?: () => void;
+  onNextPage?: () => void;
+  isVie: boolean;
+}) {
+  return (
+    <div style={{ maxWidth: '920px', margin: '0 auto', padding: '32px 24px 130px', fontFamily: "'Helvetica Neue', 'SF Pro Display', 'Switzer', sans-serif", color: '#111111' }}>
+      {/* Top Navigation Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid #EAEAEA', flexWrap: 'wrap', gap: '12px' }}>
+        <span style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#787774' }}>
+          {isVie ? 'Trang 2 / 3 • Bản CV gốc không chỉnh sửa (.PDF)' : 'Page 2 / 3 • Authentic Original CV (.PDF)'}
+        </span>
+        <a
+          href="./file/Le_Quang_Khanh_CV.pdf"
+          download="Le_Quang_Khanh_CV.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: '#111111',
+            color: '#FFFFFF',
+            borderRadius: '8px',
+            padding: '8px 16px',
+            fontSize: '12px',
+            fontWeight: 600,
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <span>↓</span>
+          <span>{isVie ? 'Tải PDF chính chủ' : 'Download Original .PDF'}</span>
+        </a>
+      </div>
+
+      {/* Embedded Exact Authentic Original PDF Document — ZERO EDITS */}
+      <div style={{
+        width: '100%',
+        height: 'calc(100vh - 160px)',
+        minHeight: '860px',
+        background: '#FFFFFF',
+        border: '1px solid #EAEAEA',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        boxShadow: '0 12px 36px rgba(0,0,0,0.06)',
+      }}>
+        <iframe
+          src="./file/Le_Quang_Khanh_CV.pdf#toolbar=0&navpanes=0&scrollbar=0"
+          title="Le Quang Khanh Authentic Original CV PDF"
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            display: 'block',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 interface IntroPageProps {
   onEnterWorkspace: () => void;
   lang: 'vie' | 'eng';
@@ -164,7 +373,11 @@ interface IntroPageProps {
 export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPageProps) {
   const isVie = lang === 'vie';
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const page1Ref = useRef<HTMLDivElement>(null);
+  const page2Ref = useRef<HTMLDivElement>(null);
+  const page3Ref = useRef<HTMLDivElement>(null);
 
   // Staggered scroll-entry animation via IntersectionObserver
   useEffect(() => {
@@ -210,47 +423,6 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
       {/* Zen Sidebar */}
       <ZenSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Toggle Button for Zen Sidebar — fixed at top-left corner */}
-      <button
-        onClick={() => setSidebarOpen((v) => !v)}
-        style={{
-          position: 'fixed',
-          top: '20px',
-          left: sidebarOpen ? '256px' : '20px',
-          zIndex: 51,
-          height: '36px',
-          padding: '0 16px',
-          background: '#FFFFFF',
-          border: '1px solid #EAEAEA',
-          borderRadius: '9999px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          cursor: 'pointer',
-          transition: 'left 280ms cubic-bezier(0.16,1,0.3,1), border-color 180ms, color 180ms, box-shadow 180ms',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          color: '#787774',
-          fontSize: '12px',
-          fontFamily: "'JetBrains Mono', monospace",
-          letterSpacing: '0.04em',
-          outline: 'none',
-        }}
-        onMouseEnter={e => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = '#111111';
-          (e.currentTarget as HTMLButtonElement).style.color = '#111111';
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
-        }}
-        onMouseLeave={e => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = '#EAEAEA';
-          (e.currentTarget as HTMLButtonElement).style.color = '#787774';
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
-        }}
-        title={sidebarOpen ? 'Close sidebar' : 'Deployed Sites'}
-      >
-        <span style={{ fontSize: '14px', transition: 'transform 280ms cubic-bezier(0.16,1,0.3,1)', transform: sidebarOpen ? 'rotate(180deg)' : 'rotate(0deg)', lineHeight: 1 }}>‹</span>
-        <span>Sites</span>
-      </button>
-
       {/* Fixed ambient ambient — single ultra-slow radial drift, pointer-events none */}
       <div
         style={{
@@ -281,34 +453,233 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         .cta-btn:active { transform:scale(0.98); }
         .lang-btn { background:transparent; border:1px solid #EAEAEA; border-radius:5px; padding:6px 14px; font-size:11px; font-family:'JetBrains Mono',monospace; letter-spacing:0.06em; cursor:pointer; color:#787774; transition:border-color 200ms,color 200ms; }
         .lang-btn:hover { border-color:#111111; color:#111111; }
+        .sites-btn { height: 34px; padding: 0 14px; background: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 9999px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: border-color 180ms, color 180ms, box-shadow 180ms; box-shadow: 0 2px 8px rgba(0,0,0,0.04); color: #787774; font-size: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .sites-btn:hover { border-color: #111111; color: #111111; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .social-a { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:1px solid #EAEAEA; border-radius:6px; color:#787774; text-decoration:none; transition:border-color 200ms, color 200ms; }
         .social-a:hover { border-color:#111111; color:#111111; }
+        .horizontal-page-scroll::-webkit-scrollbar { display: none; }
+        .horizontal-page-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes zney-meteor {
+          0% { opacity: 0; transform: translate3d(-100px, -70px, 0) rotate(38deg); }
+          15% { opacity: 1; }
+          75% { opacity: 1; }
+          100% { opacity: 0; transform: translate3d(700px, 500px, 0) rotate(38deg); }
+        }
         @media (max-width: 640px) {
-          .page-shell { padding: 40px 16px 60px !important; }
-          .bento-grid { grid-template-columns: 1fr !important; }
+          .page-shell { padding: 28px 16px 130px !important; }
+          .bento-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+          .cta-btn { width: 100% !important; justify-content: center !important; }
+          .nav-pill-fixed { bottom: 14px !important; padding: 6px 14px !important; gap: 10px !important; }
         }
       `}</style>
 
-      {/* Page shell */}
+      {/* Native Horizontal Scroll Container - 3 Pages Side by Side */}
       <div
-        ref={containerRef}
-        className="page-shell"
-        style={{ position: 'relative', zIndex: 1, maxWidth: '760px', margin: '0 auto', padding: '60px 24px 80px' }}
+        className="horizontal-page-scroll"
+        style={{
+          width: '100%',
+          height: '100vh',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          display: 'flex',
+          flexDirection: 'row',
+          scrollSnapType: 'x mandatory',
+          scrollBehavior: 'smooth',
+        }}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          const idx = Math.round(el.scrollLeft / el.clientWidth);
+          if (idx !== currentPageIndex) {
+            setCurrentPageIndex(idx);
+          }
+        }}
       >
-        {/* Top bar */}
-        <div data-reveal style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '64px' }}>
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#787774', letterSpacing: '0.06em' }}>
-            psy-zney.github.io
+        {/* FIXED ALWAYS-VISIBLE BOTTOM-CENTER NAVIGATION PILL (LOOP 3->1 & 1->3, NO NEON, BOTH BUTTONS ALWAYS PRESENT) */}
+        <div
+          className="nav-pill-fixed"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            background: '#111111',
+            border: '1px solid #333333',
+            borderRadius: '9999px',
+            padding: '8px 18px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+          }}
+        >
+          {/* Always-present Left Button "<" (Loop 1 -> 3) */}
+          <button
+            onClick={() => {
+              if (currentPageIndex === 0) page3Ref.current?.scrollIntoView({ behavior: 'smooth' });
+              else if (currentPageIndex === 1) page1Ref.current?.scrollIntoView({ behavior: 'smooth' });
+              else if (currentPageIndex === 2) page2Ref.current?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            title={isVie ? 'Trang trước' : 'Prev Page'}
+            style={{
+              width: '34px',
+              height: '34px',
+              borderRadius: '9999px',
+              background: '#FFFFFF',
+              color: '#111111',
+              border: '1px solid #EAEAEA',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: 800,
+            }}
+          >
+            <span>&lt;</span>
+          </button>
+
+          <span style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#FFFFFF', fontWeight: 600, minWidth: '135px', textAlign: 'center' }}>
+            {currentPageIndex === 0 && (isVie ? 'Trang 1 / 3 • Giới Thiệu' : 'Page 1 / 3 • Intro')}
+            {currentPageIndex === 1 && (isVie ? 'Trang 2 / 3 • CV Gốc' : 'Page 2 / 3 • Original CV')}
+            {currentPageIndex === 2 && (isVie ? 'Trang 3 / 3 • README.md' : 'Page 3 / 3 • README')}
           </span>
-          <button className="lang-btn" onClick={onToggleLang}>
-            {isVie ? 'VIE → ENG' : 'ENG → VIE'}
+
+          {/* Always-present Right Button ">" (Loop 3 -> 1) */}
+          <button
+            onClick={() => {
+              if (currentPageIndex === 0) page2Ref.current?.scrollIntoView({ behavior: 'smooth' });
+              else if (currentPageIndex === 1) page3Ref.current?.scrollIntoView({ behavior: 'smooth' });
+              else if (currentPageIndex === 2) page1Ref.current?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            title={isVie ? 'Trang tiếp theo' : 'Next Page'}
+            style={{
+              width: '34px',
+              height: '34px',
+              borderRadius: '9999px',
+              background: '#FFFFFF',
+              color: '#111111',
+              border: '1px solid #EAEAEA',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: 800,
+            }}
+          >
+            <span>&gt;</span>
           </button>
         </div>
 
-        {/* Hero: Name + role */}
-        <div data-reveal style={{ borderBottom: '1px solid #EAEAEA', paddingBottom: '48px', marginBottom: '48px' }}>
+        {/* Panel 1: Introduction */}
+        <div
+          ref={page1Ref}
+          style={{
+            minWidth: '100%',
+            width: '100%',
+            height: '100vh',
+            overflowY: 'auto',
+            scrollSnapAlign: 'start',
+            flexShrink: 0,
+          }}
+        >
+          <div
+            ref={containerRef}
+            className="page-shell"
+            style={{ position: 'relative', zIndex: 1, maxWidth: '760px', margin: '0 auto', padding: '50px 24px 130px' }}
+          >
+            {/* Top bar */}
+            <div data-reveal style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '36px', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="sites-btn"
+                  title="Deployed Sites"
+                >
+                  <span style={{ fontSize: '14px', lineHeight: 1 }}>‹</span>
+                  <span>Sites</span>
+                </button>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#787774', letterSpacing: '0.06em' }}>
+                  psy-zney.github.io
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button className="lang-btn" onClick={onToggleLang}>
+                  {isVie ? 'VIE → ENG' : 'ENG → VIE'}
+                </button>
+              </div>
+            </div>
+
+              {/* Hero: Name + role */}
+              <div data-reveal style={{ borderBottom: '1px solid #EAEAEA', paddingBottom: '48px', marginBottom: '48px' }}>
+                {/* Original Black & White Terminal ZNEY ASCII Box with Diagonal Falling Shooting Star */}
+                <div style={{
+                  position: 'relative',
+                  overflow: 'hidden',
+                  background: '#111111',
+                  border: '1px solid #262626',
+                  borderRadius: '12px',
+                  padding: '18px 22px',
+                  marginBottom: '32px',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  color: '#FFFFFF',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.14)'
+                }}>
+                  {/* Diagonal Falling Meteor inside ZNEY CLI */}
+                  <span style={{
+                    position: 'absolute',
+                    top: '-15px',
+                    left: '10%',
+                    width: '140px',
+                    height: '2px',
+                    borderRadius: '999px',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), #00F0FF)',
+                    filter: 'drop-shadow(0 0 6px rgba(0, 240, 255, 0.85))',
+                    transform: 'rotate(38deg)',
+                    animation: 'zney-meteor 2.8s cubic-bezier(0.25, 0.1, 0.25, 1) infinite',
+                    pointerEvents: 'none'
+                  }} />
+                  <span style={{
+                    position: 'absolute',
+                    top: '-15px',
+                    left: '55%',
+                    width: '120px',
+                    height: '1.5px',
+                    borderRadius: '999px',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), #00F0FF)',
+                    filter: 'drop-shadow(0 0 5px rgba(0, 240, 255, 0.75))',
+                    transform: 'rotate(38deg)',
+                    animation: 'zney-meteor 3.4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite 1.3s',
+                    pointerEvents: 'none'
+                  }} />
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #262626', paddingBottom: '10px', marginBottom: '14px', fontSize: '11px', color: '#A3A3A3', position: 'relative', zIndex: 2 }}>
+                    <span>&gt; _SYSTEM.INIT(ZNEY)_DEVELOPER_ENGINE</span>
+                    <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '4px', background: '#262626', color: '#EEEEEE', fontWeight: 600 }}>CLI v1.0</span>
+                  </div>
+                  <pre style={{
+                    position: 'relative',
+                    zIndex: 2,
+                    fontSize: 'clamp(9px, 2.3vw, 13px)',
+                    lineHeight: 1.15,
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    overflowX: 'auto',
+                    margin: 0,
+                    paddingBottom: '4px'
+                  }}>
+{`███████╗███╗   ██╗███████╗██╗   ██╗
+╚══███╔╝████╗  ██║██╔════╝╚██╗ ██╔╝
+  ███╔╝ ██╔██╗ ██║█████╗   ╚████╔╝ 
+ ███╔╝  ██║╚██╗██║██╔══╝    ╚██╔╝  
+███████╗██║ ╚████║███████╗   ██║   
+╚══════╝╚═╝  ╚═══╝╚══════╝   ╚═╝   `}
+                  </pre>
+                </div>
+
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }}>
-            {isVie ? 'Giới thiệu' : 'Introduction'}
+            {isVie ? 'Giới thiệu • Trang 1 / 2' : 'Introduction • Page 1 / 2'}
           </p>
 
           {/* Greeting line */}
@@ -427,12 +798,54 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
             </a>
           </div>
 
-          <button className="cta-btn" onClick={onEnterWorkspace}>
-            <span>{isVie ? 'Khám phá Workspace 3D' : 'View 3D Workspace'}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button className="cta-btn" onClick={onEnterWorkspace}>
+              <span>{isVie ? 'Khám phá Workspace 3D' : 'View 3D Workspace'}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    {/* Panel 2: Complete Full CV Scan */}
+    <div
+      ref={page2Ref}
+      style={{
+        minWidth: '100%',
+        width: '100%',
+        height: '100vh',
+        overflowY: 'auto',
+        scrollSnapAlign: 'start',
+        flexShrink: 0,
+      }}
+    >
+      <IntroFullCVPage
+        onBackToIntro={() => page1Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+        onNextPage={() => page3Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+        isVie={isVie}
+      />
+    </div>
+
+    {/* Panel 3: Complete README.md Encyclopedia Scan */}
+    <div
+      ref={page3Ref}
+      style={{
+        minWidth: '100%',
+        width: '100%',
+        height: '100vh',
+        overflowY: 'auto',
+        scrollSnapAlign: 'start',
+        flexShrink: 0,
+      }}
+    >
+      <IntroReadmePage
+        onPrevPage={() => page2Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+        onFirstPage={() => page1Ref.current?.scrollIntoView({ behavior: 'smooth' })}
+        isVie={isVie}
+      />
+    </div>
+  </div>
+</div>
   );
 }

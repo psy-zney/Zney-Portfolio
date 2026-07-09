@@ -78,9 +78,9 @@ const CODE_TO_SCAN_CODE: Record<string, string> = {
 type LedMode = 'wave' | 'reactive' | 'ripple' | 'off';
 
 const LED_MODES: Array<{ id: LedMode; label: string; color: string }> = [
-  { id: 'wave', label: 'Wave', color: '#8b5cf6' },
-  { id: 'reactive', label: 'Press', color: '#f472b6' },
-  { id: 'ripple', label: 'Ripple', color: '#22d3ee' },
+  { id: 'wave', label: 'White', color: '#FFFFFF' },
+  { id: 'reactive', label: 'Silver', color: '#C0C0C0' },
+  { id: 'ripple', label: 'Slate', color: '#64748B' },
   { id: 'off', label: 'Off', color: 'transparent' },
 ];
 

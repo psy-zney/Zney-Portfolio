@@ -10,10 +10,89 @@ html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
+  max-width: 100%;
   height: 100%;
+  overflow-x: hidden;
   background-color: #141923;
   color: #eadfcd;
   font-family: Outfit, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+
+
+.workspace-canvas {
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+.screen-gif-html-fallback {
+  width: clamp(62px, 11vw, 98px);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid rgba(167, 139, 250, .28);
+  border-radius: 3px;
+  background: #020204;
+  box-shadow: 0 0 18px rgba(139, 92, 246, .28);
+  pointer-events: none;
+}
+
+.screen-gif-html-fallback img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hardware-note {
+  position: absolute;
+  right: clamp(16px, 2.4vw, 32px);
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  z-index: 42;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(420px, calc(100vw - 32px));
+  padding: 13px 13px 13px 15px;
+  border: 1px solid rgba(255, 255, 255, .11);
+  border-left: 3px solid #22d3ee;
+  border-radius: 8px;
+  color: #e8eef8;
+  background: rgba(0, 0, 0, .82);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, .46);
+  backdrop-filter: blur(14px);
+}
+
+.hardware-note.is-warning {
+  border-left-color: #f59e0b;
+}
+
+.hardware-note strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #f8fafc;
+  font: 700 10px/1 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: .12em;
+}
+
+.hardware-note p {
+  margin: 0;
+  color: rgba(232, 238, 248, .72);
+  font: 500 12px/1.45 Outfit, ui-sans-serif, system-ui, sans-serif;
+}
+
+.hardware-note button {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, .72);
+  background: rgba(255, 255, 255, .04);
+  cursor: pointer;
 }
 
 /* Custom Wave Text Loader - monochrome */
@@ -530,6 +609,180 @@ html, body, #root {
 
   .keyboard-shell {
     width: min(78vw, 680px);
+  }
+}
+
+@media (pointer: coarse) {
+  .desktop-workspace {
+    cursor: auto;
+  }
+
+  .virtual-pointer {
+    display: none;
+  }
+}
+
+@media (max-width: 760px), (max-height: 520px) {
+  .desktop-workspace {
+    grid-template-rows: 44px minmax(0, 1fr) minmax(104px, 25vh);
+  }
+
+  .desktop-topbar {
+    padding: 0 12px;
+  }
+
+  .desktop-brand,
+  .desktop-status {
+    gap: 8px;
+    font-size: 8px;
+    letter-spacing: .1em;
+  }
+
+  .desktop-brand-mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+  }
+
+  .desktop-exit {
+    min-width: 92px;
+    height: 30px;
+    font-size: 8px;
+  }
+
+  .desktop-monitor {
+    grid-template-columns: minmax(0, 1fr);
+    margin: 6px 8px;
+    border-radius: 10px;
+  }
+
+  .desktop-dock {
+    display: none;
+  }
+
+  .desktop-content {
+    padding: 12px;
+  }
+
+  .desktop-heading p {
+    margin-bottom: 6px;
+    font-size: 8px;
+  }
+
+  .desktop-heading h1 {
+    font-size: clamp(18px, 4.7vw, 26px);
+    line-height: 1.02;
+    letter-spacing: 0;
+  }
+
+  .pixel-terminal-grid {
+    height: calc(100% - 62px);
+    min-height: 112px;
+    margin-top: 10px;
+  }
+
+  .terminal-bar {
+    padding: 9px 10px;
+    font-size: 7px;
+  }
+
+  .pixel-stage {
+    min-height: 92px;
+  }
+
+  .pixel-game-hud {
+    gap: 5px;
+    font-size: 6px;
+    letter-spacing: .04em;
+  }
+
+  .device-deck {
+    gap: 10px;
+    padding: 4px 8px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .keyboard-shell {
+    width: min(90vw, 560px);
+    padding: 6px;
+    border-radius: 10px;
+    transform: rotateX(4deg);
+  }
+
+  .keyboard-grid,
+  .keyboard-row {
+    gap: 3px;
+  }
+
+  .key-node {
+    height: clamp(16px, 4.8vh, 24px);
+    border-radius: 4px;
+    font-size: clamp(5px, 1.4vw, 7px);
+  }
+
+  .mouse-shell {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .workspace-back-button {
+    top: calc(26px + env(safe-area-inset-top)) !important;
+    left: 12px !important;
+    max-width: calc(100vw - 24px);
+    padding: 9px 12px !important;
+    border-radius: 12px !important;
+    font-size: 10px !important;
+  }
+
+  .hardware-note {
+    right: 12px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    left: 12px;
+    width: auto;
+    padding: 11px 11px 11px 13px;
+  }
+
+  .hardware-note p {
+    font-size: 11px;
+  }
+
+  .workspace-modal-layer {
+    align-items: flex-start !important;
+    overflow-y: auto;
+    padding: calc(48px + env(safe-area-inset-top)) 12px 24px !important;
+  }
+
+  .lanyard-modal {
+    max-width: min(100%, 360px);
+  }
+
+  .lanyard-card-stack {
+    width: min(88vw, 340px) !important;
+    height: min(510px, calc(100dvh - 172px)) !important;
+    min-height: 360px;
+  }
+}
+
+@media (max-height: 430px) and (orientation: landscape) {
+  .workspace-modal-layer {
+    align-items: flex-start !important;
+    overflow-y: auto;
+    padding-top: 38px !important;
+  }
+
+  .hardware-note {
+    max-width: 360px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    padding-block: 10px;
+  }
+
+  .hardware-note p {
+    font-size: 10px;
+  }
+
+  .lanyard-card-stack {
+    height: min(330px, calc(100dvh - 98px)) !important;
+    min-height: 300px;
   }
 }
 
@@ -1254,73 +1507,6 @@ html, body, #root {
   color: #f7f5fb;
 }
 
-.pixel-orb-sprite {
-  color: #22d3ee;
-  animation: pixel-orb-pulse 760ms steps(2, end) infinite;
-}
-
-.pixel-game-hud {
-  position: absolute;
-  right: 9px;
-  bottom: 8px;
-  left: 9px;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  color: rgba(255, 255, 255, .38);
-  font: 600 7px/1 'JetBrains Mono', ui-monospace, monospace;
-  letter-spacing: .08em;
-}
-
-.device-deck[data-led-mode="wave"] .keyboard-shell::after {
-  background: linear-gradient(90deg, #8b5cf6, #22d3ee, #f472b6, #8b5cf6);
-  background-size: 260% 100%;
-  animation: keyboard-strip-wave 1.35s linear infinite;
-}
-
-.device-deck[data-led-mode="reactive"] .key-node,
-.device-deck[data-led-mode="ripple"] .key-node {
-  color: rgba(255, 255, 255, .45);
-  text-shadow: none;
-  animation: none;
-  box-shadow:
-    0 5px 0 #050507,
-    0 7px 7px rgba(0, 0, 0, .5),
-    inset 0 1px rgba(255, 255, 255, .1),
-    inset 0 -2px rgba(0, 0, 0, .38);
-}
-
-.device-deck[data-led-mode="reactive"] .key-node::after,
-.device-deck[data-led-mode="ripple"] .key-node::after {
-  opacity: .12;
-  animation: none;
-}
-
-.device-deck[data-led-mode="reactive"] .key-node.key-pressed,
-.device-deck[data-led-mode="ripple"] .key-node.key-pressed {
-  color: #ffffff;
-  text-shadow: 0 0 6px var(--key-led);
-  box-shadow:
-    0 1px 0 #050507,
-    0 2px 4px rgba(0, 0, 0, .48),
-    0 0 20px color-mix(in srgb, var(--key-led) 82%, transparent),
-    inset 0 1px rgba(255, 255, 255, .18);
-}
-
-.device-deck[data-led-mode="reactive"] .key-node.key-pressed::after,
-.device-deck[data-led-mode="ripple"] .key-node.key-pressed::after {
-  opacity: 1;
-}
-
-@keyframes keyboard-strip-wave {
-  from { background-position: 0 50%; }
-  to { background-position: 260% 50%; }
-}
-
-@keyframes pixel-orb-pulse {
-  0%, 100% { opacity: .42; transform: scale(.8); }
-  50% { opacity: 1; transform: scale(1.08); }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .pixel-entity {
@@ -1331,4 +1517,44 @@ html, body, #root {
   .device-deck[data-led-mode="wave"] .keyboard-shell::after {
     animation: none;
   }
+}
+
+/* ==================== MOBILE & TABLET RESPONSIVE OPTIMIZATIONS ==================== */
+@media (max-width: 680px) {
+  /* Intro Page Responsive Layout */
+  .bento-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .intro-position-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .intro-bottom-actions {
+    flex-direction: column-reverse !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+  }
+
+  .intro-bottom-actions .cta-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 14px 20px !important;
+  }
+
+  .intro-socials {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+}
+
+/* Smooth drag navigation for touch screens */
+.workspace-canvas {
+  touch-action: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
 }

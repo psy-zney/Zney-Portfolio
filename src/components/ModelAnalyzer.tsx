@@ -445,11 +445,11 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
-    texture.flipY = true;
+    texture.flipY = false;
     texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.NearestFilter;
+    texture.magFilter = THREE.LinearFilter;
     texture.generateMipmaps = false;
-    texture.anisotropy = 8;
+    texture.anisotropy = 16;
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -473,11 +473,11 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
           const material = (source as THREE.MeshStandardMaterial).clone();
           material.map = texture;
           material.color.set(0xffffff);
-          material.emissive = new THREE.Color(0xddd8ff);
+          material.emissive = new THREE.Color(0xdce4ff);
           material.emissiveMap = texture;
-          material.emissiveIntensity = 0.16;
-          material.metalness = 0;
-          material.roughness = 0.18;
+          material.emissiveIntensity = 0.22;
+          material.metalness = 0.05;
+          material.roughness = 0.15;
           material.toneMapped = false;
           material.needsUpdate = true;
           return material;
@@ -485,8 +485,8 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
 
         mesh.material = Array.isArray(mesh.material) ? screenMaterials : screenMaterials[0];
         mesh.userData.screenDesktopGifApplied = true;
-        mesh.userData.origEmissive = new THREE.Color(0xddd8ff);
-        mesh.userData.origEmissiveIntensity = 0.16;
+        mesh.userData.origEmissive = new THREE.Color(0xdce4ff);
+        mesh.userData.origEmissiveIntensity = 0.22;
       });
     };
 
@@ -511,17 +511,28 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
         const decoder = new ImageDecoderCtor({ data, type: 'image/gif' });
         await decoder.tracks.ready;
 
-        const frameCount = decoder.tracks.selectedTrack?.frameCount ?? 0;
-        if (!frameCount || frameCount > 300) {
+        const compCanvas = document.createElement('canvas');
+        compCanvas.width = 480;
+        compCanvas.height = 270;
+        const compCtx = compCanvas.getContext('2d');
+        if (!compCtx) {
           decoder.close?.();
           return;
         }
 
         const frames: Array<{ image: CanvasImageSource; duration: number }> = [];
-        for (let frameIndex = 0; frameIndex < frameCount && !cancelled; frameIndex += 1) {
-          const decoded = await decoder.decode({ frameIndex });
-          const durationMs = Math.max(24, Math.round((decoded.image.duration ?? 80000) / 1000));
-          frames.push({ image: decoded.image, duration: durationMs });
+        for (let frameIndex = 0; frameIndex < 120 && !cancelled; frameIndex += 1) {
+          try {
+            const decoded = await decoder.decode({ frameIndex });
+            compCtx.drawImage(decoded.image, 0, 0, 480, 270);
+            const durationMs = Math.max(30, Math.round((decoded.image.duration ?? 80000) / 1000));
+            const bitmap = await createImageBitmap(compCanvas);
+            frames.push({ image: bitmap, duration: durationMs });
+            const maybeClosable = decoded.image as { close?: () => void };
+            maybeClosable.close?.();
+          } catch {
+            break;
+          }
         }
 
         decoder.close?.();
@@ -535,7 +546,7 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
           });
         }
       } catch {
-        // Fallback to drawing the animated <img> into canvas each frame.
+        // Fallback to live animated <img> element drawing.
       }
     };
 
@@ -568,8 +579,6 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
     if (!texture || !image || !canvas || !context) return;
 
     let source: CanvasImageSource = image;
-    let sourceWidth = image.naturalWidth;
-    let sourceHeight = image.naturalHeight;
 
     if (frames?.length) {
       const totalDuration = frames.reduce((sum, frame) => sum + frame.duration, 0);
@@ -580,40 +589,12 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
         return elapsed <= cursor;
       }) ?? frames[0];
       source = activeFrame.image;
-      sourceWidth = (activeFrame.image as { displayWidth?: number; width?: number }).displayWidth
-        ?? (activeFrame.image as { width?: number }).width
-        ?? sourceWidth;
-      sourceHeight = (activeFrame.image as { displayHeight?: number; height?: number }).displayHeight
-        ?? (activeFrame.image as { height?: number }).height
-        ?? sourceHeight;
     }
-
-    if (!sourceWidth || !sourceHeight) return;
 
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = 'high';
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = '#02030a';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    const paddingX = canvas.width * 0.055;
-    const paddingY = canvas.height * 0.055;
-    const targetWidth = canvas.width - paddingX * 2;
-    const targetHeight = canvas.height - paddingY * 2;
-    const sourceRatio = sourceWidth / sourceHeight;
-    const targetRatio = targetWidth / targetHeight;
-    let drawWidth = targetWidth;
-    let drawHeight = targetHeight;
-
-    if (sourceRatio > targetRatio) {
-      drawHeight = targetWidth / sourceRatio;
-    } else {
-      drawWidth = targetHeight * sourceRatio;
-    }
-
-    const x = (canvas.width - drawWidth) / 2;
-    const y = (canvas.height - drawHeight) / 2;
-    context.drawImage(source, x, y, drawWidth, drawHeight);
+    context.drawImage(source, 0, 0, canvas.width, canvas.height);
     texture.needsUpdate = true;
   });
 
@@ -886,52 +867,52 @@ function ModalLanyard({ onClose }: { onClose: () => void }) {
   const socials = [
     {
       title: 'STUDENT · PORTFOLIO',
-      name: 'GitHub',
-      desc: 'code · open source',
-      icon: <Github size={84} strokeWidth={1.2} />,
-      gradient: 'from-slate-900 via-[#131c2e] to-[#0a0f1d]',
-      borderColor: 'border-sky-500/40',
-      linkText: 'kết nối →',
+      name: 'GitHub Profile',
+      desc: '@psy-zney • open source repos',
+      icon: <Github size={72} strokeWidth={1.2} />,
+      gradient: 'from-[#1c1c1c] via-[#141414] to-[#0A0A0A]',
+      borderColor: 'border-[#383838]',
+      linkText: 'github.com/psy-zney →',
       link: 'https://github.com/psy-zney'
     },
     {
       title: 'STUDENT · PORTFOLIO',
       name: 'Facebook',
-      desc: 'social · personal profile',
-      icon: <Facebook size={84} strokeWidth={1.2} />,
-      gradient: 'from-blue-950 via-[#102a6c] to-[#0a0f1d]',
-      borderColor: 'border-blue-500/40',
-      linkText: 'kết nối →',
+      desc: 'Lê Quang Khánh • personal profile',
+      icon: <Facebook size={72} strokeWidth={1.2} />,
+      gradient: 'from-[#1c1c1c] via-[#141414] to-[#0A0A0A]',
+      borderColor: 'border-[#383838]',
+      linkText: 'facebook.com/psyotic.zney →',
       link: 'https://www.facebook.com/psyotic.zney/'
     },
     {
       title: 'STUDENT · PORTFOLIO',
       name: 'LinkedIn',
-      desc: 'career · professional network',
-      icon: <Share2 size={84} strokeWidth={1.2} />,
-      gradient: 'from-sky-950 via-[#0e3b6c] to-[#0a0f1d]',
-      borderColor: 'border-sky-400/40',
-      linkText: 'kết nối →',
+      desc: 'Lê Quang Khánh • professional network',
+      icon: <Share2 size={72} strokeWidth={1.2} />,
+      gradient: 'from-[#1c1c1c] via-[#141414] to-[#0A0A0A]',
+      borderColor: 'border-[#383838]',
+      linkText: 'linkedin.com/in/psy-zney295 →',
       link: 'https://www.linkedin.com/in/psy-zney295'
     },
     {
       title: 'STUDENT · PORTFOLIO',
       name: 'Email Contact',
       desc: 'lequangkhanh295@gmail.com',
-      icon: <Mail size={84} strokeWidth={1.2} />,
-      gradient: 'from-emerald-950 via-[#043327] to-[#0a0f1d]',
-      borderColor: 'border-emerald-400/40',
-      linkText: 'gửi mail →',
+      icon: <Mail size={72} strokeWidth={1.2} />,
+      gradient: 'from-[#1c1c1c] via-[#141414] to-[#0A0A0A]',
+      borderColor: 'border-[#383838]',
+      linkText: 'gửi email ngay →',
       link: 'mailto:lequangkhanh295@gmail.com'
     },
     {
       title: 'STUDENT · PORTFOLIO',
       name: 'Zalo Chat',
-      desc: 'phone · 0394426827',
-      icon: <MessageCircle size={84} strokeWidth={1.2} />,
-      gradient: 'from-indigo-950 via-[#281b6c] to-[#0a0f1d]',
-      borderColor: 'border-indigo-400/40',
-      linkText: 'nhắn zalo →',
+      desc: 'SĐT / Zalo · 0394426827',
+      icon: <MessageCircle size={72} strokeWidth={1.2} />,
+      gradient: 'from-[#1c1c1c] via-[#141414] to-[#0A0A0A]',
+      borderColor: 'border-[#383838]',
+      linkText: 'nhắn zalo ngay →',
       link: 'https://zalo.me/0394426827'
     }
   ];
@@ -939,58 +920,70 @@ function ModalLanyard({ onClose }: { onClose: () => void }) {
   return (
     <div className="relative flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300 w-full max-w-md mx-auto select-none">
       {/* Top Header: Minimalist // social links + round Close X button */}
-      <div className="w-[340px] sm:w-[360px] flex items-center justify-between mb-4 px-2">
-        <span className="font-mono text-sm text-slate-300 tracking-wider">// social links</span>
+      <div className="w-[340px] sm:w-[370px] flex items-center justify-between mb-4 px-2">
+        <span className="font-mono text-sm text-slate-300 tracking-wider">// social links • lê quang khánh</span>
         <button
           onClick={onClose}
-          className="w-10 h-10 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-full border border-slate-700/80 shadow-lg flex items-center justify-center transition cursor-pointer"
+          className="w-10 h-10 bg-[#161616] hover:bg-[#242424] text-slate-300 hover:text-white rounded-full border border-[#333333] shadow-lg flex items-center justify-center transition cursor-pointer"
         >
           <X size={18} />
         </button>
       </div>
 
-      {/* VERTICAL CARD STACK (Thẻ dọc xếp lồng như bộ bài trong Screenshot 2) */}
-      <div className="relative h-[500px] w-[340px] sm:w-[360px] flex items-center justify-center my-2">
+      {/* VERTICAL CARD STACK (Thẻ dọc xếp lồng) */}
+      <div className="relative h-[530px] w-[340px] sm:w-[370px] flex items-center justify-center my-2">
         {socials.map((soc, idx) => {
           const offset = idx - activeIdx;
           const isCurrent = offset === 0;
 
-          let cardStyle = "translate-x-0 translate-y-0 scale-100 rotate-0 z-30 opacity-100 shadow-[0_25px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/20 pointer-events-auto";
-          if (offset === 1 || offset === -3) {
-            cardStyle = "translate-x-6 sm:translate-x-8 translate-y-3 scale-95 rotate-4 z-20 opacity-75 hover:opacity-95 cursor-pointer pointer-events-auto shadow-2xl";
-          } else if (offset === 2 || offset === -2) {
-            cardStyle = "translate-x-12 sm:translate-x-16 translate-y-6 scale-90 rotate-8 z-10 opacity-50 hover:opacity-75 cursor-pointer pointer-events-auto shadow-xl";
-          } else if (offset === 3 || offset === -1) {
-            cardStyle = "translate-x-18 sm:translate-x-24 translate-y-9 scale-85 rotate-12 z-0 opacity-25 hover:opacity-50 cursor-pointer pointer-events-auto shadow-lg";
+          let cardStyle = "translate-x-0 translate-y-0 scale-100 rotate-0 z-30 opacity-100 shadow-[0_25px_60px_rgba(0,0,0,0.95)] ring-1 ring-white/20 pointer-events-auto";
+          if (offset === 1 || offset === -4) {
+            cardStyle = "translate-x-6 sm:translate-x-8 translate-y-3 scale-95 rotate-3 z-20 opacity-80 hover:opacity-95 cursor-pointer pointer-events-auto shadow-2xl";
+          } else if (offset === 2 || offset === -3) {
+            cardStyle = "translate-x-12 sm:translate-x-16 translate-y-6 scale-90 rotate-6 z-10 opacity-55 hover:opacity-80 cursor-pointer pointer-events-auto shadow-xl";
+          } else if (offset === 3 || offset === -2) {
+            cardStyle = "translate-x-18 sm:translate-x-24 translate-y-9 scale-85 rotate-9 z-0 opacity-30 hover:opacity-55 cursor-pointer pointer-events-auto shadow-lg";
+          } else if (offset === 4 || offset === -1) {
+            cardStyle = "translate-x-24 sm:translate-x-32 translate-y-12 scale-80 rotate-12 z-0 opacity-15 hover:opacity-35 cursor-pointer pointer-events-auto shadow-md";
           }
 
           return (
             <div
               key={idx}
               onClick={() => !isCurrent && setActiveIdx(idx)}
-              className={`absolute top-0 w-full h-full rounded-3xl bg-gradient-to-b ${soc.gradient} border ${soc.borderColor} p-8 flex flex-col justify-between transition-all duration-500 ease-out backdrop-blur-2xl ${cardStyle}`}
+              className={`absolute top-0 w-full h-full rounded-3xl bg-gradient-to-b ${soc.gradient} border ${soc.borderColor} p-6 flex flex-col justify-between transition-all duration-500 ease-out backdrop-blur-2xl ${cardStyle}`}
             >
-              {/* Top Card Header */}
-              <div className="flex items-center justify-between font-mono text-xs text-slate-400 tracking-widest font-semibold">
-                <span>{soc.title}</span>
-                <span>0{idx + 1}</span>
+              {/* Profile Avatar & Name Header */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="./social/LinkedinAva.jpg"
+                    alt="Lê Quang Khánh Avatar"
+                    className="w-11 h-11 rounded-full object-cover border border-white/20 shadow-md"
+                  />
+                  <div className="flex flex-col text-left">
+                    <span className="text-sm font-bold text-white tracking-wide">Lê Quang Khánh</span>
+                    <span className="text-[11px] font-mono text-slate-400">@psy-zney • IT Student</span>
+                  </div>
+                </div>
+                <span className="font-mono text-xs text-slate-400 font-bold">0{idx + 1}</span>
               </div>
 
               {/* Center Huge Icon */}
-              <div className="my-auto py-6 flex justify-center text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]">
+              <div className="my-auto py-4 flex justify-center text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]">
                 {soc.icon}
               </div>
 
               {/* Bottom Info & Link */}
               <div className="flex flex-col text-left">
-                <h4 className="text-3xl font-extrabold text-white tracking-wide mb-1">{soc.name}</h4>
-                <p className="text-xs font-mono text-slate-300 tracking-wider lowercase mb-6">{soc.desc}</p>
+                <h4 className="text-2xl font-extrabold text-white tracking-wide mb-1">{soc.name}</h4>
+                <p className="text-xs font-mono text-slate-300 tracking-wider lowercase mb-5">{soc.desc}</p>
                 <a
                   href={soc.link}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-white hover:text-sky-400 underline underline-offset-8 decoration-white/40 hover:decoration-sky-400 transition cursor-pointer pb-1 w-fit"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white hover:text-slate-300 underline underline-offset-8 decoration-white/40 transition cursor-pointer pb-1 w-fit"
                 >
                   <span>{soc.linkText}</span>
                 </a>
@@ -1000,22 +993,22 @@ function ModalLanyard({ onClose }: { onClose: () => void }) {
         })}
       </div>
 
-      {/* Navigation Controls (< 1 / 4 >) */}
+      {/* Navigation Controls (< 1 / 5 >) */}
       <div className="flex items-center justify-center gap-8 mt-6">
         <button
           onClick={() => setActiveIdx((prev) => (prev - 1 + socials.length) % socials.length)}
-          className="w-10 h-10 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shadow-lg font-bold"
+          className="w-10 h-10 rounded-full bg-[#161616] hover:bg-[#242424] border border-[#333333] text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shadow-lg font-bold"
         >
           &lt;
         </button>
 
-        <span className="font-mono text-sm text-sky-400 font-bold tracking-widest">
+        <span className="font-mono text-sm text-white font-bold tracking-widest">
           {activeIdx + 1} / {socials.length}
         </span>
 
         <button
           onClick={() => setActiveIdx((prev) => (prev + 1) % socials.length)}
-          className="w-10 h-10 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shadow-lg font-bold"
+          className="w-10 h-10 rounded-full bg-[#161616] hover:bg-[#242424] border border-[#333333] text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shadow-lg font-bold"
         >
           &gt;
         </button>
@@ -1026,34 +1019,75 @@ function ModalLanyard({ onClose }: { onClose: () => void }) {
 
 function ModalBookshelf({ onClose }: { onClose: () => void }) {
   const repos = [
-    { name: '3D-Desk-Workspace-Portfolio', stars: '1.4k', forks: '280', lang: 'TypeScript / Three.js', desc: 'Interactive real-time 3D desk portfolio built with React Three Fiber & WebGL.' },
-    { name: 'AI-Autonomous-Agent-Engine', stars: '950', forks: '140', lang: 'Python / LLM', desc: 'Autonomous AI software architecture and codebase analysis engine.' },
-    { name: 'Cyberpunk-Neon-Shader-Lib', stars: '820', forks: '110', lang: 'GLSL / WebGL', desc: 'Lightweight real-time neon lighting and GLSL post-processing shader library.' },
-    { name: 'Next-Quantum-UI-Design-System', stars: '1.1k', forks: '190', lang: 'React / TailwindCSS', desc: 'Agency-grade glassmorphic design system for modern enterprise dashboards.' }
+    {
+      name: 'psy-zney.github.io',
+      stars: '14',
+      forks: '3',
+      lang: 'TypeScript / WebGL',
+      desc: 'Interactive Cyberpunk 3D Creator Portfolio featuring desktop overlay, interactive WebGL scene & arcade mini-games.',
+      liveUrl: 'http://zney295.id.vn/',
+      repoUrl: 'https://github.com/psy-zney/psy-zney.github.io'
+    },
+    {
+      name: 'study-hub',
+      stars: '18',
+      forks: '5',
+      lang: 'React / TypeScript',
+      desc: 'Interactive learning & study dashboard platform designed for IT engineering students.',
+      liveUrl: 'https://study.zney295.id.vn/',
+      repoUrl: 'https://github.com/psy-zney'
+    },
+    {
+      name: 'beatsync-audio',
+      stars: '12',
+      forks: '2',
+      lang: 'Web Audio / React',
+      desc: 'Real-time music synchronization and dynamic audio visualization web application.',
+      liveUrl: 'https://beatsync.zney295.id.vn/',
+      repoUrl: 'https://github.com/psy-zney'
+    },
+    {
+      name: 'cybersecurity-notes',
+      stars: '21',
+      forks: '6',
+      lang: 'Python / Shell',
+      desc: 'Curated cybersecurity research, penetration testing tools, and network security notes.',
+      liveUrl: 'https://zney295.id.vn/Security/',
+      repoUrl: 'https://github.com/psy-zney'
+    },
+    {
+      name: 'mandycrimson',
+      stars: '15',
+      forks: '4',
+      lang: 'HTML5 / CSS3',
+      desc: 'Creative editorial web showcase and experimental visual interface portfolio.',
+      liveUrl: 'https://zney295.id.vn/mandycrimson/',
+      repoUrl: 'https://github.com/psy-zney'
+    }
   ];
 
   return (
-    <div className="bg-slate-900/95 border border-purple-500/40 rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-[0_0_50px_rgba(168,85,247,0.2)] backdrop-blur-xl text-slate-100 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto">
-      <div className="flex justify-between items-start border-b border-slate-700/80 pb-5 mb-6">
+    <div className="bg-[#111111] border border-[#333333] rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-[0_15px_50px_rgba(0,0,0,0.85)] text-slate-100 animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto">
+      <div className="flex justify-between items-start border-b border-[#2B2B2B] pb-5 mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          <div className="p-3 rounded-xl bg-[#1C1C1C] text-white border border-[#333333]">
             <BookOpen size={28} />
           </div>
           <div>
             <h3 className="text-xl font-bold tracking-wide text-white">OPEN SOURCE PROJECTS & REPOS</h3>
-            <p className="text-xs text-purple-400 font-mono mt-0.5">Bookshelf Archive - GitHub Repositories</p>
+            <p className="text-xs text-slate-400 font-mono mt-0.5">@psy-zney — Real GitHub Repositories & Deployed Sites</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition">
+        <button onClick={onClose} className="p-2 hover:bg-[#242424] text-slate-400 hover:text-white rounded-lg transition">
           <X size={20} />
         </button>
       </div>
 
       <div className="space-y-4">
         {repos.map((repo, idx) => (
-          <div key={idx} className="p-4 bg-slate-800/40 hover:bg-slate-800/80 rounded-xl border border-slate-700/60 transition group">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2 font-bold text-sm text-purple-300 group-hover:text-purple-200">
+          <div key={idx} className="p-5 bg-[#171717] hover:bg-[#1E1E1E] rounded-xl border border-[#2D2D2D] transition group">
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <div className="flex items-center gap-2 font-bold text-sm text-white">
                 <Code2 size={16} />
                 <span>{repo.name}</span>
               </div>
@@ -1062,13 +1096,19 @@ function ModalBookshelf({ onClose }: { onClose: () => void }) {
                 <span className="flex items-center gap-1 text-slate-400"><GitFork size={13} /> {repo.forks}</span>
               </div>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed mb-3">{repo.desc}</p>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-700/40 pt-2.5">
-              <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 font-mono">{repo.lang}</span>
-              <a href={`https://github.com/psy-zney/${repo.name}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sky-400 hover:underline">
-                <span>View Source</span>
-                <ExternalLink size={12} />
-              </a>
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">{repo.desc}</p>
+            <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-[#2B2B2B] pt-3 flex-wrap gap-2">
+              <span className="px-2.5 py-1 rounded bg-[#242424] text-white border border-[#3A3A3A] font-mono">{repo.lang}</span>
+              <div className="flex items-center gap-4">
+                <a href={repo.liveUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-white hover:underline font-semibold">
+                  <span>Live Site</span>
+                  <ExternalLink size={12} />
+                </a>
+                <a href={repo.repoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-slate-300 hover:text-white hover:underline">
+                  <span>GitHub</span>
+                  <ExternalLink size={12} />
+                </a>
+              </div>
             </div>
           </div>
         ))}
