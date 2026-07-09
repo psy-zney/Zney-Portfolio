@@ -1,150 +1,214 @@
-<div align="center">
-
-# <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=28&duration=3500&pause=1000&color=00F0FF&center=true&vCenter=true&width=750&lines=Hi+there!+%F0%9F%91%8B+I'm+Zney;Full-Stack+Web+Development+Engineer+%F0%9F%9A%80;IT+Student+%40+UEH+(University+of+Economics+HCMC)+%F0%9F%8E%93;Building+Interactive+3D+%26+Web+Applications+%E2%9C%A8" alt="Typing SVG Banner" />
+# 🚀 @psy-zney — Interactive Cyberpunk 3D Creator Portfolio
 
 <p align="center">
-  <a href="https://psy-zney.github.io">
-    <img src="https://img.shields.io/badge/Live_Portfolio-psy--zney.github.io-00F0FF?style=for-the-badge&logo=google-chrome&logoColor=black" alt="Portfolio" />
-  </a>
-  <a href="https://www.facebook.com/psyotic.zney/">
-    <img src="https://img.shields.io/badge/Facebook-psyotic.zney-1877F2?style=for-the-badge&logo=facebook&logoColor=white" alt="Facebook" />
-  </a>
-  <a href="mailto:lequangkhanh295@gmail.com">
-    <img src="https://img.shields.io/badge/Email-lequangkhanh295%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" />
-  </a>
-  <img src="https://komarev.com/ghpvc/?username=psy-zney&label=Profile%20Views&color=0e75b6&style=for-the-badge" alt="Profile Views" />
+  <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+  <img src="https://img.shields.io/badge/Three.js-WebGL-black?style=for-the-badge&logo=three.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/GitHub_Pages-Deployed-222222?style=for-the-badge&logo=github&logoColor=white" />
 </p>
+
+An agency-grade, highly interactive **Cyberpunk 3D Creator Portfolio** built for **Zney (@psy-zney)**. The project combines a cinematic Three.js workspace, tactile desktop interactions, bilingual content, custom audio, and a polished arcade-inspired overlay experience.
 
 ---
 
-</div>
+## ✨ Current Experience Direction
 
-## 📌 About Me
+The portfolio now runs as a hybrid experience: a real-time WebGL workspace powered by `main.glb`, supported by carefully scoped DOM overlays for high-fidelity UI moments.
 
-<div align="center">
-
-<!-- Refined Minimalist Animated SVG Banner (via CDN for 100% reliable rendering) -->
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/psy-zney/psy-zney.github.io@main/public/zney-banner.svg" alt="ZNEY Minimalist Banner" width="100%" />
-</p>
-
-<!-- Large Animated Z N E Y Header -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=42&duration=3500&pause=1000&color=38BDF8&center=true&vCenter=true&width=700&height=65&lines=Z+++N+++E+++Y;FULL-STACK+WEB+ENGINEER;UEH+IT+STUDENT" alt="ZNEY Animated Title" />
-</p>
-
-<!-- Subtle Minimalist Typing Subtitle -->
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=16&duration=3500&pause=1000&color=38BDF8&center=true&vCenter=true&width=700&lines=Full-Stack+Web+Development+Engineer+%40+UEH;Architecting+Clean%2C+Performant+%26+Interactive+Web+Apps;Passionate+about+Modern+Software+Engineering" alt="Typing Subtitle" />
-</p>
-
-</div>
-
-* **🎓 Education:** I'm an **Information Technology** student at the **University of Economics Ho Chi Minh (UEH)**.
-* **🔭 Engineering Passion:** I'm passionate about **Web Development Engineering**, software architecture, and exploring modern interactive technologies.
-* **🔍 Full-Stack Focus:** I’m deeply interested in **Full-Stack Development** — architecting high-performance frontend interfaces (`React`, `Three.js`, `TypeScript`) and robust backend systems (`C# / .NET`, `Node.js`, `PostgreSQL`).
-* **💡 Growth & Impact:** Always looking for opportunities to apply my engineering skills in real-world projects, solve complex challenges creatively, and continuously grow as a developer.
+- **3D Workspace Foundation:** The main environment is loaded from `public/main.glb` via React Three Fiber and Drei.
+- **Animated In-Model Monitor:** The computer screen inside the GLB uses `public/screenDesktop.gif` as an animated WebGL texture, drawn through a canvas/decoded-frame pipeline for reliable playback.
+- **Cinematic Space Atmosphere:** A deep-space panorama and sparse procedural star particles create a dark, minimal cosmic backdrop.
+- **Game-Style Interactions:** Raycasting, hover targets, and `OutlinePass` provide precise neon outlines for interactive objects.
+- **Non-Destructive Screen Entry:** Clicking the monitor triggers a designed screen-entry transition before showing the 2D desktop overlay, instead of relying on a raw camera zoom.
 
 ---
 
-## 🚀 What I'm Learning & Working On
+## 🎨 Key Features & Architectural Highlights
 
-<div align="center">
+### 🖥️ 1. Interactive 3D Workstation Scene
 
-### **Core Languages & Full-Stack Technologies**
+The workspace scene is built around a GLB workstation model and enhanced with runtime interaction logic:
 
-<br />
+- **Monitor Entry Point:** Clicking the computer screen opens the interactive desktop layer.
+- **Object Hover Feedback:** Interactive objects are detected with a raycaster and highlighted through post-processing outlines.
+- **Animated Monitor Texture:** `screenDesktop.gif` is rendered onto the monitor surface while preserving the correct orientation and 16:9 presentation.
+- **Ambient Loading Audio:** `Intro.mp3` is preloaded and played from a valid user gesture when entering the workspace.
 
-[![My Skills](https://skillicons.dev/icons?i=cs,dotnet,ts,js,html,css,powershell,react,threejs,tailwind,vite,nodejs,express,postgres,docker,git,github,vscode&perline=9)](https://skillicons.dev)
+### ⌨️ 2. Interactive Desktop Overlay
 
-<br />
+After entering the screen, the experience switches to a crisp HTML/CSS overlay for pixel-perfect UI:
 
-| Category | Technologies & Tools |
+- **Arcade Desktop Interface:** A compact pixel-game interface replaces the old text-only typing screen.
+- **Keyboard & Mouse Simulation:** Physical keyboard events drive a visual mechanical keyboard and mouse module.
+- **Cat Paw Typing Animation:** Cute cat paws reach toward the actual pressed key positions instead of using generic up/down animation.
+- **Shortcut Handling:** Common combinations such as `Ctrl/Cmd + A`, `Ctrl/Cmd + V`, and held `Backspace` are handled explicitly.
+
+### 🌈 3. Mechanical Keyboard LED System
+
+The keyboard lighting system is designed around movement, not simple brightness pulsing:
+
+- **Wave Mode:** A continuous RGB sweep runs across the keyboard.
+- **Press Mode:** Pressed keys light up instantly.
+- **Ripple Mode:** A key press propagates light to nearby keys for a physical LED spread effect.
+- **Off Mode:** Disables decorative lighting for a quieter presentation.
+
+### 🔊 4. Mechanical Key Sound Pack
+
+Keyboard audio is powered by a local Mechvibes-style sound pack:
+
+- **Sound Pack:** CherryMX Black - PBT keycaps.
+- **Assets:** `public/sounds/cherrymx-black-pbt/config.json` and `sound.ogg`.
+- **Playback:** The Web Audio API reads scan-code timing definitions from the config and plays the correct slice from the packed OGG file.
+- **Fallback:** A synthetic switch sound is available when the sound pack has not finished decoding.
+
+### ⚡ 5. Smooth Loading System
+
+The loader is tuned to avoid a frozen progress-bar feel:
+
+- **Decoupled Wave Animation:** The loading wave remains visually active even when asset progress is temporarily waiting.
+- **Smoothed Percentage Counter:** The visible percentage eases toward real progress instead of jumping or stalling aggressively.
+- **Intro Audio:** `Intro.mp3` is preloaded and played during workspace loading, with higher output volume for audibility.
+
+### 🌐 6. Bilingual Adaptive UI & Cyberpunk Atmosphere
+
+- **Default English UI:** The experience starts in English, with Vietnamese available through the language toggle.
+- **Responsive Orientation Guard:** Mobile users are prompted to rotate to landscape for the 3D workspace.
+- **Lo-Fi Cyberpunk Direction:** Dark neon lighting, starfield motion, glitch details, and tactile micro-interactions define the visual identity.
+
+---
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
 | :--- | :--- |
-| **Languages & Scripting** | `C#`, `TypeScript`, `JavaScript (ES6+)`, `PowerShell`, `HTML5`, `CSS3` |
-| **Frontend & 3D Web** | `React 18`, `Three.js / WebGL`, `Tailwind CSS`, `Vite`, `GSAP` |
-| **Backend & Databases** | `.NET / C#`, `Node.js`, `Express.js`, `REST APIs`, `WebRTC`, `PostgreSQL` |
-| **DevOps & Workflow** | `Docker`, `Git`, `GitHub Actions CI/CD`, `Linux / Bash`, `VS Code` |
-
-</div>
-
----
-
-## 📊 GitHub Stats & Activity
-
-<div align="center">
-
-<!-- Real-Time GitHub Readme Streak & Contributions -->
-<p align="center">
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=psy-zney&theme=tokyonight&hide_border=true" alt="GitHub Streak Stats" />
-</p>
-
-<!-- Real-Time Contribution Activity Graph -->
-<p align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=psy-zney&theme=tokyo-night&hide_border=true&area=true" alt="GitHub Activity Graph" />
-</p>
-
-</div>
+| **Core Framework** | [React 18.3](https://react.dev/) + [TypeScript 5.5](https://www.typescriptlang.org/) |
+| **Build & Bundler** | [Vite 5.4](https://vitejs.dev/) |
+| **Styling & Layout** | [Tailwind CSS 3.4](https://tailwindcss.com/) + custom CSS |
+| **3D & WebGL** | [Three.js](https://threejs.org/) + [React Three Fiber / Drei](https://docs.pmnd.rs/react-three-fiber/) |
+| **Post-Processing** | `EffectComposer`, `RenderPass`, `OutlinePass` |
+| **Motion** | GSAP, CSS keyframes, requestAnimationFrame |
+| **Audio** | HTMLAudioElement + Web Audio API |
+| **Icons & Typography** | [Lucide React](https://lucide.dev/) + Google Fonts (`Outfit`, `JetBrains Mono`, `Kanit`) |
+| **CI/CD Pipeline** | GitHub Actions Node 24 deployment to GitHub Pages |
 
 ---
 
-## 🌟 Featured Engineering Projects
+## 🚀 Getting Started
 
-| Project | Description | Tech Stack | Links |
-| :--- | :--- | :--- | :--- |
-| **[psy-zney.github.io](https://github.com/psy-zney/psy-zney.github.io)** | Interactive Cyberpunk 3D Creator Portfolio featuring realistic desktop overlays & mechanical keyboard simulation. | `React 18`, `TypeScript`, `Three.js`, `Tailwind` | [Live Demo](https://psy-zney.github.io) • [Source Code](https://github.com/psy-zney/psy-zney.github.io) |
-| **[beatsync](https://github.com/psy-zney/beatsync)** | Real-time collaborative music listening platform with WebRTC audio & synchronized room playback. | `TypeScript`, `WebRTC`, `WebSockets` | [Source Code](https://github.com/psy-zney/beatsync) |
-| **[Security](https://github.com/psy-zney/Security)** | Cloud relay infrastructure and automated Windows security monitoring daemon for proactive system protection. | `C#`, `PowerShell`, `Cloud Relay` | [Source Code](https://github.com/psy-zney/Security) |
-| **[LearningEnglish](https://github.com/psy-zney/LearningEnglish)** | Intelligent language acquisition app featuring automated tense verification and sentence structure parsing. | `Full-Stack Web`, `Natural Language Processing` | [Source Code](https://github.com/psy-zney/LearningEnglish) |
-| **[AI_Hill_Climbing_TSP](https://github.com/psy-zney/AI_Hill_Climbing_TSP)** | Heuristic artificial intelligence search algorithm solving the Traveling Salesperson Problem. | `Algorithms`, `Heuristic Optimization` | [Source Code](https://github.com/psy-zney/AI_Hill_Climbing_TSP) |
+### Prerequisites
+
+- Node.js 24 is recommended for deployment parity.
+- npm, pnpm, or yarn.
+
+### Local Development Setup
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/psy-zney/psy-zney.github.io.git
+   cd psy-zney.github.io
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start the local development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open your browser and navigate to `http://localhost:5173`.
 
 ---
 
-## 📫 How to Reach Me & Socials
+## 📦 Production Build & Verification
 
-<div align="center">
+To compile TypeScript and generate an optimized production bundle:
 
-| Channel | Contact / Handle | Direct Link |
-| :---: | :---: | :---: |
-| **📫 Email** | `lequangkhanh295@gmail.com` | [Send an Email](mailto:lequangkhanh295@gmail.com) |
-| **🌐 Facebook** | `psyotic.zney` | [Connect on Facebook](https://www.facebook.com/psyotic.zney/) |
-| **🚀 Portfolio** | `psy-zney.github.io` | [Visit Web 3D Portfolio](https://psy-zney.github.io) |
-| **🐙 GitHub** | `@psy-zney` (`Zney`) | [Follow on GitHub](https://github.com/psy-zney) |
-
-</div>
-
----
-
-<details>
-<summary><b>🛠️ About This Repository (Interactive 3D Portfolio Technical Architecture)</b> — <i>Click to expand</i></summary>
-
-<br />
-
-This repository hosts my interactive agency-grade **Cyberpunk 3D Creator Portfolio**.
-
-### Key Architectural Highlights:
-* **Interactive 3D Workstation Scene:** Powered by `React Three Fiber` and `Drei` loading optimized `main.glb` models with interactive screen zoom.
-* **Animated WebGL Monitor Texture:** Renders `screenDesktop.gif` directly onto the 3D computer screen.
-* **Arcade Desktop & Mechanical Keyboard Overlay:** Features interactive mechanical keyboard sound packs (`CherryMX Black PBT`), responsive LED modes (Wave, Ripple, Press), and cat paw typing animations.
-* **Bilingual UI:** Instant toggling between English and Vietnamese.
-
-### Local Development Setup:
 ```bash
-# Clone repository
-git clone https://github.com/psy-zney/psy-zney.github.io.git
-cd psy-zney.github.io
-
-# Install dependencies
-npm install
-
-# Start Vite dev server
-npm run dev
+npm run build
 ```
 
-</details>
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+Fast TypeScript verification:
+
+```bash
+npx tsc -b --pretty false
+```
 
 ---
 
-<div align="center">
-  <sub>Made with ❤️ and Cyberpunk Aesthetics by <b>Zney</b></sub>
-</div>
+## 📂 Codebase Architecture
+
+```text
+psy-zney.github.io/
+├── src/
+│   ├── components/
+│   │   ├── IntroPage.tsx        # Editorial landing page and language-aware hero
+│   │   ├── ModelAnalyzer.tsx    # 3D workspace, GLB loading, monitor texture, loader, transitions
+│   │   └── DesktopOverlay.tsx   # Pixel desktop, mechanical keyboard, LED modes, cat paws, key audio
+│   ├── utils/
+│   │   └── audioPreloader.ts    # Intro.mp3 preload and gesture-safe playback helper
+│   ├── App.tsx                  # Intro/workspace routing, language state, mobile landscape guard
+│   ├── main.tsx                 # React DOM initialization
+│   └── index.css                # Global styles, overlays, keyboard visuals, animation systems
+├── public/
+│   ├── main.glb                 # Active 3D workspace model
+│   ├── scene-v2.glb             # Secondary model asset / experimental scene asset
+│   ├── screenDesktop.gif        # Animated monitor texture for the GLB screen
+│   ├── Intro.mp3                # Workspace loading audio
+│   ├── deep-space-panorama.png  # Equirectangular space background
+│   └── sounds/
+│       └── cherrymx-black-pbt/  # Mechvibes-style mechanical keyboard sound pack
+├── .github/
+│   └── workflows/
+│       └── deploy.yml           # GitHub Pages deployment workflow
+├── package.json                 # Project scripts and dependencies
+└── vite.config.ts               # Vite bundler configuration
+```
+
+---
+
+## 🧩 Asset Notes
+
+- `public/main.glb` is still required. `ModelAnalyzer.tsx` loads it with `useGLTF('./main.glb')`.
+- `screenDesktop.gif` should stay close to 16:9 for the cleanest monitor fit.
+- `Intro.mp3` is started from the workspace entry click to avoid browser autoplay restrictions.
+- The keyboard sound pack expects a Mechvibes-compatible `config.json` plus packed `sound.ogg`.
+
+---
+
+## 🌟 Featured Open Source Repositories (@psy-zney)
+
+- **[psy-zney.github.io](https://github.com/psy-zney/psy-zney.github.io)** — Interactive cyberpunk 3D portfolio and workspace experiment.
+- **[beatsync](https://github.com/psy-zney/beatsync)** — Listen to music in real-time sync with friends across interactive web rooms with WebRTC audio.
+- **[Security](https://github.com/psy-zney/Security)** — Cloud relay server and automated Windows security monitoring daemon for proactive system protection.
+- **[LearningEnglish](https://github.com/psy-zney/LearningEnglish)** — Intelligent language acquisition app featuring automated tense verification and sentence parsing.
+- **[AI_Hill_Climbing_TSP](https://github.com/psy-zney/AI_Hill_Climbing_TSP)** — Artificial intelligence heuristic algorithms solving the Traveling Salesperson Problem using Hill Climbing.
+- **[mandycrimson](https://github.com/psy-zney/mandycrimson)** — Modern full-stack product catalog and interactive presentation web platform.
+
+---
+
+## 👨‍💻 Author & Contact
+
+Designed and engineered by **Zney (@psy-zney)**.
+
+- **GitHub:** [@psy-zney](https://github.com/psy-zney)
+- **Facebook:** [psyotic.zney](https://www.facebook.com/psyotic.zney/)
+
+---
+
+<p align="center">
+  Made with ❤️ and Cyberpunk Aesthetics by <b>Zney</b>
+</p>
