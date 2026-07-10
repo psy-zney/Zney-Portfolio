@@ -42,7 +42,7 @@ function ZenSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         position: 'fixed',
         top: 0,
         left: 0,
-        height: '100vh',
+        height: '100dvh',
         zIndex: 50,
         display: 'flex',
         pointerEvents: 'none',
@@ -341,7 +341,7 @@ function IntroFullCVPage({
       {/* Embedded Exact Authentic Original PDF Document — ZERO EDITS */}
       <div style={{
         width: '100%',
-        height: 'calc(100vh - 160px)',
+        height: 'calc(100dvh - 160px)',
         minHeight: '860px',
         background: '#FFFFFF',
         border: '1px solid #EAEAEA',
@@ -413,11 +413,12 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
 
   return (
     <div
-      className="w-screen h-screen overflow-y-auto"
+      className="w-screen overflow-y-auto"
       style={{
         background: '#FBFBFA',
         fontFamily: "'Helvetica Neue', 'SF Pro Display', 'Switzer', sans-serif",
         color: '#111111',
+        height: '100dvh',
       }}
     >
       {/* Zen Sidebar */}
@@ -466,10 +467,17 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
           100% { opacity: 0; transform: translate3d(700px, 500px, 0) rotate(38deg); }
         }
         @media (max-width: 640px) {
-          .page-shell { padding: 28px 16px 130px !important; }
+          .page-shell { max-width: 100% !important; padding: 24px 14px 190px !important; }
           .bento-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+          .card { padding: 20px !important; border-radius: 10px !important; }
+          .intro-position-row { align-items: flex-start !important; justify-content: flex-start !important; }
+          .intro-bottom-actions { flex-direction: column-reverse !important; align-items: stretch !important; gap: 18px !important; }
+          .intro-socials { justify-content: center !important; width: 100% !important; }
           .cta-btn { width: 100% !important; justify-content: center !important; }
-          .nav-pill-fixed { bottom: 14px !important; padding: 6px 14px !important; gap: 10px !important; }
+          .nav-pill-fixed { bottom: calc(18px + env(safe-area-inset-bottom)) !important; width: min(326px, calc(100vw - 28px)) !important; justify-content: space-between !important; padding: 6px 12px !important; gap: 8px !important; }
+          .nav-pill-fixed button { width: 38px !important; height: 38px !important; flex: 0 0 38px !important; }
+          .nav-pill-fixed > span { min-width: 0 !important; flex: 1 1 auto !important; font-size: 11px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+          .horizontal-page-scroll { height: 100dvh !important; }
         }
       `}</style>
 
@@ -478,7 +486,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         className="horizontal-page-scroll"
         style={{
           width: '100%',
-          height: '100vh',
+          height: '100dvh',
           overflowX: 'auto',
           overflowY: 'hidden',
           display: 'flex',
@@ -578,7 +586,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
           style={{
             minWidth: '100%',
             width: '100%',
-            height: '100vh',
+            height: '100dvh',
             overflowY: 'auto',
             scrollSnapAlign: 'start',
             flexShrink: 0,
@@ -766,7 +774,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
 
 
         {/* Position row */}
-        <div data-reveal style={{ borderTop: '1px solid #EAEAEA', borderBottom: '1px solid #EAEAEA', padding: '20px 0', marginBottom: '48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div data-reveal className="intro-position-row" style={{ borderTop: '1px solid #EAEAEA', borderBottom: '1px solid #EAEAEA', padding: '20px 0', marginBottom: '48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
             <span className="tag tag-yellow">{isVie ? 'Vị trí mong muốn' : 'Target Role'}</span>
             <span style={{ fontSize: '13px', color: '#2F3437' }}>Full Stack Developer</span>
@@ -778,9 +786,9 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         </div>
 
         {/* Bottom: Socials + CTA */}
-        <div data-reveal style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
+        <div data-reveal className="intro-bottom-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
           {/* Social icon links — SVG inline, no external icon lib */}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="intro-socials" style={{ display: 'flex', gap: '8px' }}>
             <a href="https://github.com/psy-zney" target="_blank" rel="noopener noreferrer" className="social-a" title="GitHub">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
             </a>
@@ -814,7 +822,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
       style={{
         minWidth: '100%',
         width: '100%',
-        height: '100vh',
+        height: '100dvh',
         overflowY: 'auto',
         scrollSnapAlign: 'start',
         flexShrink: 0,
@@ -833,7 +841,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
       style={{
         minWidth: '100%',
         width: '100%',
-        height: '100vh',
+        height: '100dvh',
         overflowY: 'auto',
         scrollSnapAlign: 'start',
         flexShrink: 0,

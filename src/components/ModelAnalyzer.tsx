@@ -439,6 +439,16 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
     if (!gltf.scene) return;
 
     const image = new Image();
+    image.decoding = 'async';
+    image.style.position = 'fixed';
+    image.style.left = '-9999px';
+    image.style.top = '0';
+    image.style.width = '1px';
+    image.style.height = '1px';
+    image.style.opacity = '0';
+    image.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(image);
+
     const canvas = document.createElement('canvas');
     canvas.width = 768;
     canvas.height = 432;
@@ -495,65 +505,8 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
     };
     image.src = './img/screenDesktop.gif';
 
-    let cancelled = false;
-    const loadDecodedGifFrames = async () => {
-      const ImageDecoderCtor = (window as unknown as { ImageDecoder?: new (init: { data: ArrayBuffer; type: string }) => {
-        tracks: { ready: Promise<void>; selectedTrack?: { frameCount?: number } };
-        decode: (options: { frameIndex: number }) => Promise<{ image: CanvasImageSource & { duration?: number; close?: () => void } }>;
-        close?: () => void;
-      } }).ImageDecoder;
-
-      if (!ImageDecoderCtor) return;
-
-      try {
-        const response = await fetch('./img/screenDesktop.gif');
-        const data = await response.arrayBuffer();
-        const decoder = new ImageDecoderCtor({ data, type: 'image/gif' });
-        await decoder.tracks.ready;
-
-        const compCanvas = document.createElement('canvas');
-        compCanvas.width = 480;
-        compCanvas.height = 270;
-        const compCtx = compCanvas.getContext('2d');
-        if (!compCtx) {
-          decoder.close?.();
-          return;
-        }
-
-        const frames: Array<{ image: CanvasImageSource; duration: number }> = [];
-        for (let frameIndex = 0; frameIndex < 120 && !cancelled; frameIndex += 1) {
-          try {
-            const decoded = await decoder.decode({ frameIndex });
-            compCtx.drawImage(decoded.image, 0, 0, 480, 270);
-            const durationMs = Math.max(30, Math.round((decoded.image.duration ?? 80000) / 1000));
-            const bitmap = await createImageBitmap(compCanvas);
-            frames.push({ image: bitmap, duration: durationMs });
-            const maybeClosable = decoded.image as { close?: () => void };
-            maybeClosable.close?.();
-          } catch {
-            break;
-          }
-        }
-
-        decoder.close?.();
-        if (!cancelled && frames.length > 1) {
-          screenGifFramesRef.current = frames;
-          screenGifStartTimeRef.current = performance.now();
-        } else {
-          frames.forEach((frame) => {
-            const maybeClosable = frame.image as { close?: () => void };
-            maybeClosable.close?.();
-          });
-        }
-      } catch {
-        // Fallback to live animated <img> element drawing.
-      }
-    };
-
-    void loadDecodedGifFrames();
-
     return () => {
-      cancelled = true;
+      image.remove();
       if (screenGifTextureRef.current === texture) screenGifTextureRef.current = null;
       if (screenGifImageRef.current === image) screenGifImageRef.current = null;
       if (screenGifCanvasRef.current === canvas) screenGifCanvasRef.current = null;
@@ -577,6 +530,7 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
     const frames = screenGifFramesRef.current;
 
     if (!texture || !image || !canvas || !context) return;
+    if (!frames?.length && !image.complete) return;
 
     let source: CanvasImageSource = image;
 
@@ -594,7 +548,11 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = 'high';
     context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
+    context.translate(0, canvas.height);
+    context.scale(1, -1);
     context.drawImage(source, 0, 0, canvas.width, canvas.height);
+    context.restore();
     texture.needsUpdate = true;
   });
 
@@ -1148,8 +1106,9 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
     let trackWidth = trackRef.current?.clientWidth ?? 0;
     let lastRounded = -1;
     let finished = false;
-    let audioStarted = false;
+    let audioStarted = !introAudio.paused;
     let audioFadeFrame = 0;
+    let loaderCompleted = false;
 
     const fadeAudioTo = (target: number, duration: number) => {
       window.cancelAnimationFrame(audioFadeFrame);
@@ -1176,13 +1135,17 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
           }
           audioStarted = true;
           window.removeEventListener('pointerdown', startIntroAudio);
+          window.removeEventListener('touchstart', startIntroAudio);
+          window.removeEventListener('click', startIntroAudio);
           window.removeEventListener('keydown', startIntroAudio);
         })
         .catch(() => undefined);
     };
 
-    window.addEventListener('pointerdown', startIntroAudio, { once: true });
-    window.addEventListener('keydown', startIntroAudio, { once: true });
+    window.addEventListener('pointerdown', startIntroAudio);
+    window.addEventListener('touchstart', startIntroAudio);
+    window.addEventListener('click', startIntroAudio);
+    window.addEventListener('keydown', startIntroAudio);
     startIntroAudio();
 
     const resizeObserver = new ResizeObserver((entries) => {
@@ -1234,6 +1197,7 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
 
       if (displayed >= 99.95 && complete && elapsed >= MIN_VISIBLE_MS) {
         finished = true;
+        loaderCompleted = true;
         fadeAudioTo(0, COMPLETION_HOLD_MS);
         completionTimer = window.setTimeout(() => onFinishRef.current(), COMPLETION_HOLD_MS);
         return;
@@ -1251,9 +1215,13 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
       window.cancelAnimationFrame(audioFadeFrame);
       window.clearTimeout(completionTimer);
       window.removeEventListener('pointerdown', startIntroAudio);
+      window.removeEventListener('touchstart', startIntroAudio);
+      window.removeEventListener('click', startIntroAudio);
       window.removeEventListener('keydown', startIntroAudio);
-      introAudio.pause();
-      introAudio.currentTime = 0;
+      if (loaderCompleted) {
+        introAudio.pause();
+        introAudio.currentTime = 0;
+      }
       resizeObserver.disconnect();
     };
   }, []);

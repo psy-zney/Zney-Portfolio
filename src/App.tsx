@@ -14,16 +14,34 @@ function MobileLandscapeOverlay({ lang }: { lang: 'vie' | 'eng' }) {
 
   useEffect(() => {
     const checkOrientation = () => {
-      const isPortrait = window.innerHeight > window.innerWidth && window.innerWidth <= 768;
-      setIsPortraitMobile(isPortrait);
+      const viewport = window.visualViewport;
+      const width = viewport?.width ?? window.innerWidth;
+      const height = viewport?.height ?? window.innerHeight;
+      const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+      const isSmallScreen = Math.min(width, height) <= 768 && Math.max(width, height) <= 1024;
+      const isPortrait = window.matchMedia('(orientation: portrait)').matches || height > width;
+      setIsPortraitMobile(isCoarsePointer && isSmallScreen && isPortrait);
     };
 
     checkOrientation();
+    const orientationQuery = window.matchMedia('(orientation: portrait)');
     window.addEventListener('resize', checkOrientation);
     window.addEventListener('orientationchange', checkOrientation);
+    window.visualViewport?.addEventListener('resize', checkOrientation);
+    if (orientationQuery.addEventListener) {
+      orientationQuery.addEventListener('change', checkOrientation);
+    } else {
+      orientationQuery.addListener(checkOrientation);
+    }
     return () => {
       window.removeEventListener('resize', checkOrientation);
       window.removeEventListener('orientationchange', checkOrientation);
+      window.visualViewport?.removeEventListener('resize', checkOrientation);
+      if (orientationQuery.removeEventListener) {
+        orientationQuery.removeEventListener('change', checkOrientation);
+      } else {
+        orientationQuery.removeListener(checkOrientation);
+      }
     };
   }, []);
 
@@ -93,7 +111,7 @@ export default function App() {
   }, [viewMode]);
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-[#0f141d] font-sans text-slate-100 select-none">
+    <div className="w-screen overflow-hidden bg-[#0f141d] font-sans text-slate-100 select-none" style={{ height: '100dvh' }}>
       {viewMode === 'workspace' && <MobileLandscapeOverlay lang={lang} />}
       {viewMode === 'intro' ? (
         <IntroPage
