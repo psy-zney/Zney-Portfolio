@@ -9,19 +9,21 @@ function readViewMode(): ViewMode {
   return window.location.hash === '#/workspace' ? 'workspace' : 'intro';
 }
 
-function MobileLandscapeOverlay({ lang }: { lang: 'vie' | 'eng' }) {
+function getIsPortraitMobile(): boolean {
+  const viewport = window.visualViewport;
+  const width = viewport?.width ?? window.innerWidth;
+  const height = viewport?.height ?? window.innerHeight;
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const isSmallScreen = Math.min(width, height) <= 768 && Math.max(width, height) <= 1024;
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches || height > width;
+  return isCoarsePointer && isSmallScreen && isPortrait;
+}
+
+function usePortraitMobile(): boolean {
   const [isPortraitMobile, setIsPortraitMobile] = useState(false);
 
   useEffect(() => {
-    const checkOrientation = () => {
-      const viewport = window.visualViewport;
-      const width = viewport?.width ?? window.innerWidth;
-      const height = viewport?.height ?? window.innerHeight;
-      const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
-      const isSmallScreen = Math.min(width, height) <= 768 && Math.max(width, height) <= 1024;
-      const isPortrait = window.matchMedia('(orientation: portrait)').matches || height > width;
-      setIsPortraitMobile(isCoarsePointer && isSmallScreen && isPortrait);
-    };
+    const checkOrientation = () => setIsPortraitMobile(getIsPortraitMobile());
 
     checkOrientation();
     const orientationQuery = window.matchMedia('(orientation: portrait)');
@@ -45,8 +47,10 @@ function MobileLandscapeOverlay({ lang }: { lang: 'vie' | 'eng' }) {
     };
   }, []);
 
-  if (!isPortraitMobile) return null;
+  return isPortraitMobile;
+}
 
+function MobileLandscapeOverlay({ lang }: { lang: 'vie' | 'eng' }) {
   return (
     <div className="fixed inset-0 z-[9999] bg-[#0c1017]/95 backdrop-blur-2xl flex flex-col items-center justify-center p-8 text-center text-white animate-in fade-in duration-300">
       <div className="w-24 h-24 mb-8 relative flex items-center justify-center">
@@ -73,6 +77,7 @@ function MobileLandscapeOverlay({ lang }: { lang: 'vie' | 'eng' }) {
 export default function App() {
   const [viewMode, setViewMode] = useState<ViewMode>(readViewMode);
   const [lang, setLang] = useState<'vie' | 'eng'>('eng');
+  const isPortraitMobile = usePortraitMobile();
 
   const toggleLang = () => setLang((prev) => (prev === 'vie' ? 'eng' : 'vie'));
 
@@ -112,11 +117,13 @@ export default function App() {
 
   return (
     <div className="w-screen overflow-hidden bg-[#0f141d] font-sans text-slate-100 select-none" style={{ height: '100dvh' }}>
-      {viewMode === 'workspace' && <MobileLandscapeOverlay lang={lang} />}
+      {viewMode === 'workspace' && isPortraitMobile && <MobileLandscapeOverlay lang={lang} />}
       {viewMode === 'intro' ? (
         <IntroPage
           onEnterWorkspace={() => {
-            startIntroAudioFromGesture(1);
+            if (!getIsPortraitMobile()) {
+              startIntroAudioFromGesture(0);
+            }
             navigateTo('workspace');
           }}
           lang={lang}
@@ -126,6 +133,7 @@ export default function App() {
         <ModelAnalyzer
           onBackToIntro={() => navigateTo('intro')}
           lang={lang}
+          loadingAudioBlocked={isPortraitMobile}
         />
       )}
     </div>

@@ -1075,11 +1075,12 @@ function ModalBookshelf({ onClose }: { onClose: () => void }) {
   );
 }
 
-function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
+function InitialPageLoader({ onFinish, audioBlocked }: { onFinish: () => void; audioBlocked: boolean }) {
   const { progress, active } = useProgress();
   const progressRef = useRef(progress);
   const activeRef = useRef(active);
   const onFinishRef = useRef(onFinish);
+  const audioBlockedRef = useRef(audioBlocked);
   const trackRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
@@ -1088,13 +1089,15 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
   progressRef.current = progress;
   activeRef.current = active;
   onFinishRef.current = onFinish;
+  audioBlockedRef.current = audioBlocked;
 
   useEffect(() => {
     const MIN_VISIBLE_MS = 600;
     const COMPLETION_HOLD_MS = 160;
+    const TAIL_LOOP_SECONDS = 1;
     const introAudio = getPreloadedIntroAudio();
     introAudio.preload = 'auto';
-    introAudio.loop = true;
+    introAudio.loop = false;
     introAudio.muted = false;
     introAudio.volume = 1;
     const startTime = performance.now();
@@ -1109,6 +1112,7 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
     let audioStarted = !introAudio.paused;
     let audioFadeFrame = 0;
     let loaderCompleted = false;
+    let userGestureSeen = !introAudio.paused;
 
     const fadeAudioTo = (target: number, duration: number) => {
       window.cancelAnimationFrame(audioFadeFrame);
@@ -1122,9 +1126,25 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
       audioFadeFrame = window.requestAnimationFrame(updateVolume);
     };
 
-    const startIntroAudio = () => {
-      if (audioStarted) return;
+    const stopIntroAudio = (reset = false) => {
+      window.cancelAnimationFrame(audioFadeFrame);
+      introAudio.pause();
+      if (reset) {
+        try {
+          introAudio.currentTime = 0;
+        } catch {
+          // Ignore browsers that cannot seek before metadata is ready.
+        }
+      }
+    };
+
+    const shouldAudioPlay = () => !finished && !loaderCompleted && !audioBlockedRef.current;
+
+    const startIntroAudio = (event?: Event) => {
+      if (event) userGestureSeen = true;
+      if (audioStarted || !shouldAudioPlay()) return;
       resumeAudioContextIfNeeded();
+      introAudio.loop = false;
       introAudio.muted = false;
       introAudio.volume = 1;
       void introAudio.play()
@@ -1148,6 +1168,32 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
     window.addEventListener('keydown', startIntroAudio);
     startIntroAudio();
 
+    const handleAudioEnded = () => {
+      audioStarted = false;
+      if (!shouldAudioPlay()) return;
+
+      const duration = Number.isFinite(introAudio.duration) ? introAudio.duration : 0;
+      if (duration > TAIL_LOOP_SECONDS) {
+        try {
+          introAudio.currentTime = Math.max(0, duration - TAIL_LOOP_SECONDS);
+        } catch {
+          // Keep the natural ended state if the browser refuses seeking.
+        }
+      } else {
+        try {
+          introAudio.currentTime = 0;
+        } catch {
+          // Keep the natural ended state if the browser refuses seeking.
+        }
+      }
+
+      if (userGestureSeen) {
+        startIntroAudio();
+      }
+    };
+
+    introAudio.addEventListener('ended', handleAudioEnded);
+
     const resizeObserver = new ResizeObserver((entries) => {
       trackWidth = entries[0]?.contentRect.width ?? trackRef.current?.clientWidth ?? 0;
     });
@@ -1155,6 +1201,10 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
 
     const paint = (value: number) => {
       const normalized = Math.max(0, Math.min(100, value));
+      if (audioBlockedRef.current && !introAudio.paused) {
+        stopIntroAudio(true);
+        audioStarted = false;
+      }
       fillRef.current?.style.setProperty('transform', 'scaleX(' + normalized / 100 + ')');
       headRef.current?.style.setProperty('transform', 'translate3d(' + (trackWidth * normalized / 100) + 'px, -50%, 0)');
       trackRef.current?.setAttribute('aria-valuenow', String(Math.round(normalized)));
@@ -1218,13 +1268,24 @@ function InitialPageLoader({ onFinish }: { onFinish: () => void }) {
       window.removeEventListener('touchstart', startIntroAudio);
       window.removeEventListener('click', startIntroAudio);
       window.removeEventListener('keydown', startIntroAudio);
+      introAudio.removeEventListener('ended', handleAudioEnded);
       if (loaderCompleted) {
-        introAudio.pause();
-        introAudio.currentTime = 0;
+        stopIntroAudio(true);
       }
       resizeObserver.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (!audioBlocked) return;
+    const introAudio = getPreloadedIntroAudio();
+    introAudio.pause();
+    try {
+      introAudio.currentTime = 0;
+    } catch {
+      // Ignore browsers that cannot seek before metadata is ready.
+    }
+  }, [audioBlocked]);
 
   const stars = useRef(
     Array.from({ length: 60 }, (_, index) => ({
@@ -1324,9 +1385,10 @@ function ScreenEntryTransition({ lang }: { lang: 'vie' | 'eng' }) {
 interface ModelAnalyzerProps {
   onBackToIntro?: () => void;
   lang?: 'vie' | 'eng';
+  loadingAudioBlocked?: boolean;
 }
 
-export function ModelAnalyzer({ onBackToIntro, lang = 'eng' }: ModelAnalyzerProps) {
+export function ModelAnalyzer({ onBackToIntro, lang = 'eng', loadingAudioBlocked = false }: ModelAnalyzerProps) {
   const povPosition = React.useMemo<[number, number, number]>(() => [5.0, 10.0, 0.5], []);
   const lookTarget = React.useMemo<[number, number, number]>(() => [1.5, 9.5, 0], []);
   const [hoveredItem, setHoveredItem] = useState<ItemType | null>(null);
@@ -1374,7 +1436,7 @@ export function ModelAnalyzer({ onBackToIntro, lang = 'eng' }: ModelAnalyzerProp
         document.body.style.cursor = 'grab';
       }}
     >
-      {isAppLoading && <InitialPageLoader onFinish={() => setIsAppLoading(false)} />}
+      {isAppLoading && <InitialPageLoader onFinish={() => setIsAppLoading(false)} audioBlocked={loadingAudioBlocked} />}
 
       {onBackToIntro && !isAppLoading && !screenTransitionActive && !screenOverlayVisible && (
         <button

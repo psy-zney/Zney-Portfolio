@@ -78,7 +78,7 @@ export function preloadIntroAudio(): Promise<string> {
         sharedAudioInstance.src = cachedBlobUrl;
       }
       sharedAudioInstance.preload = 'auto';
-      sharedAudioInstance.loop = true;
+      sharedAudioInstance.loop = false;
       if (sharedAudioInstance.paused) {
         sharedAudioInstance.volume = 1;
         sharedAudioInstance.load();
@@ -108,7 +108,7 @@ export function getPreloadedIntroAudio(): HTMLAudioElement {
   setupAudioGainBoost(sharedAudioInstance);
 
   sharedAudioInstance.preload = 'auto';
-  sharedAudioInstance.loop = true;
+  sharedAudioInstance.loop = false;
   if (sharedAudioInstance.paused) {
     sharedAudioInstance.volume = 1;
   }
@@ -147,8 +147,8 @@ void preloadIntroAudio();
 export function startIntroAudioFromGesture(targetVolume = 1): void {
   const audio = getPreloadedIntroAudio();
   resumeAudioContextIfNeeded();
-  audio.loop = true;
+  audio.loop = false;
   audio.muted = false;
-  audio.volume = Math.max(audio.volume, Math.min(1, targetVolume));
+  audio.volume = Math.max(0, Math.min(1, targetVolume));
   void audio.play().catch(() => undefined);
 }
