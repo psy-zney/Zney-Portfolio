@@ -4,3 +4,5 @@ dist/
 tmp_*.png
 .agents/
 skills-lock.json
+*.log
+

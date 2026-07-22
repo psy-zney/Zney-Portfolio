@@ -751,9 +751,44 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
 // ==================== INTERACTIVE MODALS ====================
 
 function ModalCV({ onClose }: { onClose: () => void }) {
+  const [activeTab, setActiveTab] = useState<'web' | 'mobile'>('web');
+  const [markdownText, setMarkdownText] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  const filePath = activeTab === 'web'
+    ? './file/Le_Quang_Khanh_CV_Web_FullStack.md'
+    : './file/Le_Quang_Khanh_CV_Mobile.md';
+
+  const fileName = activeTab === 'web'
+    ? 'Le_Quang_Khanh_CV_Web_FullStack.md'
+    : 'Le_Quang_Khanh_CV_Mobile.md';
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetch(filePath)
+      .then((res) => res.text())
+      .then((data) => {
+        if (active) {
+          setMarkdownText(data);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setMarkdownText('# Error loading CV');
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [filePath]);
+
   return (
-    <div className="bg-slate-950/95 border border-sky-500/40 rounded-2xl max-w-5xl w-full mx-4 shadow-[0_0_60px_rgba(56,189,248,0.25)] backdrop-blur-2xl text-slate-100 animate-in fade-in zoom-in duration-200 h-[88vh] flex flex-col overflow-hidden">
-      <div className="flex justify-between items-center px-6 py-4 bg-slate-900/80 border-b border-sky-500/20 shrink-0">
+    <div className="bg-[#111622]/95 border border-sky-500/40 rounded-2xl max-w-5xl w-full mx-4 shadow-[0_0_60px_rgba(56,189,248,0.25)] backdrop-blur-2xl text-slate-100 animate-in fade-in zoom-in duration-200 h-[88vh] flex flex-col overflow-hidden">
+      {/* Header Bar */}
+      <div className="flex justify-between items-center px-6 py-4 bg-[#161b26] border-b border-sky-500/20 shrink-0 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-gradient-to-br from-sky-500/20 to-indigo-500/20 text-sky-400 border border-sky-500/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
             <FileText size={22} />
@@ -761,21 +796,38 @@ function ModalCV({ onClose }: { onClose: () => void }) {
           <div>
             <h3 className="text-base font-bold tracking-wide text-white flex items-center gap-2">
               <span>CURRICULUM VITAE</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 font-mono border border-sky-500/20">.PDF</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 font-mono border border-sky-500/20">.MD</span>
             </h3>
-            <p className="text-xs text-slate-400">Lê Quang Khánh — Fullstack 3D Web & Interactive Designer</p>
+            <p className="text-xs text-slate-400">Lê Quang Khánh — @psy-zney</p>
           </div>
         </div>
+
+        {/* Tab Switcher */}
+        <div className="flex items-center gap-2 bg-[#0c1017] p-1 rounded-xl border border-slate-800">
+          <button
+            onClick={() => setActiveTab('web')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition ${activeTab === 'web' ? 'bg-sky-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}`}
+          >
+            Full-Stack Web (.md)
+          </button>
+          <button
+            onClick={() => setActiveTab('mobile')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition ${activeTab === 'mobile' ? 'bg-purple-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}`}
+          >
+            Mobile Developer (.md)
+          </button>
+        </div>
+
         <div className="flex items-center gap-3">
           <a
-            href="./file/Le_Quang_Khanh_CV.pdf"
-            download="Le_Quang_Khanh_CV.pdf"
+            href={filePath}
+            download={fileName}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-sky-400 via-cyan-300 to-indigo-400 hover:from-sky-300 hover:to-cyan-200 text-slate-950 font-bold text-xs rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.4)] transition hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
           >
             <Download size={15} />
-            <span>Download .PDF</span>
+            <span>Download .MD</span>
           </a>
           <button
             onClick={onClose}
@@ -787,33 +839,19 @@ function ModalCV({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      <div className="flex-1 w-full bg-slate-950 relative overflow-hidden">
-        <object
-          data="./file/Le_Quang_Khanh_CV.pdf"
-          type="application/pdf"
-          className="w-full h-full border-0"
-        >
-          <iframe
-            src="./file/Le_Quang_Khanh_CV.pdf"
-            className="w-full h-full border-0"
-            title="Le Quang Khanh CV"
-          >
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-slate-900 text-slate-300">
-              <FileText size={48} className="text-sky-400 mb-4 animate-bounce" />
-              <p className="text-base font-semibold text-white mb-2">Trình duyệt không hỗ trợ xem trực tiếp PDF</p>
-              <p className="text-sm text-slate-400 mb-6">Vui lòng tải file về máy để xem trọn vẹn tài liệu.</p>
-              <a
-                href="./file/Le_Quang_Khanh_CV.pdf"
-                download="Le_Quang_Khanh_CV.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-gradient-to-r from-sky-400 to-cyan-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-sky-500/30 transition hover:scale-105"
-              >
-                Tải CV (.PDF) ngay
-              </a>
-            </div>
-          </iframe>
-        </object>
+      {/* Markdown Document Content */}
+      <div className="flex-1 w-full bg-[#0c1017] p-6 sm:p-8 overflow-y-auto">
+        {loading ? (
+          <div className="py-20 text-center font-mono text-slate-400 text-sm">
+            [ Loading {fileName}... ]
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto bg-[#141923] border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl">
+            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-200 m-0">
+              {markdownText}
+            </pre>
+          </div>
+        )}
       </div>
     </div>
   );

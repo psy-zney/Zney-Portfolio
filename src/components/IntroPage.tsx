@@ -1,4 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
+import {
+  FileText,
+  CreditCard,
+  BookOpen,
+  X,
+  ExternalLink,
+  Download,
+  Github,
+  Mail,
+  Share2,
+  CheckCircle2,
+  Star,
+  GitFork,
+  Code2,
+  UserCheck,
+  Volume2,
+  VolumeX,
+  Facebook,
+  MessageCircle,
+  Terminal as TerminalIcon,
+  Sparkles,
+  Smartphone,
+  Globe
+} from 'lucide-react';
 
 // ==================== ZEN SIDEBAR (MINIMALIST EDITORIAL) ====================
 
@@ -48,7 +72,7 @@ function ZenSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         pointerEvents: 'none',
       }}
     >
-      {/* Backdrop dimmer — only visible when open */}
+      {/* Backdrop dimmer */}
       {open && (
         <div
           onClick={onClose}
@@ -63,7 +87,7 @@ function ZenSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         />
       )}
 
-      {/* Sidebar panel — minimalist bone/white theme matching IntroPage */}
+      {/* Sidebar panel */}
       <div
         style={{
           position: 'relative',
@@ -83,14 +107,12 @@ function ZenSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
           overflowY: 'auto',
         }}
       >
-        {/* Header */}
         <div style={{ padding: '0 20px 16px', borderBottom: '1px solid #EAEAEA', marginBottom: '12px' }}>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>
             Deployed Sites
           </p>
         </div>
 
-        {/* Site list — rounded web bars */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 12px' }}>
           {DEPLOYED_SITES.map((site, i) => (
             <a
@@ -124,7 +146,6 @@ function ZenSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              {/* Color favicon dot */}
               <span style={{
                 width: '30px',
                 height: '30px',
@@ -138,7 +159,6 @@ function ZenSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
               }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: site.color }} />
               </span>
-              {/* Labels */}
               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <span style={{ fontFamily: "'Helvetica Neue', sans-serif", fontSize: '13px', fontWeight: 600, color: '#111111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {site.label}
@@ -155,169 +175,339 @@ function ZenSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
-function IntroReadmePage({
-  onPrevPage,
-  onFirstPage,
+// ==================== SIMPLE MARKDOWN RENDERER ====================
+
+function SimpleMarkdownRenderer({ content }: { content: string }) {
+  const lines = content.split('\n');
+  const elements: React.ReactNode[] = [];
+  let inTable = false;
+  let tableHeaders: string[] = [];
+  let tableRows: string[][] = [];
+
+  const renderFormattedText = (text: string): React.ReactNode => {
+    const parts = text.split(/(\[.*?\]\(.*?\)|`.*?`|\*\*.*?\*\*)/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith('[') && part.includes('](')) {
+        const match = part.match(/\[(.*?)\]\((.*?)\)/);
+        if (match) {
+          return (
+            <a key={idx} href={match[2]} target="_blank" rel="noopener noreferrer" className="text-sky-600 dark:text-sky-400 hover:underline font-semibold">
+              {match[1]}
+            </a>
+          );
+        }
+      }
+      if (part.startsWith('`') && part.endsWith('`')) {
+        return (
+          <code key={idx} className="bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-1.5 py-0.5 rounded font-mono text-xs font-semibold border border-slate-300/50">
+            {part.slice(1, -1)}
+          </code>
+        );
+      }
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={idx} className="font-bold text-[#111111] dark:text-white">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
+
+  const flushTable = (key: string) => {
+    if (!inTable) return;
+    elements.push(
+      <div key={key} className="my-6 overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-[#15171e] shadow-sm">
+        <table className="w-full text-left border-collapse text-xs sm:text-sm">
+          <thead>
+            <tr className="bg-slate-100 dark:bg-[#1a1d26] border-b border-slate-200 dark:border-slate-800">
+              {tableHeaders.map((h, i) => (
+                <th key={i} className="p-3 font-bold text-[#111111] dark:text-white">{renderFormattedText(h)}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {tableRows.map((row, ri) => (
+              <tr key={ri} className="border-b border-slate-200 dark:border-slate-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-[#1c202a]">
+                {row.map((cell, ci) => (
+                  <td key={ci} className="p-3 text-slate-800 dark:text-slate-200 font-mono leading-relaxed">{renderFormattedText(cell)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+    inTable = false;
+    tableHeaders = [];
+    tableRows = [];
+  };
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      const cells = trimmed.split('|').slice(1, -1).map(c => c.trim());
+      if (cells.every(c => c.match(/^:?-+:?$/))) {
+        return;
+      }
+      if (!inTable) {
+        inTable = true;
+        tableHeaders = cells;
+      } else {
+        tableRows.push(cells);
+      }
+      return;
+    } else if (inTable) {
+      flushTable(`table-${idx}`);
+    }
+
+    if (trimmed === '---') {
+      elements.push(<hr key={idx} className="my-6 border-t border-slate-200 dark:border-slate-800" />);
+      return;
+    }
+
+    if (trimmed.startsWith('# ')) {
+      elements.push(
+        <h1 key={idx} className="text-3xl sm:text-4xl font-extrabold text-[#111111] dark:text-white tracking-tight mb-2 font-serif">
+          {renderFormattedText(trimmed.slice(2))}
+        </h1>
+      );
+      return;
+    }
+
+    if (trimmed.startsWith('### ')) {
+      elements.push(
+        <h3 key={idx} className="text-lg sm:text-xl font-bold text-sky-600 dark:text-sky-400 tracking-wide mt-5 mb-2">
+          {renderFormattedText(trimmed.slice(4))}
+        </h3>
+      );
+      return;
+    }
+
+    if (trimmed.startsWith('## ')) {
+      elements.push(
+        <h2 key={idx} className="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-8 mb-3 font-semibold pb-1 border-b border-slate-200 dark:border-slate-800">
+          {renderFormattedText(trimmed.slice(3))}
+        </h2>
+      );
+      return;
+    }
+
+    if (trimmed.startsWith('- ')) {
+      elements.push(
+        <li key={idx} className="ml-5 list-disc text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-2">
+          {renderFormattedText(trimmed.slice(2))}
+        </li>
+      );
+      return;
+    }
+
+    if (trimmed.length > 0) {
+      elements.push(
+        <p key={idx} className="text-sm sm:text-base text-slate-800 dark:text-slate-200 leading-relaxed mb-3">
+          {renderFormattedText(trimmed)}
+        </p>
+      );
+    }
+  });
+
+  if (inTable) {
+    flushTable('table-end');
+  }
+
+  return <div className="space-y-1">{elements}</div>;
+}
+
+// ==================== MACOS TERMINAL WINDOW COMPONENT ====================
+
+function MacTerminalWindow({
+  onRunCommand,
   isVie,
 }: {
-  onPrevPage: () => void;
-  onFirstPage: () => void;
+  onRunCommand: (cmd: string) => void;
   isVie: boolean;
 }) {
+  const [inputVal, setInputVal] = useState('');
+  const [history, setHistory] = useState<Array<{ type: 'input' | 'output' | 'system'; text: string }>>([
+    {
+      type: 'system',
+      text: isVie
+        ? 'Khởi tạo zney CLI v2.0 (macOS arm64). Nhập lệnh hoặc bấm nút lệnh nhanh bên dưới:'
+        : 'Initialized zney CLI v2.0 (macOS arm64). Type a command or click buttons below:'
+    },
+    {
+      type: 'system',
+      text: 'Các lệnh khả dụng: portfolio | cvweb | cvmb | workspace | help | clear'
+    }
+  ]);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history]);
+
+  const handleExecute = (cmdToRun?: string) => {
+    const rawCmd = (cmdToRun !== undefined ? cmdToRun : inputVal).trim();
+    if (!rawCmd) return;
+
+    const lower = rawCmd.toLowerCase();
+    const newHistory = [...history, { type: 'input' as const, text: `$ ${rawCmd}` }];
+
+    if (lower === 'clear' || lower === 'cls') {
+      setHistory([]);
+      setInputVal('');
+      return;
+    }
+
+    if (lower === 'help' || lower === 'ls') {
+      newHistory.push({
+        type: 'output' as const,
+        text: 'Danh sách lệnh:\n - portfolio  : Xem trang Giới thiệu chính (Page 1)\n - cvweb      : Xem CV Full-Stack Web Developer (.md) (Page 2)\n - cvmb       : Xem CV Mobile Developer (.md) (Page 3)\n - workspace  : Vào Không Gian 3D Workspace\n - clear      : Xóa lịch sử màn hình terminal'
+      });
+    } else if (['portfolio', 'intro', 'p1'].includes(lower)) {
+      newHistory.push({ type: 'output' as const, text: '→ Chuyển đến Trang Giới thiệu Portfolio (Page 1)...' });
+      onRunCommand('portfolio');
+    } else if (['cvweb', 'web', 'p2'].includes(lower)) {
+      newHistory.push({ type: 'output' as const, text: '→ Mở file Markdown CV Full-Stack Web Developer (Page 2)...' });
+      onRunCommand('cvweb');
+    } else if (['cvmb', 'mobile', 'p3'].includes(lower)) {
+      newHistory.push({ type: 'output' as const, text: '→ Mở file Markdown CV Mobile Developer (Page 3)...' });
+      onRunCommand('cvmb');
+    } else if (['workspace', '3d', 'room'].includes(lower)) {
+      newHistory.push({ type: 'output' as const, text: '→ Khởi chạy Không gian 3D Workspace...' });
+      onRunCommand('workspace');
+    } else {
+      newHistory.push({
+        type: 'output' as const,
+        text: `zsh: command not found: ${rawCmd}. Type 'help' for available commands.`
+      });
+    }
+
+    setHistory(newHistory);
+    setInputVal('');
+  };
+
   return (
-    <div style={{ maxWidth: '840px', margin: '0 auto', padding: '40px 24px 130px', fontFamily: "'Helvetica Neue', 'SF Pro Display', 'Switzer', sans-serif", color: '#111111' }}>
-      {/* Top Navigation Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', paddingBottom: '16px', borderBottom: '1px solid #EAEAEA', flexWrap: 'wrap', gap: '12px' }}>
-        <span style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#787774' }}>
-          {isVie ? 'Trang 3 / 3 • Bách khoa README.md' : 'Page 3 / 3 • README.md Documentation'}
+    <div className="relative overflow-hidden bg-[#0c1017] border border-[#21262d] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.55)] font-mono text-slate-200 w-full mb-8">
+      {/* macOS Window Title Bar */}
+      <div className="flex items-center justify-between px-4 py-3 bg-[#161b22] border-b border-[#21262d] select-none">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-[#ff5f56] inline-block shadow-sm" />
+          <span className="w-3 h-3 rounded-full bg-[#ffbd2e] inline-block shadow-sm" />
+          <span className="w-3 h-3 rounded-full bg-[#27c93f] inline-block shadow-sm" />
+        </div>
+        <span className="text-xs font-semibold text-slate-400 tracking-wide flex items-center gap-1.5">
+          <TerminalIcon size={13} className="text-sky-400" />
+          <span>zney@macbook-pro: ~ (zsh)</span>
         </span>
+        <span className="text-[10px] text-slate-500 font-mono">CLI v2.0</span>
       </div>
 
-      {/* Editorial Document Paper */}
-      <div style={{
-        background: '#FFFFFF',
-        border: '1px solid #EAEAEA',
-        borderRadius: '12px',
-        padding: '44px 48px',
-        boxShadow: '0 12px 36px rgba(0,0,0,0.06)'
-      }}>
-        <div style={{ borderBottom: '2px solid #111111', paddingBottom: '24px', marginBottom: '32px' }}>
-          <span style={{ fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            REPOSITORY ENCYCLOPEDIA • DOCUMENTATION SCAN
-          </span>
-          <h1 style={{ fontSize: '32px', fontWeight: 800, margin: '8px 0 8px', letterSpacing: '-0.02em', color: '#111111' }}>
-            🚀 @psy-zney — Interactive Cyberpunk 3D Creator Portfolio
-          </h1>
-          <p style={{ fontSize: '15px', color: '#444444', fontWeight: 500, margin: 0, lineHeight: 1.6 }}>
-            An agency-grade, highly interactive Cyberpunk 3D Creator Portfolio combining a cinematic Three.js workspace, tactile desktop interactions, bilingual content, custom audio, and a polished arcade-inspired overlay experience.
-          </p>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '18px' }}>
-            {['React 18.3', 'TypeScript 5.5', 'Vite 5.4', 'Tailwind CSS 3.4', 'Three.js / WebGL', 'Web Audio API'].map((t) => (
-              <span key={t} style={{ background: '#111111', color: '#FFFFFF', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
-                {t}
-              </span>
-            ))}
+      {/* Terminal Screen Body */}
+      <div className="p-4 sm:p-5 text-xs sm:text-sm space-y-2 max-h-[300px] overflow-y-auto font-mono leading-relaxed">
+        {history.map((h, i) => (
+          <div key={i} className={h.type === 'input' ? 'text-sky-400 font-semibold' : h.type === 'system' ? 'text-slate-400' : 'text-emerald-400'}>
+            <pre className="whitespace-pre-wrap font-mono m-0">{h.text}</pre>
           </div>
-        </div>
+        ))}
 
-        {/* Section 1: Architecture & Direction */}
-        <div style={{ marginBottom: '32px' }}>
-          <h2 style={{ fontSize: '13px', fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.08em', color: '#787774', marginBottom: '14px' }}>
-            {isVie ? '01. Kiến trúc Trải nghiệm (Experience Direction)' : '01. Experience Direction'}
-          </h2>
-          <div style={{ background: '#FBFBFA', border: '1px solid #EAEAEA', borderRadius: '8px', padding: '18px 20px', fontSize: '14px', lineHeight: 1.7, color: '#333333' }}>
-            <p style={{ margin: '0 0 10px' }}>
-              The portfolio runs as a hybrid experience: a real-time WebGL workspace powered by <code>main.glb</code>, supported by carefully scoped DOM overlays for high-fidelity UI moments.
-            </p>
-            <ul style={{ margin: 0, paddingLeft: '18px' }}>
-              <li><strong>3D Workspace Foundation:</strong> Loaded from <code>public/main.glb</code> via React Three Fiber & Drei.</li>
-              <li><strong>Animated Monitor Screen:</strong> In-model computer screen uses <code>public/screenDesktop.gif</code> as an animated WebGL canvas texture.</li>
-              <li><strong>Game-Style Interactions:</strong> Raycasting, hover targets, and <code>OutlinePass</code> provide neon outlines for interactive objects.</li>
-            </ul>
-          </div>
-        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleExecute();
+          }}
+          className="flex items-center gap-2 pt-2 text-sky-400 font-semibold"
+        >
+          <span className="text-emerald-400 select-none">zney@portfolio:~$</span>
+          <input
+            type="text"
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            placeholder="nhập lệnh: portfolio | cvweb | cvmb | workspace"
+            className="flex-1 bg-transparent border-none outline-none text-sky-300 placeholder-slate-600 font-mono text-xs sm:text-sm"
+          />
+        </form>
+        <div ref={bottomRef} />
+      </div>
 
-        {/* Section 2: Key Features */}
-        <div style={{ marginBottom: '32px' }}>
-          <h2 style={{ fontSize: '13px', fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.08em', color: '#787774', marginBottom: '14px' }}>
-            {isVie ? '02. Các Hệ thống Nổi bật (Key Systems & Features)' : '02. Key Systems & Features'}
-          </h2>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-            <div style={{ border: '1px solid #EAEAEA', borderRadius: '8px', padding: '16px 18px' }}>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '6px' }}>⌨️ Arcade Desktop & Mech Keyboard</div>
-              <p style={{ fontSize: '13px', color: '#555555', margin: 0, lineHeight: 1.6 }}>
-                Tactile pixel-game desktop interface featuring live mechanical keyboard simulation, cat paw typing animations, and precise shortcut handling (Ctrl/Cmd+A, V).
-              </p>
-            </div>
-
-            <div style={{ border: '1px solid #EAEAEA', borderRadius: '8px', padding: '16px 18px' }}>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#111111', marginBottom: '6px' }}>🌈 Mechanical Keyboard LED & Audio Pack</div>
-              <p style={{ fontSize: '13px', color: '#555555', margin: 0, lineHeight: 1.6 }}>
-                Dynamic RGB Wave/Press/Ripple LED propagation paired with CherryMX Black PBT Web Audio scan-code audio synthesis.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: Technology Stack Table */}
-        <div>
-          <h2 style={{ fontSize: '13px', fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.08em', color: '#787774', marginBottom: '14px' }}>
-            {isVie ? '03. Bảng Công nghệ (Technology Stack)' : '03. Technology Stack'}
-          </h2>
-          <div style={{ border: '1px solid #EAEAEA', borderRadius: '8px', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
-              <tbody>
-                <tr style={{ borderBottom: '1px solid #EAEAEA', background: '#FBFBFA' }}>
-                  <th style={{ padding: '10px 14px', fontWeight: 700, width: '38%' }}>Core Framework</th>
-                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>React 18.3 + TypeScript 5.5</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #EAEAEA' }}>
-                  <th style={{ padding: '10px 14px', fontWeight: 700 }}>Build & Bundler</th>
-                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>Vite 5.4</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #EAEAEA', background: '#FBFBFA' }}>
-                  <th style={{ padding: '10px 14px', fontWeight: 700 }}>3D & WebGL Engine</th>
-                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>Three.js + React Three Fiber / Drei</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #EAEAEA' }}>
-                  <th style={{ padding: '10px 14px', fontWeight: 700 }}>Post-Processing & Sound</th>
-                  <td style={{ padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace" }}>EffectComposer, OutlinePass, Web Audio API</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Bottom Centered Page Navigation Icon "<" */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '48px' }}>
+      {/* Quick Command Pills */}
+      <div className="flex items-center gap-2 p-3 bg-[#161b22]/80 border-t border-[#21262d] flex-wrap">
+        <span className="text-[11px] text-slate-400 font-mono mr-1">Lệnh nhanh:</span>
+        {[
+          { label: 'portfolio', cmd: 'portfolio', color: 'bg-sky-500/10 text-sky-400 border-sky-500/30 hover:bg-sky-500/20' },
+          { label: 'cvweb', cmd: 'cvweb', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' },
+          { label: 'cvmb', cmd: 'cvmb', color: 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20' },
+          { label: 'workspace', cmd: 'workspace', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' },
+        ].map((item) => (
           <button
-            onClick={onPrevPage}
-            title={isVie ? 'Trang trước (CV Scan)' : 'Prev Page (CV Scan)'}
-            style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '9999px',
-              background: '#FFFFFF',
-              color: '#111111',
-              border: '1.5px solid #111111',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-              fontSize: '20px',
-              fontWeight: 700,
-            }}
+            key={item.cmd}
+            type="button"
+            onClick={() => handleExecute(item.cmd)}
+            className={`px-3 py-1 rounded-lg border text-xs font-mono font-semibold transition cursor-pointer ${item.color}`}
           >
-            <span>&lt;</span>
+            $ {item.label}
           </button>
-        </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function IntroFullCVPage({
-  onBackToIntro,
-  onNextPage,
-  isVie,
+// ==================== MARKDOWN CV PAGE COMPONENT ====================
+
+function MarkdownCVPage({
+  filePath,
+  badgeTitle,
+  fileName,
+  isVie
 }: {
-  onBackToIntro?: () => void;
-  onNextPage?: () => void;
+  filePath: string;
+  badgeTitle: string;
+  fileName: string;
   isVie: boolean;
 }) {
+  const [content, setContent] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetch(filePath)
+      .then((res) => res.text())
+      .then((data) => {
+        if (active) {
+          setContent(data);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setContent('# Error loading file\nCould not load markdown document.');
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [filePath]);
+
   return (
-    <div style={{ maxWidth: '920px', margin: '0 auto', padding: '32px 24px 130px', fontFamily: "'Helvetica Neue', 'SF Pro Display', 'Switzer', sans-serif", color: '#111111' }}>
-      {/* Top Navigation Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid #EAEAEA', flexWrap: 'wrap', gap: '12px' }}>
-        <span style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#787774' }}>
-          {isVie ? 'Trang 2 / 3 • Bản CV gốc không chỉnh sửa (.PDF)' : 'Page 2 / 3 • Authentic Original CV (.PDF)'}
-        </span>
+    <div style={{ maxWidth: '880px', margin: '0 auto', padding: '36px 24px 140px', fontFamily: "'Helvetica Neue', sans-serif", color: '#111111' }}>
+      {/* Header bar with badge & download */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #EAEAEA', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", background: '#111111', color: '#FFFFFF', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>
+            {badgeTitle}
+          </span>
+          <span style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#787774' }}>
+            public/file/{fileName}
+          </span>
+        </div>
         <a
-          href="./file/Le_Quang_Khanh_CV.pdf"
-          download="Le_Quang_Khanh_CV.pdf"
+          href={filePath}
+          download={fileName}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -333,36 +523,160 @@ function IntroFullCVPage({
             gap: '6px'
           }}
         >
-          <span>↓</span>
-          <span>{isVie ? 'Tải PDF chính chủ' : 'Download Original .PDF'}</span>
+          <Download size={14} />
+          <span>{isVie ? 'Tải File Markdown' : 'Download .md'}</span>
         </a>
       </div>
 
-      {/* Embedded Exact Authentic Original PDF Document — ZERO EDITS */}
+      {/* Styled Document Paper */}
       <div style={{
-        width: '100%',
-        height: 'calc(100dvh - 160px)',
-        minHeight: '860px',
         background: '#FFFFFF',
         border: '1px solid #EAEAEA',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow: '0 12px 36px rgba(0,0,0,0.06)',
+        borderRadius: '16px',
+        padding: '40px 44px',
+        boxShadow: '0 12px 36px rgba(0,0,0,0.06)'
       }}>
-        <iframe
-          src="./file/Le_Quang_Khanh_CV.pdf#toolbar=0&navpanes=0&scrollbar=0"
-          title="Le Quang Khanh Authentic Original CV PDF"
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            display: 'block',
-          }}
-        />
+        {loading ? (
+          <div className="py-20 text-center font-mono text-slate-400 text-sm">
+            [ Loading {fileName}... ]
+          </div>
+        ) : (
+          <SimpleMarkdownRenderer content={content} />
+        )}
       </div>
     </div>
   );
 }
+
+// ==================== GLOBAL STICKY BOTTOM TOOLBAR (COMBINED CONTACT + WORKSPACE) ====================
+
+function GlobalStickyBottomBar({
+  currentPageIndex,
+  onNavigatePage,
+  onEnterWorkspace,
+  isVie,
+}: {
+  currentPageIndex: number;
+  onNavigatePage: (pageIdx: number) => void;
+  onEnterWorkspace: () => void;
+  isVie: boolean;
+}) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        bottom: '16px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
+        width: 'min(920px, calc(100vw - 28px))',
+        background: '#111111',
+        border: '1px solid #2B2B2B',
+        borderRadius: '20px',
+        padding: '10px 18px',
+        boxShadow: '0 12px 40px rgba(0,0,0,0.65)',
+        backdropFilter: 'blur(16px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}
+    >
+      {/* LEFT: Social Contacts */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <a href="https://github.com/psy-zney" target="_blank" rel="noopener noreferrer" className="social-pill" title="GitHub">
+          <Github size={15} />
+        </a>
+        <a href="https://www.facebook.com/psyotic.zney/" target="_blank" rel="noopener noreferrer" className="social-pill" title="Facebook">
+          <Facebook size={15} />
+        </a>
+        <a href="https://www.linkedin.com/in/psy-zney295" target="_blank" rel="noopener noreferrer" className="social-pill" title="LinkedIn">
+          <Share2 size={15} />
+        </a>
+        <a href="mailto:lequangkhanh295@gmail.com" className="social-pill" title="Email">
+          <Mail size={15} />
+        </a>
+        <a href="https://zalo.me/0394426827" target="_blank" rel="noopener noreferrer" className="social-pill" title="Zalo">
+          <MessageCircle size={15} />
+        </a>
+      </div>
+
+      {/* CENTER: Page Navigator */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px' }}>
+        <button
+          onClick={() => onNavigatePage((currentPageIndex + 2) % 3)}
+          title={isVie ? 'Trang trước' : 'Prev Page'}
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '9999px',
+            background: '#242424',
+            color: '#FFFFFF',
+            border: '1px solid #3A3A3A',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontWeight: 800
+          }}
+        >
+          &lt;
+        </button>
+
+        <span style={{ color: '#FFFFFF', fontWeight: 600, padding: '4px 10px', borderRadius: '8px', background: '#1C1C1C', border: '1px solid #333' }}>
+          {currentPageIndex === 0 && (isVie ? 'Trang 1 / 3 • Intro' : 'Page 1 / 3 • Intro')}
+          {currentPageIndex === 1 && (isVie ? 'Trang 2 / 3 • CV Web (.md)' : 'Page 2 / 3 • CV Web')}
+          {currentPageIndex === 2 && (isVie ? 'Trang 3 / 3 • CV Mobile (.md)' : 'Page 3 / 3 • CV Mobile')}
+        </span>
+
+        <button
+          onClick={() => onNavigatePage((currentPageIndex + 1) % 3)}
+          title={isVie ? 'Trang tiếp' : 'Next Page'}
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '9999px',
+            background: '#242424',
+            color: '#FFFFFF',
+            border: '1px solid #3A3A3A',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontWeight: 800
+          }}
+        >
+          &gt;
+        </button>
+      </div>
+
+      {/* RIGHT: Join 3D Workspace CTA */}
+      <button
+        onClick={onEnterWorkspace}
+        style={{
+          background: '#FFFFFF',
+          color: '#111111',
+          border: 'none',
+          borderRadius: '12px',
+          padding: '8px 18px',
+          fontSize: '12px',
+          fontWeight: 700,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          transition: 'all 180ms ease'
+        }}
+      >
+        <span>{isVie ? 'Vào Workspace 3D' : 'View 3D Workspace'}</span>
+        <span>→</span>
+      </button>
+    </div>
+  );
+}
+
+// ==================== MAIN INTRO PAGE ====================
 
 interface IntroPageProps {
   onEnterWorkspace: () => void;
@@ -379,7 +693,20 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
   const page2Ref = useRef<HTMLDivElement>(null);
   const page3Ref = useRef<HTMLDivElement>(null);
 
-  // Staggered scroll-entry animation via IntersectionObserver
+  const navigateToPage = (pageIdx: number) => {
+    setCurrentPageIndex(pageIdx);
+    if (pageIdx === 0) page1Ref.current?.scrollIntoView({ behavior: 'smooth' });
+    else if (pageIdx === 1) page2Ref.current?.scrollIntoView({ behavior: 'smooth' });
+    else if (pageIdx === 2) page3Ref.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleRunCommand = (cmd: string) => {
+    if (cmd === 'portfolio') navigateToPage(0);
+    else if (cmd === 'cvweb') navigateToPage(1);
+    else if (cmd === 'cvmb') navigateToPage(2);
+    else if (cmd === 'workspace') onEnterWorkspace();
+  };
+
   useEffect(() => {
     const items = containerRef.current?.querySelectorAll('[data-reveal]');
     if (!items) return;
@@ -421,27 +748,10 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         height: '100dvh',
       }}
     >
-      {/* Zen Sidebar */}
       <ZenSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Fixed ambient ambient — single ultra-slow radial drift, pointer-events none */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '-20%',
-          right: '-10%',
-          width: '600px',
-          height: '600px',
-          background: 'radial-gradient(circle, rgba(0,0,0,0.025) 0%, transparent 70%)',
-          pointerEvents: 'none',
-          zIndex: 0,
-          animation: 'drift 24s ease-in-out infinite alternate',
-        }}
-      />
-
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&family=Caveat:wght@600;700&display=swap');
-        @keyframes drift { from { transform: translate(0,0); } to { transform: translate(-40px, 30px); } }
+        @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600;700&family=Caveat:wght@600;700&display=swap');
         .tag { display:inline-block; padding:2px 10px; border-radius:9999px; font-size:11px; letter-spacing:0.05em; text-transform:uppercase; font-weight:500; }
         .tag-blue { background:#E1F3FE; color:#1F6C9F; }
         .tag-green { background:#EDF3EC; color:#346538; }
@@ -456,32 +766,26 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         .lang-btn:hover { border-color:#111111; color:#111111; }
         .sites-btn { height: 34px; padding: 0 14px; background: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 9999px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: border-color 180ms, color 180ms, box-shadow 180ms; box-shadow: 0 2px 8px rgba(0,0,0,0.04); color: #787774; font-size: 12px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
         .sites-btn:hover { border-color: #111111; color: #111111; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .social-a { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:1px solid #EAEAEA; border-radius:6px; color:#787774; text-decoration:none; transition:border-color 200ms, color 200ms; }
-        .social-a:hover { border-color:#111111; color:#111111; }
+        .social-pill { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; background:#1E1E1E; border:1px solid #333333; border-radius:10px; color:#CCCCCC; text-decoration:none; transition:all 180ms; }
+        .social-pill:hover { background:#2E2E2E; color:#FFFFFF; border-color:#555555; transform:translateY(-1px); }
         .horizontal-page-scroll::-webkit-scrollbar { display: none; }
         .horizontal-page-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes zney-meteor {
-          0% { opacity: 0; transform: translate3d(-100px, -70px, 0) rotate(38deg); }
-          15% { opacity: 1; }
-          75% { opacity: 1; }
-          100% { opacity: 0; transform: translate3d(700px, 500px, 0) rotate(38deg); }
-        }
         @media (max-width: 640px) {
           .page-shell { max-width: 100% !important; padding: 24px 14px 190px !important; }
           .bento-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
           .card { padding: 20px !important; border-radius: 10px !important; }
-          .intro-position-row { align-items: flex-start !important; justify-content: flex-start !important; }
-          .intro-bottom-actions { flex-direction: column-reverse !important; align-items: stretch !important; gap: 18px !important; }
-          .intro-socials { justify-content: center !important; width: 100% !important; }
-          .cta-btn { width: 100% !important; justify-content: center !important; }
-          .nav-pill-fixed { bottom: calc(18px + env(safe-area-inset-bottom)) !important; width: min(326px, calc(100vw - 28px)) !important; justify-content: space-between !important; padding: 6px 12px !important; gap: 8px !important; }
-          .nav-pill-fixed button { width: 38px !important; height: 38px !important; flex: 0 0 38px !important; }
-          .nav-pill-fixed > span { min-width: 0 !important; flex: 1 1 auto !important; font-size: 11px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-          .horizontal-page-scroll { height: 100dvh !important; }
         }
       `}</style>
 
-      {/* Native Horizontal Scroll Container - 3 Pages Side by Side */}
+      {/* Global Unified Fixed Bottom Bar (Contact + Navigation + Join Workspace) */}
+      <GlobalStickyBottomBar
+        currentPageIndex={currentPageIndex}
+        onNavigatePage={navigateToPage}
+        onEnterWorkspace={onEnterWorkspace}
+        isVie={isVie}
+      />
+
+      {/* Native Horizontal Scroll Container - 3 Pages */}
       <div
         className="horizontal-page-scroll"
         style={{
@@ -502,85 +806,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
           }
         }}
       >
-        {/* FIXED ALWAYS-VISIBLE BOTTOM-CENTER NAVIGATION PILL (LOOP 3->1 & 1->3, NO NEON, BOTH BUTTONS ALWAYS PRESENT) */}
-        <div
-          className="nav-pill-fixed"
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            background: '#111111',
-            border: '1px solid #333333',
-            borderRadius: '9999px',
-            padding: '8px 18px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
-          }}
-        >
-          {/* Always-present Left Button "<" (Loop 1 -> 3) */}
-          <button
-            onClick={() => {
-              if (currentPageIndex === 0) page3Ref.current?.scrollIntoView({ behavior: 'smooth' });
-              else if (currentPageIndex === 1) page1Ref.current?.scrollIntoView({ behavior: 'smooth' });
-              else if (currentPageIndex === 2) page2Ref.current?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            title={isVie ? 'Trang trước' : 'Prev Page'}
-            style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '9999px',
-              background: '#FFFFFF',
-              color: '#111111',
-              border: '1px solid #EAEAEA',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 800,
-            }}
-          >
-            <span>&lt;</span>
-          </button>
-
-          <span style={{ fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", color: '#FFFFFF', fontWeight: 600, minWidth: '135px', textAlign: 'center' }}>
-            {currentPageIndex === 0 && (isVie ? 'Trang 1 / 3 • Giới Thiệu' : 'Page 1 / 3 • Intro')}
-            {currentPageIndex === 1 && (isVie ? 'Trang 2 / 3 • CV Gốc' : 'Page 2 / 3 • Original CV')}
-            {currentPageIndex === 2 && (isVie ? 'Trang 3 / 3 • README.md' : 'Page 3 / 3 • README')}
-          </span>
-
-          {/* Always-present Right Button ">" (Loop 3 -> 1) */}
-          <button
-            onClick={() => {
-              if (currentPageIndex === 0) page2Ref.current?.scrollIntoView({ behavior: 'smooth' });
-              else if (currentPageIndex === 1) page3Ref.current?.scrollIntoView({ behavior: 'smooth' });
-              else if (currentPageIndex === 2) page1Ref.current?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            title={isVie ? 'Trang tiếp theo' : 'Next Page'}
-            style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '9999px',
-              background: '#FFFFFF',
-              color: '#111111',
-              border: '1px solid #EAEAEA',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 800,
-            }}
-          >
-            <span>&gt;</span>
-          </button>
-        </div>
-
-        {/* Panel 1: Introduction */}
+        {/* Panel 1: Main Introduction + macOS Terminal Window */}
         <div
           ref={page1Ref}
           style={{
@@ -595,10 +821,10 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
           <div
             ref={containerRef}
             className="page-shell"
-            style={{ position: 'relative', zIndex: 1, maxWidth: '760px', margin: '0 auto', padding: '50px 24px 130px' }}
+            style={{ position: 'relative', zIndex: 1, maxWidth: '780px', margin: '0 auto', padding: '40px 24px 140px' }}
           >
             {/* Top bar */}
-            <div data-reveal style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '36px', flexWrap: 'wrap', gap: '12px' }}>
+            <div data-reveal style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <button
                   onClick={() => setSidebarOpen(true)}
@@ -619,241 +845,149 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
               </div>
             </div>
 
-              {/* Hero: Name + role */}
-              <div data-reveal style={{ borderBottom: '1px solid #EAEAEA', paddingBottom: '48px', marginBottom: '48px' }}>
-                {/* Original Black & White Terminal ZNEY ASCII Box with Diagonal Falling Shooting Star */}
-                <div style={{
-                  position: 'relative',
-                  overflow: 'hidden',
-                  background: '#111111',
-                  border: '1px solid #262626',
-                  borderRadius: '12px',
-                  padding: '18px 22px',
-                  marginBottom: '32px',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  color: '#FFFFFF',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.14)'
-                }}>
-                  {/* Diagonal Falling Meteor inside ZNEY CLI */}
-                  <span style={{
-                    position: 'absolute',
-                    top: '-15px',
-                    left: '10%',
-                    width: '140px',
-                    height: '2px',
-                    borderRadius: '999px',
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), #00F0FF)',
-                    filter: 'drop-shadow(0 0 6px rgba(0, 240, 255, 0.85))',
-                    transform: 'rotate(38deg)',
-                    animation: 'zney-meteor 2.8s cubic-bezier(0.25, 0.1, 0.25, 1) infinite',
-                    pointerEvents: 'none'
-                  }} />
-                  <span style={{
-                    position: 'absolute',
-                    top: '-15px',
-                    left: '55%',
-                    width: '120px',
-                    height: '1.5px',
-                    borderRadius: '999px',
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), #00F0FF)',
-                    filter: 'drop-shadow(0 0 5px rgba(0, 240, 255, 0.75))',
-                    transform: 'rotate(38deg)',
-                    animation: 'zney-meteor 3.4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite 1.3s',
-                    pointerEvents: 'none'
-                  }} />
-
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #262626', paddingBottom: '10px', marginBottom: '14px', fontSize: '11px', color: '#A3A3A3', position: 'relative', zIndex: 2 }}>
-                    <span>&gt; _SYSTEM.INIT(ZNEY)_DEVELOPER_ENGINE</span>
-                    <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '4px', background: '#262626', color: '#EEEEEE', fontWeight: 600 }}>CLI v1.0</span>
-                  </div>
-                  <pre style={{
-                    position: 'relative',
-                    zIndex: 2,
-                    fontSize: 'clamp(9px, 2.3vw, 13px)',
-                    lineHeight: 1.15,
-                    fontWeight: 700,
-                    color: '#FFFFFF',
-                    overflowX: 'auto',
-                    margin: 0,
-                    paddingBottom: '4px'
-                  }}>
-{`███████╗███╗   ██╗███████╗██╗   ██╗
-╚══███╔╝████╗  ██║██╔════╝╚██╗ ██╔╝
-  ███╔╝ ██╔██╗ ██║█████╗   ╚████╔╝ 
- ███╔╝  ██║╚██╗██║██╔══╝    ╚██╔╝  
-███████╗██║ ╚████║███████╗   ██║   
-╚══════╝╚═╝  ╚═══╝╚══════╝   ╚═╝   `}
-                  </pre>
-                </div>
-
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }}>
-            {isVie ? 'Giới thiệu • Trang 1 / 2' : 'Introduction • Page 1 / 2'}
-          </p>
-
-          {/* Greeting line */}
-          <p style={{ fontFamily: "'Newsreader', serif", fontStyle: 'italic', fontSize: '1.1rem', color: '#787774', marginBottom: '12px' }}>
-            {isVie ? 'Xin chào —' : 'Hi there —'}
-          </p>
-
-          <h1 style={{
-            fontFamily: "'Newsreader', 'Playfair Display', Georgia, serif",
-            fontSize: 'clamp(2.2rem, 6vw, 3.8rem)',
-            fontWeight: 600,
-            letterSpacing: '-0.03em',
-            lineHeight: 1.1,
-            color: '#111111',
-            marginBottom: '6px',
-          }}>
-            Lê Quang Khánh
-          </h1>
-          {/* Stylized alias — Caveat handwritten accent */}
-          <p style={{
-            fontFamily: "'Caveat', cursive",
-            fontSize: '1.6rem',
-            fontWeight: 700,
-            color: '#787774',
-            letterSpacing: '0.01em',
-            marginBottom: '24px',
-          }}>
-            — zney
-          </p>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '28px' }}>
-            <span className="tag tag-blue">Full Stack Developer</span>
-            <span className="tag tag-green">{isVie ? 'Sinh viên UEH · Ngành IT' : 'UEH Student · IT Major'}</span>
-          </div>
-
-          <p style={{ fontSize: '15px', lineHeight: 1.75, color: '#2F3437', maxWidth: '560px' }}>
-            {isVie
-              ? <>Mình là sinh viên ngành IT, khá thích việc coding và xây dựng ứng dụng — từ web đến mobile. Mình muốn những thứ mình làm ra không chỉ chạy được mà còn <strong style={{ color: '#111', fontWeight: 600 }}>được người khác thật sự dùng</strong>. Chỉ vậy thôi, nhưng đó cũng là lý do mình viết code mỗi ngày.</>
-              : <>An IT student who enjoys building things — web apps, mobile apps, whatever. The goal is simple: ship something people actually <strong style={{ color: '#111', fontWeight: 600 }}>find useful</strong>. That's what keeps me coding every day.</>
-            }
-          </p>
-        </div>
-
-        {/* Bento grid: Core tech + Languages */}
-        <div data-reveal className="bento-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '48px' }}>
-          {/* Core Tech */}
-          <div className="card">
-            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }}>
-              {isVie ? 'Nền tảng & Kỹ thuật' : 'Core Concepts'}
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {coreTech.map((t, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#EAEAEA', flexShrink: 0 }} />
-                  <span style={{ fontSize: '13px', color: '#2F3437', lineHeight: 1.4 }}>{t}</span>
-                </div>
-              ))}
+            {/* macOS Interactive Terminal Frame */}
+            <div data-reveal>
+              <MacTerminalWindow onRunCommand={handleRunCommand} isVie={isVie} />
             </div>
-          </div>
 
-          {/* Languages */}
-          <div className="card">
-            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }}>
-              {isVie ? 'Ngôn ngữ & Frameworks' : 'Languages & Frameworks'}
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {langs.map((l, i) => (
-                <kbd key={i} style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '12px',
-                  padding: '3px 8px',
-                  border: '1px solid #EAEAEA',
-                  borderRadius: '4px',
-                  background: '#F7F6F3',
-                  color: '#2F3437',
-                }}>
-                  {l}
-                </kbd>
-              ))}
+            {/* Hero Section */}
+            <div data-reveal style={{ borderBottom: '1px solid #EAEAEA', paddingBottom: '40px', marginBottom: '40px' }}>
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>
+                {isVie ? 'Giới thiệu • Trang 1 / 3' : 'Introduction • Page 1 / 3'}
+              </p>
+
+              <p style={{ fontFamily: "'Newsreader', serif", fontStyle: 'italic', fontSize: '1.1rem', color: '#787774', marginBottom: '8px' }}>
+                {isVie ? 'Xin chào —' : 'Hi there —'}
+              </p>
+
+              <h1 style={{
+                fontFamily: "'Newsreader', Georgia, serif",
+                fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)',
+                fontWeight: 600,
+                letterSpacing: '-0.03em',
+                lineHeight: 1.1,
+                color: '#111111',
+                marginBottom: '4px',
+              }}>
+                Lê Quang Khánh
+              </h1>
+
+              <p style={{
+                fontFamily: "'Caveat', cursive",
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: '#787774',
+                letterSpacing: '0.01em',
+                marginBottom: '20px',
+              }}>
+                — zney
+              </p>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
+                <span className="tag tag-blue">Full Stack Developer</span>
+                <span className="tag tag-green">{isVie ? 'Sinh viên UEH · Ngành IT' : 'UEH Student · IT Major'}</span>
+              </div>
+
+              <p style={{ fontSize: '15px', lineHeight: 1.75, color: '#2F3437', maxWidth: '580px' }}>
+                {isVie
+                  ? <>Mình là sinh viên ngành IT, xây dựng ứng dụng web & mobile với mong muốn sản phẩm không chỉ chạy tốt mà còn <strong style={{ color: '#111', fontWeight: 600 }}>được mọi người thực sự sử dụng</strong>.</>
+                  : <>An IT student building web & mobile applications with a simple goal: ship software that people actually <strong style={{ color: '#111', fontWeight: 600 }}>find useful</strong>.</>
+                }
+              </p>
+            </div>
+
+            {/* Bento Grid */}
+            <div data-reveal className="bento-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '40px' }}>
+              <div className="card">
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '14px' }}>
+                  {isVie ? 'Nền tảng & Kỹ thuật' : 'Core Concepts'}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {coreTech.map((t, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#EAEAEA', flexShrink: 0 }} />
+                      <span style={{ fontSize: '13px', color: '#2F3437', lineHeight: 1.4 }}>{t}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="card">
+                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#787774', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '14px' }}>
+                  {isVie ? 'Ngôn ngữ & Frameworks' : 'Languages & Frameworks'}
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {langs.map((l, i) => (
+                    <kbd key={i} style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '12px',
+                      padding: '3px 8px',
+                      border: '1px solid #EAEAEA',
+                      borderRadius: '4px',
+                      background: '#F7F6F3',
+                      color: '#2F3437',
+                    }}>
+                      {l}
+                    </kbd>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Target Role & University */}
+            <div data-reveal style={{ borderTop: '1px solid #EAEAEA', borderBottom: '1px solid #EAEAEA', padding: '18px 0', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span className="tag tag-yellow">{isVie ? 'Vị trí mong muốn' : 'Target Role'}</span>
+                <span style={{ fontSize: '13px', color: '#2F3437', fontWeight: 600 }}>Full Stack Developer</span>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span className="tag tag-red">{isVie ? 'Trường' : 'University'}</span>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#787774' }}>UEH — Ho Chi Minh City</span>
+              </div>
             </div>
           </div>
         </div>
 
-
-
-        {/* Position row */}
-        <div data-reveal className="intro-position-row" style={{ borderTop: '1px solid #EAEAEA', borderBottom: '1px solid #EAEAEA', padding: '20px 0', marginBottom: '48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span className="tag tag-yellow">{isVie ? 'Vị trí mong muốn' : 'Target Role'}</span>
-            <span style={{ fontSize: '13px', color: '#2F3437' }}>Full Stack Developer</span>
-          </div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span className="tag tag-red">{isVie ? 'Trường' : 'University'}</span>
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#787774' }}>UEH — Ho Chi Minh City</span>
-          </div>
+        {/* Panel 2: Full-Stack Web Developer CV (.md) */}
+        <div
+          ref={page2Ref}
+          style={{
+            minWidth: '100%',
+            width: '100%',
+            height: '100dvh',
+            overflowY: 'auto',
+            scrollSnapAlign: 'start',
+            flexShrink: 0,
+          }}
+        >
+          <MarkdownCVPage
+            filePath="./file/Le_Quang_Khanh_CV_Web_FullStack.md"
+            badgeTitle="FULL-STACK WEB DEVELOPER CV"
+            fileName="Le_Quang_Khanh_CV_Web_FullStack.md"
+            isVie={isVie}
+          />
         </div>
 
-        {/* Bottom: Socials + CTA */}
-        <div data-reveal className="intro-bottom-actions" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-          {/* Social icon links — SVG inline, no external icon lib */}
-          <div className="intro-socials" style={{ display: 'flex', gap: '8px' }}>
-            <a href="https://github.com/psy-zney" target="_blank" rel="noopener noreferrer" className="social-a" title="GitHub">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-            </a>
-            <a href="https://www.facebook.com/psyotic.zney/" target="_blank" rel="noopener noreferrer" className="social-a" title="Facebook">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-            </a>
-            <a href="https://www.linkedin.com/in/psy-zney295" target="_blank" rel="noopener noreferrer" className="social-a" title="LinkedIn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-            </a>
-            <a href="mailto:lequangkhanh295@gmail.com" className="social-a" title="Email">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            </a>
-            <a href="https://zalo.me/0394426827" target="_blank" rel="noopener noreferrer" className="social-a" title="Zalo">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </a>
-          </div>
-
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button className="cta-btn" onClick={onEnterWorkspace}>
-              <span>{isVie ? 'Khám phá Workspace 3D' : 'View 3D Workspace'}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-          </div>
+        {/* Panel 3: Mobile Developer CV (.md) */}
+        <div
+          ref={page3Ref}
+          style={{
+            minWidth: '100%',
+            width: '100%',
+            height: '100dvh',
+            overflowY: 'auto',
+            scrollSnapAlign: 'start',
+            flexShrink: 0,
+          }}
+        >
+          <MarkdownCVPage
+            filePath="./file/Le_Quang_Khanh_CV_Mobile.md"
+            badgeTitle="MOBILE DEVELOPER CV"
+            fileName="Le_Quang_Khanh_CV_Mobile.md"
+            isVie={isVie}
+          />
         </div>
       </div>
     </div>
-
-    {/* Panel 2: Complete Full CV Scan */}
-    <div
-      ref={page2Ref}
-      style={{
-        minWidth: '100%',
-        width: '100%',
-        height: '100dvh',
-        overflowY: 'auto',
-        scrollSnapAlign: 'start',
-        flexShrink: 0,
-      }}
-    >
-      <IntroFullCVPage
-        onBackToIntro={() => page1Ref.current?.scrollIntoView({ behavior: 'smooth' })}
-        onNextPage={() => page3Ref.current?.scrollIntoView({ behavior: 'smooth' })}
-        isVie={isVie}
-      />
-    </div>
-
-    {/* Panel 3: Complete README.md Encyclopedia Scan */}
-    <div
-      ref={page3Ref}
-      style={{
-        minWidth: '100%',
-        width: '100%',
-        height: '100dvh',
-        overflowY: 'auto',
-        scrollSnapAlign: 'start',
-        flexShrink: 0,
-      }}
-    >
-      <IntroReadmePage
-        onPrevPage={() => page2Ref.current?.scrollIntoView({ behavior: 'smooth' })}
-        onFirstPage={() => page1Ref.current?.scrollIntoView({ behavior: 'smooth' })}
-        isVie={isVie}
-      />
-    </div>
-  </div>
-</div>
   );
 }
