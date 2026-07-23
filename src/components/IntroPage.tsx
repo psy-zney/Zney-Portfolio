@@ -812,6 +812,9 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         }
         .horizontal-page-scroll::-webkit-scrollbar { display:none; }
         .horizontal-page-scroll { -ms-overflow-style:none; scrollbar-width:none; }
+        @media (min-width: 768px) {
+          .desktop-zoom { zoom: 1.2; }
+        }
       `}</style>
 
       {showSplash ? (
@@ -826,7 +829,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
             <button className="lang-btn" onClick={onToggleLang}>{isVie ? 'VIE → ENG' : 'ENG → VIE'}</button>
           </div>
 
-          <div style={{ minHeight: 'calc(100dvh - 80px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '16px 24px 90px', maxWidth: '820px', margin: '0 auto' }}>
+          <div className="desktop-zoom" style={{ minHeight: 'calc(100dvh - 80px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '16px 24px 90px', maxWidth: '820px', margin: '0 auto' }}>
             <AITerminalWindow onRunCommand={handleRunCommand} isVie={isVie} />
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '14px', justifyContent: 'center' }}>
