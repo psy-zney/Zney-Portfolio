@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Environment, ContactShadows, useProgress, Html, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import { GifReader } from 'omggif';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
@@ -500,24 +501,64 @@ function ModelContent({ hoveredItem, onHoverItem, onHoverObject, onSelectItem, a
       });
     };
 
-    image.onload = () => {
-      applyScreenTexture();
-    };
-    image.src = './img/screenDesktop.gif';
+    fetch('./img/screenDesktop.gif')
+      .then(res => res.arrayBuffer())
+      .then(buffer => {
+        const reader = new GifReader(new Uint8Array(buffer));
+        const frames: Array<{ image: CanvasImageSource; duration: number }> = [];
+        
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = reader.width;
+        tempCanvas.height = reader.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        if (!tempCtx) return;
+        
+        const imageData = tempCtx.createImageData(reader.width, reader.height);
+        let previousImageData: ImageData | null = null;
+        
+        for (let i = 0; i < reader.numFrames(); i++) {
+          const frameInfo = reader.frameInfo(i);
+          
+          if (i > 0 && frameInfo.disposal === 2) {
+             if (previousImageData) tempCtx.putImageData(previousImageData, 0, 0);
+             else tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+          } else {
+             if (i === 0 || frameInfo.disposal !== 3) {
+                 previousImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+             }
+          }
+
+          reader.decodeAndBlitFrameRGBA(i, imageData.data as unknown as Uint8ClampedArray);
+          tempCtx.putImageData(imageData, 0, 0);
+          
+          const frameCanvas = document.createElement('canvas');
+          frameCanvas.width = reader.width;
+          frameCanvas.height = reader.height;
+          frameCanvas.getContext('2d')!.drawImage(tempCanvas, 0, 0);
+          
+          frames.push({
+            image: frameCanvas,
+            duration: Math.max(20, frameInfo.delay * 10) // convert hundredths to ms, default to at least 20ms
+          });
+        }
+        
+        screenGifFramesRef.current = frames;
+        screenGifStartTimeRef.current = performance.now();
+        image.src = frames[0]?.image instanceof HTMLCanvasElement ? frames[0].image.toDataURL() : './img/screenDesktop.gif';
+        applyScreenTexture();
+      })
+      .catch(err => {
+        console.error('Failed to parse GIF', err);
+        image.onload = applyScreenTexture;
+        image.src = './img/screenDesktop.gif';
+      });
 
     return () => {
       image.remove();
       if (screenGifTextureRef.current === texture) screenGifTextureRef.current = null;
       if (screenGifImageRef.current === image) screenGifImageRef.current = null;
       if (screenGifCanvasRef.current === canvas) screenGifCanvasRef.current = null;
-      const decodedFrames = screenGifFramesRef.current;
-      if (decodedFrames) {
-        decodedFrames.forEach((frame) => {
-          const maybeClosable = frame.image as { close?: () => void };
-          maybeClosable.close?.();
-        });
-        screenGifFramesRef.current = null;
-      }
+      screenGifFramesRef.current = null;
       texture.dispose();
     };
   }, [gltf.scene]);

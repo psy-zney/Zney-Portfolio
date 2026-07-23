@@ -219,13 +219,13 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
       }
       if (part.startsWith('`') && part.endsWith('`')) {
         return (
-          <code key={idx} style={{ background: '#F3F4F6', color: '#374151', padding: '1px 6px', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.85em', fontWeight: 600, border: '1px solid #E5E7EB' }}>
+          <code key={idx} style={{ background: 'rgba(120, 130, 140, 0.15)', color: '#e6edf3', padding: '1px 6px', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.85em', fontWeight: 600, border: '1px solid rgba(120, 130, 140, 0.2)' }}>
             {part.slice(1, -1)}
           </code>
         );
       }
       if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={idx} style={{ fontWeight: 700, color: '#111111' }}>{part.slice(2, -2)}</strong>;
+        return <strong key={idx} style={{ fontWeight: 700, color: '#ffffff' }}>{part.slice(2, -2)}</strong>;
       }
       return part;
     });
@@ -234,20 +234,20 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
   const flushTable = (key: string) => {
     if (!inTable) return;
     elements.push(
-      <div key={key} style={{ margin: '20px 0', overflowX: 'auto', border: '1px solid #E5E7EB', borderRadius: '10px', background: '#fff' }}>
+      <div key={key} style={{ margin: '20px 0', overflowX: 'auto', border: '1px solid #30363d', borderRadius: '10px', background: 'transparent' }}>
         <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
-            <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+            <tr style={{ background: '#161b22', borderBottom: '1px solid #30363d' }}>
               {tableHeaders.map((h, i) => (
-                <th key={i} style={{ padding: '10px 14px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '11px', fontFamily: "'JetBrains Mono', monospace" }}>{renderFormattedText(h)}</th>
+                <th key={i} style={{ padding: '10px 14px', fontWeight: 700, color: '#c9d1d9', textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '11px', fontFamily: "'JetBrains Mono', monospace" }}>{renderFormattedText(h)}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {tableRows.map((row, ri) => (
-              <tr key={ri} style={{ borderBottom: '1px solid #F3F4F6' }}>
+              <tr key={ri} style={{ borderBottom: '1px solid #21262d' }}>
                 {row.map((cell, ci) => (
-                  <td key={ci} style={{ padding: '10px 14px', color: '#374151', fontFamily: "'JetBrains Mono', monospace", lineHeight: 1.6 }}>{renderFormattedText(cell)}</td>
+                  <td key={ci} style={{ padding: '10px 14px', color: '#e6edf3', fontFamily: "'JetBrains Mono', monospace", lineHeight: 1.6 }}>{renderFormattedText(cell)}</td>
                 ))}
               </tr>
             ))}
@@ -270,12 +270,12 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
       return;
     } else if (inTable) { flushTable(`table-${idx}`); }
 
-    if (trimmed === '---') { elements.push(<hr key={idx} style={{ margin: '24px 0', border: 'none', borderTop: '1px solid #E5E7EB' }} />); return; }
-    if (trimmed.startsWith('# ')) { elements.push(<h1 key={idx} style={{ fontSize: 'clamp(1.6rem,4vw,2.4rem)', fontWeight: 800, color: '#111111', letterSpacing: '-0.02em', marginBottom: '12px', lineHeight: 1.15, fontFamily: "'Newsreader', serif" }}>{renderFormattedText(trimmed.slice(2))}</h1>); return; }
-    if (trimmed.startsWith('### ')) { elements.push(<h3 key={idx} style={{ fontSize: '16px', fontWeight: 700, color: '#374151', marginTop: '20px', marginBottom: '8px' }}>{renderFormattedText(trimmed.slice(4))}</h3>); return; }
-    if (trimmed.startsWith('## ')) { elements.push(<h2 key={idx} style={{ fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6B7280', marginTop: '32px', marginBottom: '12px', paddingBottom: '6px', borderBottom: '1px solid #E5E7EB' }}>{renderFormattedText(trimmed.slice(3))}</h2>); return; }
-    if (trimmed.startsWith('- ')) { elements.push(<li key={idx} style={{ marginLeft: '20px', listStyleType: 'disc', fontSize: '14px', color: '#374151', lineHeight: 1.7, marginBottom: '6px' }}>{renderFormattedText(trimmed.slice(2))}</li>); return; }
-    if (trimmed.length > 0) { elements.push(<p key={idx} style={{ fontSize: '14px', color: '#374151', lineHeight: 1.75, marginBottom: '10px' }}>{renderFormattedText(trimmed)}</p>); }
+    if (trimmed === '---') { elements.push(<hr key={idx} style={{ margin: '24px 0', border: 'none', borderTop: '1px solid #30363d' }} />); return; }
+    if (trimmed.startsWith('# ')) { elements.push(<h1 key={idx} style={{ fontSize: 'clamp(1.6rem,4vw,2.4rem)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '12px', lineHeight: 1.15, fontFamily: "'Newsreader', serif" }}>{renderFormattedText(trimmed.slice(2))}</h1>); return; }
+    if (trimmed.startsWith('### ')) { elements.push(<h3 key={idx} style={{ fontSize: '16px', fontWeight: 700, color: '#e6edf3', marginTop: '20px', marginBottom: '8px' }}>{renderFormattedText(trimmed.slice(4))}</h3>); return; }
+    if (trimmed.startsWith('## ')) { elements.push(<h2 key={idx} style={{ fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#8b949e', marginTop: '32px', marginBottom: '12px', paddingBottom: '6px', borderBottom: '1px solid #30363d' }}>{renderFormattedText(trimmed.slice(3))}</h2>); return; }
+    if (trimmed.startsWith('- ')) { elements.push(<li key={idx} style={{ marginLeft: '20px', listStyleType: 'disc', fontSize: '14px', color: '#c9d1d9', lineHeight: 1.7, marginBottom: '6px' }}>{renderFormattedText(trimmed.slice(2))}</li>); return; }
+    if (trimmed.length > 0) { elements.push(<p key={idx} style={{ fontSize: '14px', color: '#c9d1d9', lineHeight: 1.75, marginBottom: '10px' }}>{renderFormattedText(trimmed)}</p>); }
   });
 
   if (inTable) flushTable('table-end');
@@ -549,7 +549,7 @@ function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorksp
           transition: 'all 300ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* The true liquid glass layer */}
+        {/* The true liquid glass layer without border */}
         <div style={{
           position: 'absolute',
           inset: 0,
@@ -557,9 +557,17 @@ function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorksp
           background: 'rgba(200, 210, 230, 0.18)',
           backdropFilter: 'blur(28px) saturate(200%) brightness(1.15)',
           WebkitBackdropFilter: 'blur(28px) saturate(200%) brightness(1.15)',
-          border: '1px solid rgba(255, 255, 255, 0.45)',
           zIndex: -1,
           filter: 'url(#apple-liquid-glass)'
+        }} />
+        {/* Border Layer (no filter to avoid distortion) */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: 'inherit',
+          border: '1px solid rgba(255, 255, 255, 0.45)',
+          zIndex: -1,
+          pointerEvents: 'none'
         }} />
 
         {/* Inner container to hold contents above the absolute glass background */}
