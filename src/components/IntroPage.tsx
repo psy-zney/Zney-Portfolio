@@ -518,20 +518,13 @@ function MarkdownCVPage({ filePath, badgeTitle, fileName, isVie }: { filePath: s
 function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorkspace, isVie, isSplashMode, onBackToTerminal, theme, onToggleTheme }: { currentPageIndex: number; onNavigatePage: (i: number) => void; onEnterWorkspace: () => void; isVie: boolean; isSplashMode: boolean; onBackToTerminal: () => void; theme?: 'dark' | 'light'; onToggleTheme?: () => void; }) {
   return (
     <>
-      <svg style={{ position: 'absolute', width: 0, height: 0, visibility: 'hidden' }}>
-        <filter id="apple-liquid-glass">
-          <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise" />
-          <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 3 -1" in="noise" result="coloredNoise" />
-          <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale="5" xChannelSelector="R" yChannelSelector="G" result="displacement" />
-        </filter>
-      </svg>
-
       <div
         style={{
           position: 'fixed',
           bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          left: 0,
+          right: 0,
+          margin: '0 auto',
           zIndex: 9999,
           width: isSplashMode ? 'fit-content' : 'min(920px, calc(100vw - 28px))',
           borderRadius: '26px',
@@ -557,8 +550,7 @@ function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorksp
           background: 'rgba(200, 210, 230, 0.18)',
           backdropFilter: 'blur(28px) saturate(200%) brightness(1.15)',
           WebkitBackdropFilter: 'blur(28px) saturate(200%) brightness(1.15)',
-          zIndex: -1,
-          filter: 'url(#apple-liquid-glass)'
+          zIndex: -1
         }} />
         {/* Border Layer (no filter to avoid distortion) */}
         <div style={{
@@ -813,7 +805,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
         .horizontal-page-scroll::-webkit-scrollbar { display:none; }
         .horizontal-page-scroll { -ms-overflow-style:none; scrollbar-width:none; }
         @media (min-width: 768px) {
-          .desktop-zoom { zoom: 1.2; }
+          .desktop-zoom { /* removed zoom: 1.2 to fix blurriness/lag */ }
         }
       `}</style>
 
