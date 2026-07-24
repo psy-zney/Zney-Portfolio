@@ -358,7 +358,10 @@ function AITerminalWindow({
         const vInfo = visitor
           ? `IP: ${visitor.ip} (${visitor.city ? visitor.city + ', ' : ''}${visitor.country}) | ${visitor.browser} on ${visitor.os} | Total Visits: #${visitor.visitCount.toLocaleString()}`
           : 'Loading visitor stats...';
-        newH.push({ type: 'out', text: `[ACCESS GRANTED] Admin authenticated!\n  → ${vInfo}` });
+        newH.push({ type: 'out', text: `[ACCESS GRANTED] Admin authenticated!\n  → ${vInfo}\n  → Opening Introduction...` });
+        setHistory(newH);
+        setTimeout(() => { onRunCommand('portfolio'); }, 500);
+        return;
       } else {
         // Hide existence of admin command from normal users
         newH.push({ type: 'out', text: `command not found: ${cmd}  (try /help)` });
@@ -450,6 +453,17 @@ function AITerminalWindow({
               <span style={{ color: '#484f58', minWidth: '72px', display: 'inline-block' }}>direc:</span>
               <span style={{ color: '#c9d1d9' }}>Portfolio</span>
             </div>
+            {isAdminUnlocked && (
+              <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(56,189,248,0.06)', border: '1px solid rgba(56,189,248,0.22)', borderRadius: '8px', fontSize: '11px', lineHeight: 1.7 }}>
+                <div style={{ color: '#34d399', fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
+                  <span>🔓 Admin Telemetry Activated</span>
+                </div>
+                <div style={{ color: '#38bdf8' }}>Client IP: {visitor?.ip || 'Detecting...'} {visitor?.country ? `(${visitor.city ? visitor.city + ', ' : ''}${visitor.country})` : ''}</div>
+                <div style={{ color: '#c084fc' }}>System: {visitor?.browser} on {visitor?.os}</div>
+                <div style={{ color: '#fb923c' }}>Total Site Visits: #{visitor?.visitCount?.toLocaleString() || 1}</div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -537,6 +551,107 @@ function AITerminalWindow({
   );
 }
 
+// ==================== ADMIN TELEMETRY DASHBOARD PAGE ====================
+function AdminTelemetryPage({ visitor, isVie, onLockAdmin }: { visitor: VisitorInfo | null; isVie: boolean; onLockAdmin: () => void }) {
+  return (
+    <div style={{ maxWidth: '920px', margin: '0 auto', padding: '36px 24px 140px', fontFamily: "'JetBrains Mono', monospace", color: '#e6edf3' }}>
+      {/* Header Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #21262d', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '12px', background: '#38bdf8', color: '#000', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>🔓 ADMIN PANEL</span>
+          <span style={{ fontSize: '13px', color: '#8b949e', fontWeight: 600 }}>zneyOS Telemetry &amp; Analytics Dashboard</span>
+        </div>
+        <button
+          onClick={onLockAdmin}
+          style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5', borderRadius: '8px', padding: '8px 16px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+        >
+          🔒 Lock Session
+        </button>
+      </div>
+
+      {/* Main Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+        {/* Client Telemetry */}
+        <div style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: '16px', padding: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
+          <div style={{ fontSize: '11px', color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '14px', fontWeight: 700 }}>
+            • Client Telemetry &amp; Session
+          </div>
+          <div style={{ fontSize: '13px', lineHeight: 2 }}>
+            <div><span style={{ color: '#6e7681', minWidth: '100px', display: 'inline-block' }}>IP Address:</span> <span style={{ color: '#38bdf8', fontWeight: 700 }}>{visitor?.ip || 'Detecting...'}</span></div>
+            <div><span style={{ color: '#6e7681', minWidth: '100px', display: 'inline-block' }}>Location:</span> <span style={{ color: '#e6edf3' }}>{visitor?.city ? `${visitor.city}, ` : ''}{visitor?.country || 'Unknown'}</span></div>
+            <div><span style={{ color: '#6e7681', minWidth: '100px', display: 'inline-block' }}>Browser:</span> <span style={{ color: '#c084fc' }}>{visitor?.browser || 'Unknown'}</span></div>
+            <div><span style={{ color: '#6e7681', minWidth: '100px', display: 'inline-block' }}>OS Platform:</span> <span style={{ color: '#34d399' }}>{visitor?.os || 'Unknown'}</span></div>
+            <div><span style={{ color: '#6e7681', minWidth: '100px', display: 'inline-block' }}>Screen Res:</span> <span style={{ color: '#8b949e' }}>{window.innerWidth} x {window.innerHeight}</span></div>
+          </div>
+        </div>
+
+        {/* Global Traffic Stats */}
+        <div style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: '16px', padding: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
+          <div style={{ fontSize: '11px', color: '#34d399', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '14px', fontWeight: 700 }}>
+            • Global Traffic Metrics
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ background: '#161b22', padding: '14px', borderRadius: '10px', border: '1px solid #21262d' }}>
+              <span style={{ fontSize: '22px', fontWeight: 700, color: '#fb923c', display: 'block' }}>#{visitor?.visitCount?.toLocaleString() || 1}</span>
+              <span style={{ fontSize: '11px', color: '#6e7681' }}>Total Visits</span>
+            </div>
+            <div style={{ background: '#161b22', padding: '14px', borderRadius: '10px', border: '1px solid #21262d' }}>
+              <span style={{ fontSize: '22px', fontWeight: 700, color: '#34d399', display: 'block' }}>100%</span>
+              <span style={{ fontSize: '11px', color: '#6e7681' }}>System Status</span>
+            </div>
+            <div style={{ background: '#161b22', padding: '14px', borderRadius: '10px', border: '1px solid #21262d' }}>
+              <span style={{ fontSize: '22px', fontWeight: 700, color: '#38bdf8', display: 'block' }}>AWS/CF</span>
+              <span style={{ fontSize: '11px', color: '#6e7681' }}>Edge Infra</span>
+            </div>
+            <div style={{ background: '#161b22', padding: '14px', borderRadius: '10px', border: '1px solid #21262d' }}>
+              <span style={{ fontSize: '22px', fontWeight: 700, color: '#c084fc', display: 'block' }}>&lt; 30ms</span>
+              <span style={{ fontSize: '11px', color: '#6e7681' }}>Avg Latency</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Visitor Logs Table */}
+      <div style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: '16px', padding: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.4)', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ fontSize: '11px', color: '#c084fc', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>
+            • MongoDB Visitor Telemetry Logs ({visitor?.logs?.length || 0})
+          </div>
+          <span style={{ fontSize: '11px', color: '#6e7681' }}>Cluster: MongoDB Atlas Telemetry</span>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #21262d', color: '#6e7681', fontSize: '11px' }}>
+                <th style={{ padding: '8px 12px' }}>Timestamp</th>
+                <th style={{ padding: '8px 12px' }}>IP Address</th>
+                <th style={{ padding: '8px 12px' }}>Location</th>
+                <th style={{ padding: '8px 12px' }}>Browser / OS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visitor?.logs && visitor.logs.length > 0 ? (
+                visitor.logs.map((log, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid #161b22' }}>
+                    <td style={{ padding: '10px 12px', color: '#8b949e', whiteSpace: 'nowrap' }}>{new Date(log.timestamp).toLocaleTimeString()} {new Date(log.timestamp).toLocaleDateString()}</td>
+                    <td style={{ padding: '10px 12px', color: '#38bdf8', fontWeight: 700 }}>{log.ip}</td>
+                    <td style={{ padding: '10px 12px', color: '#e6edf3' }}>{log.city ? `${log.city}, ` : ''}{log.country || 'Vietnam'}</td>
+                    <td style={{ padding: '10px 12px', color: '#c084fc' }}>{log.browser} ({log.os})</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} style={{ padding: '16px 12px', color: '#6e7681', textAlign: 'center' }}>No visitor telemetry logs recorded yet.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ==================== MARKDOWN CV PAGE ====================
 function MarkdownCVPage({ filePath, badgeTitle, fileName, isVie }: { filePath: string; badgeTitle: string; fileName: string; isVie: boolean }) {
   const [content, setContent] = useState('');
@@ -576,7 +691,8 @@ function MarkdownCVPage({ filePath, badgeTitle, fileName, isVie }: { filePath: s
 }
 
 // ==================== GLOBAL STICKY BOTTOM BAR (LIQUID Glass) ====================
-function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorkspace, isVie, isSplashMode, onBackToTerminal, theme, onToggleTheme }: { currentPageIndex: number; onNavigatePage: (i: number) => void; onEnterWorkspace: () => void; isVie: boolean; isSplashMode: boolean; onBackToTerminal: () => void; theme?: 'dark' | 'light'; onToggleTheme?: () => void; }) {
+function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorkspace, isVie, isSplashMode, onBackToTerminal, theme, onToggleTheme, isAdminUnlocked }: { currentPageIndex: number; onNavigatePage: (i: number) => void; onEnterWorkspace: () => void; isVie: boolean; isSplashMode: boolean; onBackToTerminal: () => void; theme?: 'dark' | 'light'; onToggleTheme?: () => void; isAdminUnlocked?: boolean; }) {
+  const totalPages = isAdminUnlocked ? 4 : 3;
   return (
     <>
       <div
@@ -671,7 +787,7 @@ function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorksp
           {!isSplashMode && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px' }}>
               <button
-                onClick={() => onNavigatePage((currentPageIndex + 2) % 3)}
+                onClick={() => onNavigatePage((currentPageIndex + totalPages - 1) % totalPages)}
                 style={{
                   width: 34,
                   height: 34,
@@ -706,13 +822,14 @@ function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorksp
                   boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.15)',
                 }}
               >
-                {currentPageIndex === 0 && (isVie ? 'Trang 1 / 3 • Intro' : 'Page 1 / 3 • Intro')}
-                {currentPageIndex === 1 && (isVie ? 'Trang 2 / 3 • CV Web' : 'Page 2 / 3 • CV Web')}
-                {currentPageIndex === 2 && (isVie ? 'Trang 3 / 3 • CV Mobile' : 'Page 3 / 3 • CV Mobile')}
+                {currentPageIndex === 0 && (isVie ? `Trang 1 / ${totalPages} • Intro` : `Page 1 / ${totalPages} • Intro`)}
+                {currentPageIndex === 1 && (isVie ? `Trang 2 / ${totalPages} • CV Web` : `Page 2 / ${totalPages} • CV Web`)}
+                {currentPageIndex === 2 && (isVie ? `Trang 3 / ${totalPages} • CV Mobile` : `Page 3 / ${totalPages} • CV Mobile`)}
+                {currentPageIndex === 3 && (isVie ? `Trang 4 / ${totalPages} • Admin Panel` : `Page 4 / ${totalPages} • Admin Panel`)}
               </span>
 
               <button
-                onClick={() => onNavigatePage((currentPageIndex + 1) % 3)}
+                onClick={() => onNavigatePage((currentPageIndex + 1) % totalPages)}
                 style={{
                   width: 34,
                   height: 34,
@@ -798,9 +915,17 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
   const [showSplash, setShowSplash] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(() => {
+    return sessionStorage.getItem('zney_admin_unlocked') === 'true';
+  });
+  const [visitor, setVisitor] = useState<VisitorInfo | null>(null);
+
+  useEffect(() => { fetchVisitorInfo().then(setVisitor); }, []);
+
   const page1Ref = useRef<HTMLDivElement>(null);
   const page2Ref = useRef<HTMLDivElement>(null);
   const page3Ref = useRef<HTMLDivElement>(null);
+  const page4Ref = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
   const navigateToPage = (pageIdx: number) => {
@@ -808,15 +933,17 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
     if (pageIdx === 0) page1Ref.current?.scrollIntoView({ behavior: 'smooth' });
     else if (pageIdx === 1) page2Ref.current?.scrollIntoView({ behavior: 'smooth' });
     else if (pageIdx === 2) page3Ref.current?.scrollIntoView({ behavior: 'smooth' });
+    else if (pageIdx === 3) page4Ref.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleRunCommand = (cmd: string) => {
     if (showSplash) {
-      if (['intro', 'portfolio', 'cvweb', 'cvmb'].includes(cmd)) {
+      if (['intro', 'portfolio', 'cvweb', 'cvmb', 'admin'].includes(cmd)) {
         setShowSplash(false);
         setTimeout(() => {
           if (cmd === 'cvweb') navigateToPage(1);
           if (cmd === 'cvmb') navigateToPage(2);
+          if (cmd === 'admin') navigateToPage(3);
         }, 50);
       } else if (cmd === 'workspace') {
         onEnterWorkspace();
@@ -827,6 +954,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
     if (cmd === 'portfolio') heroRef.current?.scrollIntoView({ behavior: 'smooth' });
     else if (cmd === 'cvweb') navigateToPage(1);
     else if (cmd === 'cvmb') navigateToPage(2);
+    else if (cmd === 'admin') navigateToPage(3);
     else if (cmd === 'workspace') onEnterWorkspace();
   };
 
@@ -921,6 +1049,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
             onBackToTerminal={() => setShowSplash(true)}
             theme={theme}
             onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            isAdminUnlocked={isAdminUnlocked}
           />
         </div>
       ) : (
@@ -934,6 +1063,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
             onBackToTerminal={() => setShowSplash(true)}
             theme={theme}
             onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            isAdminUnlocked={isAdminUnlocked}
           />
 
           <div
@@ -1078,6 +1208,21 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
             <div ref={page3Ref} style={{ minWidth: '100%', width: '100%', height: '100dvh', overflowY: 'auto', scrollSnapAlign: 'start', flexShrink: 0, background: '#000000' }}>
               <MarkdownCVPage filePath="./file/Le_Quang_Khanh_CV_Mobile.md" badgeTitle="MOBILE DEVELOPER CV" fileName="Le_Quang_Khanh_CV_Mobile.md" isVie={isVie} />
             </div>
+
+            {/* ===== PANEL 4: Admin Telemetry Dashboard ===== */}
+            {isAdminUnlocked && (
+              <div ref={page4Ref} style={{ minWidth: '100%', width: '100%', height: '100dvh', overflowY: 'auto', scrollSnapAlign: 'start', flexShrink: 0, background: '#000000' }}>
+                <AdminTelemetryPage
+                  visitor={visitor}
+                  isVie={isVie}
+                  onLockAdmin={() => {
+                    sessionStorage.removeItem('zney_admin_unlocked');
+                    setIsAdminUnlocked(false);
+                    navigateToPage(0);
+                  }}
+                />
+              </div>
+            )}
           </div>
         </>
       )}
