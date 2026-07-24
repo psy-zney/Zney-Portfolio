@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { GalaxyButton } from './GalaxyButton';
 import { RectGlowButton } from './RectGlowButton';
+import { fetchVisitorInfo, VisitorInfo } from '../utils/visitorTracker';
 
 // ==================== ZNEY ASCII LOGO + LED SCAN WAVE ====================
 const ASCII_ROWS = [
@@ -304,9 +305,14 @@ function AITerminalWindow({
   const [showSug, setShowSug] = useState(false);
   const [filtered, setFiltered] = useState(SLASH_CMDS);
   const [history, setHistory] = useState<Array<{ type: 'in' | 'out'; text: string }>>([]);
+  const [visitor, setVisitor] = useState<VisitorInfo | null>(null);
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(() => {
+    return sessionStorage.getItem('zney_admin_unlocked') === 'true';
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => { fetchVisitorInfo().then(setVisitor); }, []);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [history]);
 
   const handleInput = (val: string) => {
@@ -320,7 +326,7 @@ function AITerminalWindow({
     }
   };
 
-  const execCmd = (raw: string) => {
+  const execCmd = async (raw: string) => {
     const cmd = raw.trim();
     setShowSug(false);
     setInputVal('');
@@ -330,6 +336,33 @@ function AITerminalWindow({
     const newH = [...history, { type: 'in' as const, text: cmd }];
     if (['help', 'ls'].includes(lower)) {
       newH.push({ type: 'out', text: 'Available: /intro /cvweb /cvmb /projects /skills /workspace /help' });
+    } else if (lower.startsWith('admin')) {
+      const encoder = new TextEncoder();
+      const rawCmd = lower.replace(/\s+/g, '');
+      const saltedData = encoder.encode('zney_salt_2026_x9$' + rawCmd);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', saltedData);
+      const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const rawHashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(rawCmd));
+      const rawHashHex = Array.from(new Uint8Array(rawHashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const VALID_HASHES = [
+        'bef671fe0f3fee6bc2ccc1a9133fd5ed2f1de2462155c1cfbe778221859241f0', // Salted SHA-256 (Anti-Rainbow Table)
+        'c9d8b3587a14b8331aec4bc7362f9e19e0534fe5530b5a3d61c74228067e255f',
+        (import.meta as any).env?.VITE_ADMIN_PASS_HASH,
+      ].filter(Boolean);
+
+      if (VALID_HASHES.includes(hashHex) || VALID_HASHES.includes(rawHashHex)) {
+        setIsAdminUnlocked(true);
+        sessionStorage.setItem('zney_admin_unlocked', 'true');
+        const vInfo = visitor
+          ? `IP: ${visitor.ip} (${visitor.city ? visitor.city + ', ' : ''}${visitor.country}) | ${visitor.browser} on ${visitor.os} | Total Visits: #${visitor.visitCount.toLocaleString()}`
+          : 'Loading visitor stats...';
+        newH.push({ type: 'out', text: `[ACCESS GRANTED] Admin authenticated!\n  → ${vInfo}` });
+      } else {
+        // Hide existence of admin command from normal users
+        newH.push({ type: 'out', text: `command not found: ${cmd}  (try /help)` });
+      }
     } else if (['intro', 'portfolio', 'p1'].includes(lower)) {
       onRunCommand('portfolio'); return;
     } else if (['cvweb', 'web', 'p2'].includes(lower)) {
@@ -354,6 +387,16 @@ function AITerminalWindow({
     inputRef.current?.focus();
   };
 
+  const lastTapRef = useRef<number>(0);
+
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 350) {
+      onRunCommand('portfolio');
+    }
+    lastTapRef.current = now;
+  };
+
   return (
     <div
       style={{
@@ -362,8 +405,11 @@ function AITerminalWindow({
         width: '100%', maxWidth: '660px', margin: '0 auto',
         boxShadow: '0 0 0 1px #21262d, 0 32px 80px rgba(0,0,0,0.9)',
         position: 'relative',
+        cursor: 'pointer',
       }}
       onClick={() => inputRef.current?.focus()}
+      onTouchEnd={handleDoubleTap}
+      onDoubleClick={() => onRunCommand('portfolio')}
     >
       {/* Shooting stars — clipped inside terminal box, zIndex 0 puts them behind text and title bar */}
       <span style={{ position: 'absolute', top: '0px', left: '20%', width: '120px', height: '1.5px', borderRadius: '999px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), #38bdf8)', filter: 'drop-shadow(0 0 5px rgba(56,189,248,0.8))', transform: 'rotate(36deg)', animation: 'zney-meteor 2.8s cubic-bezier(0.25,0.1,0.25,1) infinite', pointerEvents: 'none', zIndex: 0 }} />
@@ -423,7 +469,9 @@ function AITerminalWindow({
         {history.length === 0 && (
           <div style={{ marginBottom: '14px', fontSize: '12px', color: '#484f58' }}>
             <span style={{ color: '#8b949e', fontWeight: 600 }}>Tip:</span>{' '}
-            {isVie ? 'nhấn Enter để vào Introduction' : 'enter to Introduction'}
+            {isVie
+              ? 'nhấn Enter (hoặc chạm 2 lần) để vào Introduction'
+              : 'press Enter (or double tap) to enter Introduction'}
           </div>
         )}
 
@@ -465,11 +513,24 @@ function AITerminalWindow({
         </div>
 
         {/* Footer status */}
-        <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #21262d', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#484f58' }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3fb950', display: 'inline-block', flexShrink: 0 }} />
-          <span style={{ color: '#8b949e' }}>LQK - Extra High</span>
-          <span>·</span>
-          <span>Portfolio</span>
+        <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #21262d', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', fontSize: '11px', color: '#484f58' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3fb950', display: 'inline-block', flexShrink: 0 }} />
+            <span style={{ color: '#8b949e' }}>LQK - Extra High</span>
+            <span>·</span>
+            <span>Portfolio</span>
+          </div>
+          {isAdminUnlocked && visitor && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10px', color: '#6e7681' }}>
+              <span style={{ color: '#34d399' }}>🔓 Admin</span>
+              <span>·</span>
+              <span style={{ color: '#38bdf8' }}>IP: {visitor.ip}</span>
+              <span>·</span>
+              <span style={{ color: '#c084fc' }}>{visitor.browser} ({visitor.os})</span>
+              <span>·</span>
+              <span style={{ color: '#fb923c' }}>Visits: #{visitor.visitCount.toLocaleString()}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

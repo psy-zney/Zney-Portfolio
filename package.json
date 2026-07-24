@@ -2,6 +2,7 @@
   "name": "zney-3d-creator-portfolio",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "pnpm@10.5.2",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
