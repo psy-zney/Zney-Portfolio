@@ -330,6 +330,24 @@ function AITerminalWindow({
     const cmd = raw.trim();
     setShowSug(false);
     setInputVal('');
+    
+    // First, check if the exact command matches the admin password hash
+    const encoder = new TextEncoder();
+    const rawHashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(cmd));
+    const rawHashHex = Array.from(new Uint8Array(rawHashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const validPassHash = (import.meta as any).env?.VITE_ADMIN_PASS_HASH;
+    
+    if (validPassHash && rawHashHex === validPassHash) {
+       // Secret Admin Access Granted!
+       const newH = [...history, { type: 'in' as const, text: '*'.repeat(cmd.length) }];
+       newH.push({ type: 'out', text: `[ACCESS GRANTED] Redirecting to Admin Dashboard...` });
+       setHistory(newH);
+       setTimeout(() => {
+         onRunCommand('admin');
+       }, 600);
+       return;
+    }
+
     const lower = cmd.toLowerCase().replace(/^\//, '');
 
     if (!cmd || lower === 'enter') { onRunCommand('portfolio'); return; }
@@ -337,22 +355,20 @@ function AITerminalWindow({
     if (['help', 'ls'].includes(lower)) {
       newH.push({ type: 'out', text: 'Available: /intro /cvweb /cvmb /projects /skills /workspace /help' });
     } else if (lower.startsWith('admin')) {
-      const encoder = new TextEncoder();
       const rawCmd = lower.replace(/\s+/g, '');
       const saltedData = encoder.encode('zney_salt_2026_x9$' + rawCmd);
       const hashBuffer = await crypto.subtle.digest('SHA-256', saltedData);
       const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 
-      const rawHashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(rawCmd));
-      const rawHashHex = Array.from(new Uint8Array(rawHashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+      const rawHashBufferLower = await crypto.subtle.digest('SHA-256', encoder.encode(rawCmd));
+      const rawHashHexLower = Array.from(new Uint8Array(rawHashBufferLower)).map(b => b.toString(16).padStart(2, '0')).join('');
 
       const VALID_HASHES = [
         'bef671fe0f3fee6bc2ccc1a9133fd5ed2f1de2462155c1cfbe778221859241f0', // Salted SHA-256 (Anti-Rainbow Table)
-        'c9d8b3587a14b8331aec4bc7362f9e19e0534fe5530b5a3d61c74228067e255f',
-        (import.meta as any).env?.VITE_ADMIN_PASS_HASH,
-      ].filter(Boolean);
+        'c9d8b3587a14b8331aec4bc7362f9e19e0534fe5530b5a3d61c74228067e255f'
+      ];
 
-      if (VALID_HASHES.includes(hashHex) || VALID_HASHES.includes(rawHashHex)) {
+      if (VALID_HASHES.includes(hashHex) || VALID_HASHES.includes(rawHashHexLower)) {
         setIsAdminUnlocked(true);
         sessionStorage.setItem('zney_admin_unlocked', 'true');
         const vInfo = visitor
@@ -937,13 +953,18 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
   };
 
   const handleRunCommand = (cmd: string) => {
+    if (cmd === 'admin') {
+      window.history.pushState({ viewMode: 'admin' }, '', window.location.pathname + '?admin');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      return;
+    }
+    
     if (showSplash) {
-      if (['intro', 'portfolio', 'cvweb', 'cvmb', 'admin'].includes(cmd)) {
+      if (['intro', 'portfolio', 'cvweb', 'cvmb'].includes(cmd)) {
         setShowSplash(false);
         setTimeout(() => {
           if (cmd === 'cvweb') navigateToPage(1);
           if (cmd === 'cvmb') navigateToPage(2);
-          if (cmd === 'admin') navigateToPage(3);
         }, 50);
       } else if (cmd === 'workspace') {
         onEnterWorkspace();
@@ -954,7 +975,6 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
     if (cmd === 'portfolio') heroRef.current?.scrollIntoView({ behavior: 'smooth' });
     else if (cmd === 'cvweb') navigateToPage(1);
     else if (cmd === 'cvmb') navigateToPage(2);
-    else if (cmd === 'admin') navigateToPage(3);
     else if (cmd === 'workspace') onEnterWorkspace();
   };
 
