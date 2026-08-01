@@ -37,6 +37,9 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build
+        env:
+          VITE_MONGO_API_ENDPOINT: ${{ secrets.VITE_MONGO_API_ENDPOINT }}
+          VITE_ADMIN_PASS_HASH: ${{ secrets.VITE_ADMIN_PASS_HASH }}
         run: pnpm run build
 
       - name: Upload Pages artifact

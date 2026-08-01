@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { ModelAnalyzer } from './components/ModelAnalyzer';
 import { IntroPage } from './components/IntroPage';
 import { preloadIntroAudio, startIntroAudioFromGesture } from './utils/audioPreloader';
+import { AdminDashboard } from './components/AdminDashboard';
 
-type ViewMode = 'intro' | 'workspace';
+type ViewMode = 'intro' | 'workspace' | 'admin';
 
 function readViewMode(): ViewMode {
+  if (window.location.search.includes('admin')) return 'admin';
   return window.location.hash === '#/workspace' ? 'workspace' : 'intro';
 }
 
@@ -82,9 +84,12 @@ export default function App() {
   const toggleLang = () => setLang((prev) => (prev === 'vie' ? 'eng' : 'vie'));
 
   const navigateTo = (mode: ViewMode) => {
-    const nextUrl = mode === 'workspace'
-      ? `${window.location.pathname}${window.location.search}#/workspace`
-      : `${window.location.pathname}${window.location.search}`;
+    let nextUrl = window.location.pathname;
+    if (mode === 'workspace') {
+      nextUrl += '#/workspace';
+    } else if (mode === 'admin') {
+      nextUrl += '?admin';
+    }
     window.history.pushState({ viewMode: mode }, '', nextUrl);
     setViewMode(mode);
   };
@@ -101,7 +106,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.title = viewMode === 'workspace' ? 'Workspace | zney' : 'zney - Portfolio';
+    document.title = viewMode === 'workspace' ? 'Workspace | zney' : viewMode === 'admin' ? 'Admin | zney' : 'zney - Portfolio';
     const favicon = document.getElementById('favicon') as HTMLLinkElement || document.querySelector("link[rel*='icon']");
     if (favicon) {
       favicon.href = viewMode === 'intro' ? './img/black-hole.png' : './img/hacker.png';
@@ -114,6 +119,10 @@ export default function App() {
       document.head.appendChild(link);
     }
   }, [viewMode]);
+
+  if (viewMode === 'admin') {
+    return <AdminDashboard onExit={() => navigateTo('intro')} lang={lang} />;
+  }
 
   return (
     <div className="w-screen overflow-hidden bg-[#0f141d] font-sans text-slate-100 select-none" style={{ height: '100dvh' }}>
@@ -139,4 +148,3 @@ export default function App() {
     </div>
   );
 }
-
