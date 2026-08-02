@@ -40,6 +40,7 @@ jobs:
         env:
           VITE_MONGO_API_ENDPOINT: ${{ secrets.VITE_MONGO_API_ENDPOINT }}
           VITE_ADMIN_PASS_HASH: ${{ secrets.VITE_ADMIN_PASS_HASH }}
+          VITE_ANALYTICS_URL: ${{ secrets.VITE_ANALYTICS_URL }}
         run: pnpm run build
 
       - name: Upload Pages artifact
