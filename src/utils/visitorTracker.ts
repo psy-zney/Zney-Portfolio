@@ -101,6 +101,21 @@ export async function fetchVisitorInfo(): Promise<VisitorInfo> {
 
   const logs = getVisitorLogsHistory(currentLog);
 
+  // Send telemetry to custom backend
+  try {
+    await fetch('https://analytics.zney295.id.vn/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        path: window.location.pathname,
+        referrer: document.referrer
+      }),
+      signal: AbortSignal.timeout(3000)
+    });
+  } catch {
+    // Ignore tracking errors
+  }
+
   return {
     ip,
     country,
