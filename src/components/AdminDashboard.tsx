@@ -36,7 +36,8 @@ export function AdminDashboard({ onExit, lang }: AdminDashboardProps) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('https://route-hiv-blog-pdas.trycloudflare.com/stats', {
+      const backendUrl = (import.meta as any).env.VITE_ANALYTICS_URL || '';
+      const res = await fetch(`${backendUrl}/stats`, {
         headers: { 'Authorization': `Bearer ${pass}` }
       });
       
@@ -108,9 +109,9 @@ export function AdminDashboard({ onExit, lang }: AdminDashboardProps) {
                 <Lock className="text-sky-400" size={32} />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-center text-white mb-2">Admin Access</h1>
+            <h1 className="text-2xl font-bold text-center text-white mb-2">System Access</h1>
             <p className="text-center text-slate-400 mb-8 text-sm">
-              {lang === 'vie' ? 'Nhập mật khẩu quản trị' : 'Enter admin password'}
+              {lang === 'vie' ? 'Nhập mã truy cập hệ thống' : 'Enter system passcode'}
             </p>
 
             <form onSubmit={handleLogin} className="space-y-4">
@@ -158,7 +159,7 @@ export function AdminDashboard({ onExit, lang }: AdminDashboardProps) {
                 <ArrowLeft size={20} />
               </button>
               <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                <Globe className="text-sky-400" /> zney Analytics
+                <Globe className="text-sky-400" /> zney Metrics
               </h1>
             </div>
           </div>

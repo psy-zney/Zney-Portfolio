@@ -338,10 +338,10 @@ function AITerminalWindow({
     const validPassHash = (import.meta as any).env?.VITE_ADMIN_PASS_HASH;
     
     if (validPassHash && rawHashHex === validPassHash) {
-       // Secret Admin Access Granted!
+       // Secret Access Granted!
        localStorage.setItem('zney_admin_pass', cmd);
        const newH = [...history, { type: 'in' as const, text: '*'.repeat(cmd.length) }];
-       newH.push({ type: 'out', text: `[ACCESS GRANTED] Redirecting to Admin Dashboard...` });
+       newH.push({ type: 'out', text: `[ACCESS GRANTED] Redirecting to System Console...` });
        setHistory(newH);
        setTimeout(() => {
          onRunCommand('admin');
@@ -355,34 +355,6 @@ function AITerminalWindow({
     const newH = [...history, { type: 'in' as const, text: cmd }];
     if (['help', 'ls'].includes(lower)) {
       newH.push({ type: 'out', text: 'Available: /intro /cvweb /cvmb /projects /skills /workspace /help' });
-    } else if (lower.startsWith('admin')) {
-      const rawCmd = lower.replace(/\s+/g, '');
-      const saltedData = encoder.encode('zney_salt_2026_x9$' + rawCmd);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', saltedData);
-      const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-
-      const rawHashBufferLower = await crypto.subtle.digest('SHA-256', encoder.encode(rawCmd));
-      const rawHashHexLower = Array.from(new Uint8Array(rawHashBufferLower)).map(b => b.toString(16).padStart(2, '0')).join('');
-
-      const VALID_HASHES = [
-        'bef671fe0f3fee6bc2ccc1a9133fd5ed2f1de2462155c1cfbe778221859241f0', // Salted SHA-256 (Anti-Rainbow Table)
-        'c9d8b3587a14b8331aec4bc7362f9e19e0534fe5530b5a3d61c74228067e255f'
-      ];
-
-      if (VALID_HASHES.includes(hashHex) || VALID_HASHES.includes(rawHashHexLower)) {
-        setIsAdminUnlocked(true);
-        sessionStorage.setItem('zney_admin_unlocked', 'true');
-        const vInfo = visitor
-          ? `IP: ${visitor.ip} (${visitor.city ? visitor.city + ', ' : ''}${visitor.country}) | ${visitor.browser} on ${visitor.os} | Total Visits: #${visitor.visitCount.toLocaleString()}`
-          : 'Loading visitor stats...';
-        newH.push({ type: 'out', text: `[ACCESS GRANTED] Admin authenticated!\n  → ${vInfo}\n  → Opening Introduction...` });
-        setHistory(newH);
-        setTimeout(() => { onRunCommand('portfolio'); }, 500);
-        return;
-      } else {
-        // Hide existence of admin command from normal users
-        newH.push({ type: 'out', text: `command not found: ${cmd}  (try /help)` });
-      }
     } else if (['intro', 'portfolio', 'p1'].includes(lower)) {
       onRunCommand('portfolio'); return;
     } else if (['cvweb', 'web', 'p2'].includes(lower)) {
@@ -474,7 +446,7 @@ function AITerminalWindow({
               <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(56,189,248,0.06)', border: '1px solid rgba(56,189,248,0.22)', borderRadius: '8px', fontSize: '11px', lineHeight: 1.7 }}>
                 <div style={{ color: '#34d399', fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
-                  <span>🔓 Admin Telemetry Activated</span>
+                  <span>🔓 System Console Activated</span>
                 </div>
                 <div style={{ color: '#38bdf8' }}>Client IP: {visitor?.ip || 'Detecting...'} {visitor?.country ? `(${visitor.city ? visitor.city + ', ' : ''}${visitor.country})` : ''}</div>
                 <div style={{ color: '#c084fc' }}>System: {visitor?.browser} on {visitor?.os}</div>
@@ -553,7 +525,7 @@ function AITerminalWindow({
           </div>
           {isAdminUnlocked && visitor && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10px', color: '#6e7681' }}>
-              <span style={{ color: '#34d399' }}>🔓 Admin</span>
+              <span style={{ color: '#34d399' }}>🔓 System</span>
               <span>·</span>
               <span style={{ color: '#38bdf8' }}>IP: {visitor.ip}</span>
               <span>·</span>
@@ -568,15 +540,15 @@ function AITerminalWindow({
   );
 }
 
-// ==================== ADMIN TELEMETRY DASHBOARD PAGE ====================
+// ==================== SYSTEM CONSOLE PAGE ====================
 function AdminTelemetryPage({ visitor, isVie, onLockAdmin }: { visitor: VisitorInfo | null; isVie: boolean; onLockAdmin: () => void }) {
   return (
     <div style={{ maxWidth: '920px', margin: '0 auto', padding: '36px 24px 140px', fontFamily: "'JetBrains Mono', monospace", color: '#e6edf3' }}>
       {/* Header Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #21262d', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '12px', background: '#38bdf8', color: '#000', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>🔓 ADMIN PANEL</span>
-          <span style={{ fontSize: '13px', color: '#8b949e', fontWeight: 600 }}>zneyOS Telemetry &amp; Analytics Dashboard</span>
+          <span style={{ fontSize: '12px', background: '#38bdf8', color: '#000', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>🔓 SYSTEM CONSOLE</span>
+          <span style={{ fontSize: '13px', color: '#8b949e', fontWeight: 600 }}>zneyOS Internal Metrics Dashboard</span>
         </div>
         <button
           onClick={onLockAdmin}
@@ -632,7 +604,7 @@ function AdminTelemetryPage({ visitor, isVie, onLockAdmin }: { visitor: VisitorI
       <div style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: '16px', padding: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.4)', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ fontSize: '11px', color: '#c084fc', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>
-            • MongoDB Visitor Telemetry Logs ({visitor?.logs?.length || 0})
+            • System Metrics Logs ({visitor?.logs?.length || 0})
           </div>
           <span style={{ fontSize: '11px', color: '#6e7681' }}>Cluster: MongoDB Atlas Telemetry</span>
         </div>
@@ -842,7 +814,7 @@ function GlobalStickyBottomBar({ currentPageIndex, onNavigatePage, onEnterWorksp
                 {currentPageIndex === 0 && (isVie ? `Trang 1 / ${totalPages} • Intro` : `Page 1 / ${totalPages} • Intro`)}
                 {currentPageIndex === 1 && (isVie ? `Trang 2 / ${totalPages} • CV Web` : `Page 2 / ${totalPages} • CV Web`)}
                 {currentPageIndex === 2 && (isVie ? `Trang 3 / ${totalPages} • CV Mobile` : `Page 3 / ${totalPages} • CV Mobile`)}
-                {currentPageIndex === 3 && (isVie ? `Trang 4 / ${totalPages} • Admin Panel` : `Page 4 / ${totalPages} • Admin Panel`)}
+                {currentPageIndex === 3 && (isVie ? `Trang 4 / ${totalPages} • System Console` : `Page 4 / ${totalPages} • System Console`)}
               </span>
 
               <button
@@ -1230,7 +1202,7 @@ export function IntroPage({ onEnterWorkspace, lang, onToggleLang }: IntroPagePro
               <MarkdownCVPage filePath="./file/Le_Quang_Khanh_CV_Mobile.md" badgeTitle="MOBILE DEVELOPER CV" fileName="Le_Quang_Khanh_CV_Mobile.md" isVie={isVie} />
             </div>
 
-            {/* ===== PANEL 4: Admin Telemetry Dashboard ===== */}
+            {/* ===== PANEL 4: System Console Dashboard ===== */}
             {isAdminUnlocked && (
               <div ref={page4Ref} style={{ minWidth: '100%', width: '100%', height: '100dvh', overflowY: 'auto', scrollSnapAlign: 'start', flexShrink: 0, background: '#000000' }}>
                 <AdminTelemetryPage

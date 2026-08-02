@@ -154,7 +154,10 @@ function getSessionId() {
 
 export async function trackPageView(viewName: string) {
   try {
-    await fetch('https://route-hiv-blog-pdas.trycloudflare.com/track', {
+    const backendUrl = (import.meta as any).env.VITE_ANALYTICS_URL || '';
+    if (!backendUrl) return;
+
+    await fetch(`${backendUrl}/track`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
