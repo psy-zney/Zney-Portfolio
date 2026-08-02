@@ -101,21 +101,6 @@ export async function fetchVisitorInfo(): Promise<VisitorInfo> {
 
   const logs = getVisitorLogsHistory(currentLog);
 
-  // Send telemetry to custom backend
-  try {
-    await fetch('https://pot-agrees-transit-watch.trycloudflare.com/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        path: window.location.pathname,
-        referrer: document.referrer
-      }),
-      signal: AbortSignal.timeout(3000)
-    });
-  } catch {
-    // Ignore tracking errors
-  }
-
   return {
     ip,
     country,
@@ -155,5 +140,31 @@ export function getVisitorLogsHistory(currentLog?: VisitorLog): VisitorLog[] {
     return logs;
   } catch {
     return currentLog ? [currentLog] : [];
+  }
+}
+
+function getSessionId() {
+  let sid = sessionStorage.getItem('zney_session_id');
+  if (!sid) {
+    sid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem('zney_session_id', sid);
+  }
+  return sid;
+}
+
+export async function trackPageView(viewName: string) {
+  try {
+    await fetch('https://route-hiv-blog-pdas.trycloudflare.com/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        path: viewName,
+        referrer: document.referrer,
+        session_id: getSessionId()
+      }),
+      signal: AbortSignal.timeout(3000)
+    });
+  } catch {
+    // Ignore
   }
 }

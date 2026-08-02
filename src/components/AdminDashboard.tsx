@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Eye, Users, MousePointerClick, ArrowLeft, LogOut, Globe, Clock, Smartphone, Monitor } from 'lucide-react';
+import { Lock, Eye, Users, MousePointerClick, ArrowLeft, LogOut, Globe, Clock, Smartphone, Monitor, Waypoints } from 'lucide-react';
 
 interface AdminDashboardProps {
   onExit: () => void;
@@ -12,6 +12,7 @@ interface StatData {
   topPaths: { path: string; count: number }[];
   topReferrers: { referrer: string; count: number }[];
   recentVisits: { ip: string; user_agent: string; path: string; timestamp: string }[];
+  topFlows?: { transition: string; count: number }[];
   status: string;
 }
 
@@ -259,6 +260,45 @@ export function AdminDashboard({ onExit, lang }: AdminDashboardProps) {
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+
+        {/* User Journey Flow */}
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mt-6">
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <Waypoints size={18} className="text-sky-400" /> User Journey Flow
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(!data?.topFlows || data.topFlows.length === 0) ? (
+              <p className="text-slate-500 text-sm">No flow data yet</p>
+            ) : (
+              data.topFlows.map((f, i) => {
+                const parts = f.transition.split(' ➔ ');
+                return (
+                  <div key={i} className="flex items-center justify-between p-4 bg-slate-800/40 border border-slate-800/80 rounded-xl relative overflow-hidden group hover:border-sky-500/30 transition-colors">
+                    {/* Background gradient line */}
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent -z-10 group-hover:via-sky-900/50 transition-colors" />
+                    
+                    <div className="flex flex-col items-center flex-1">
+                      <span className="text-xs font-mono text-slate-400 mb-1">From</span>
+                      <span className="px-2 py-1 bg-slate-950 rounded text-sky-300 font-mono text-sm shadow-sm">{parts[0]}</span>
+                    </div>
+                    
+                    <div className="flex flex-col items-center px-2">
+                      <span className="text-xs font-bold text-slate-500 mb-1">({f.count} users)</span>
+                      <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 shadow-inner z-10 group-hover:bg-slate-700 transition-colors">
+                        <span className="text-sky-400 text-lg leading-none">➔</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-center flex-1">
+                      <span className="text-xs font-mono text-slate-400 mb-1">To</span>
+                      <span className="px-2 py-1 bg-slate-950 rounded text-emerald-400 font-mono text-sm shadow-sm">{parts[1]}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 

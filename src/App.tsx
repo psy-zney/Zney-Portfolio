@@ -3,6 +3,7 @@ import { ModelAnalyzer } from './components/ModelAnalyzer';
 import { IntroPage } from './components/IntroPage';
 import { preloadIntroAudio, startIntroAudioFromGesture } from './utils/audioPreloader';
 import { AdminDashboard } from './components/AdminDashboard';
+import { trackPageView } from './utils/visitorTracker';
 
 type ViewMode = 'intro' | 'workspace' | 'admin';
 
@@ -104,6 +105,10 @@ export default function App() {
       window.removeEventListener('hashchange', syncViewFromUrl);
     };
   }, []);
+
+  useEffect(() => {
+    trackPageView(viewMode);
+  }, [viewMode]);
 
   useEffect(() => {
     document.title = viewMode === 'workspace' ? 'Workspace | zney' : viewMode === 'admin' ? 'Admin | zney' : 'zney - Portfolio';
