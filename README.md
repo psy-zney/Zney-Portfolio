@@ -1,4 +1,4 @@
-# 🚀 @psy-zney — Interactive Cyberpunk 3D Creator Portfolio
+# 🚀 Zney's Portfolio — Interactive Cyberpunk 3D Experience
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
@@ -6,76 +6,39 @@
   <img src="https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
   <img src="https://img.shields.io/badge/Three.js-WebGL-black?style=for-the-badge&logo=three.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/GitHub_Pages-Deployed-222222?style=for-the-badge&logo=github&logoColor=white" />
+  <img src="https://img.shields.io/badge/Bun-Backend-000000?style=for-the-badge&logo=bun&logoColor=white" />
 </p>
 
-An agency-grade, highly interactive **Cyberpunk 3D Creator Portfolio** built for **Zney (@psy-zney)**. The project combines a cinematic Three.js workspace, tactile desktop interactions, bilingual content, custom audio, and a polished arcade-inspired overlay experience.
+An agency-grade, highly interactive **Cyberpunk 3D Creator Portfolio** built for **Zney (@psy-zney)**. The project combines a cinematic Three.js workspace, tactile desktop interactions, bilingual content, custom audio, and a completely custom-built full-stack analytics engine.
+
+🌐 **Live Website:** [zney295.id.vn](https://zney295.id.vn)
 
 ---
 
-## ✨ Current Experience Direction
-
-The portfolio now runs as a hybrid experience: a real-time WebGL workspace powered by `main.glb`, supported by carefully scoped DOM overlays for high-fidelity UI moments.
-
-- **3D Workspace Foundation:** The main environment is loaded from `public/main.glb` via React Three Fiber and Drei.
-- **Animated In-Model Monitor:** The computer screen inside the GLB uses `public/screenDesktop.gif` as an animated WebGL texture, drawn through a canvas/decoded-frame pipeline for reliable playback.
-- **Cinematic Space Atmosphere:** A deep-space panorama and sparse procedural star particles create a dark, minimal cosmic backdrop.
-- **Game-Style Interactions:** Raycasting, hover targets, and `OutlinePass` provide precise neon outlines for interactive objects.
-- **Non-Destructive Screen Entry:** Clicking the monitor triggers a designed screen-entry transition before showing the 2D desktop overlay, instead of relying on a raw camera zoom.
-
----
-
-## 🎨 Key Features & Architectural Highlights
+## ✨ Key Features & Architectural Highlights
 
 ### 🖥️ 1. Interactive 3D Workstation Scene
-
 The workspace scene is built around a GLB workstation model and enhanced with runtime interaction logic:
-
-- **Monitor Entry Point:** Clicking the computer screen opens the interactive desktop layer.
-- **Object Hover Feedback:** Interactive objects are detected with a raycaster and highlighted through post-processing outlines.
-- **Animated Monitor Texture:** `screenDesktop.gif` is rendered onto the monitor surface while preserving the correct orientation and 16:9 presentation.
-- **Ambient Loading Audio:** `Intro.mp3` is preloaded and played from a valid user gesture when entering the workspace.
+- **Monitor Entry Point:** Clicking the computer screen seamlessly transitions you from the 3D room into the interactive 2D desktop layer.
+- **Object Hover Feedback:** Interactive objects are detected with a raycaster and highlighted through neon post-processing outlines.
+- **Animated Monitor Texture:** A custom GIF is rendered onto the 3D monitor surface while preserving correct orientation and presentation.
 
 ### ⌨️ 2. Interactive Desktop Overlay
-
 After entering the screen, the experience switches to a crisp HTML/CSS overlay for pixel-perfect UI:
+- **Mechanical Keyboard Simulation:** Physical keyboard events drive a visual mechanical keyboard module.
+- **Cat Paw Typing Animation:** Cute cat paws dynamically reach toward the exact key positions you type on your real keyboard.
+- **RGB LED Lighting System:** Features Wave, Press, and Ripple lighting modes that react to user input.
+- **Custom Sound Pack:** A Web Audio API integration plays accurate CherryMX Black mechanical switch sounds based on physical typing timing.
 
-- **Arcade Desktop Interface:** A compact pixel-game interface replaces the old text-only typing screen.
-- **Keyboard & Mouse Simulation:** Physical keyboard events drive a visual mechanical keyboard and mouse module.
-- **Cat Paw Typing Animation:** Cute cat paws reach toward the actual pressed key positions instead of using generic up/down animation.
-- **Shortcut Handling:** Common combinations such as `Ctrl/Cmd + A`, `Ctrl/Cmd + V`, and held `Backspace` are handled explicitly.
+### 📊 3. Custom Full-Stack Analytics Engine (New!)
+Unlike most portfolios that use Google Analytics, this project features a 100% custom-built telemetry and analytics system:
+- **Session & Flow Tracking:** Tracks unique user journeys (e.g., `Intro ➔ Workspace ➔ Admin`) using session storage and SQLite.
+- **Hono & Bun Backend:** A high-performance REST API hosted on a private VPS, connected securely via Cloudflare Tunnels.
+- **Secret Admin Dashboard:** Accessible by typing a hidden command (`admin`) in the terminal. Features a beautifully designed UI with real-time stats, visitor geo-location, and user journey flow charts.
 
-### 🌈 3. Mechanical Keyboard LED System
-
-The keyboard lighting system is designed around movement, not simple brightness pulsing:
-
-- **Wave Mode:** A continuous RGB sweep runs across the keyboard.
-- **Press Mode:** Pressed keys light up instantly.
-- **Ripple Mode:** A key press propagates light to nearby keys for a physical LED spread effect.
-- **Off Mode:** Disables decorative lighting for a quieter presentation.
-
-### 🔊 4. Mechanical Key Sound Pack
-
-Keyboard audio is powered by a local Mechvibes-style sound pack:
-
-- **Sound Pack:** CherryMX Black - PBT keycaps.
-- **Assets:** `public/sounds/cherrymx-black-pbt/config.json` and `sound.ogg`.
-- **Playback:** The Web Audio API reads scan-code timing definitions from the config and plays the correct slice from the packed OGG file.
-- **Fallback:** A synthetic switch sound is available when the sound pack has not finished decoding.
-
-### ⚡ 5. Smooth Loading System
-
-The loader is tuned to avoid a frozen progress-bar feel:
-
-- **Decoupled Wave Animation:** The loading wave remains visually active even when asset progress is temporarily waiting.
-- **Smoothed Percentage Counter:** The visible percentage eases toward real progress instead of jumping or stalling aggressively.
-- **Intro Audio:** `Intro.mp3` is preloaded and played during workspace loading, with higher output volume for audibility.
-
-### 🌐 6. Bilingual Adaptive UI & Cyberpunk Atmosphere
-
-- **Default English UI:** The experience starts in English, with Vietnamese available through the language toggle.
-- **Responsive Orientation Guard:** Mobile users are prompted to rotate to landscape for the 3D workspace.
-- **Lo-Fi Cyberpunk Direction:** Dark neon lighting, starfield motion, glitch details, and tactile micro-interactions define the visual identity.
+### 🌐 4. Bilingual Adaptive UI
+- Defaults to English, with full Vietnamese support via a language toggle.
+- Responsive design with an orientation guard that prompts mobile users to rotate their device for the optimal 3D experience.
 
 ---
 
@@ -83,119 +46,48 @@ The loader is tuned to avoid a frozen progress-bar feel:
 
 | Component | Technology |
 | :--- | :--- |
-| **Core Framework** | [React 18.3](https://react.dev/) + [TypeScript 5.5](https://www.typescriptlang.org/) |
-| **Build & Bundler** | [Vite 5.4](https://vitejs.dev/) |
-| **Styling & Layout** | [Tailwind CSS 3.4](https://tailwindcss.com/) + custom CSS |
-| **3D & WebGL** | [Three.js](https://threejs.org/) + [React Three Fiber / Drei](https://docs.pmnd.rs/react-three-fiber/) |
-| **Post-Processing** | `EffectComposer`, `RenderPass`, `OutlinePass` |
-| **Motion** | GSAP, CSS keyframes, requestAnimationFrame |
-| **Audio** | HTMLAudioElement + Web Audio API |
-| **Icons & Typography** | [Lucide React](https://lucide.dev/) + Google Fonts (`Outfit`, `JetBrains Mono`, `Kanit`) |
-| **CI/CD Pipeline** | GitHub Actions Node 24 deployment to GitHub Pages |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 24 is recommended for deployment parity.
-- npm, pnpm, or yarn.
-
-### Local Development Setup
-
-1. **Clone the repository:**
-
-   ```bash
-   git clone https://github.com/psy-zney/psy-zney.github.io.git
-   cd psy-zney.github.io
-   ```
-
-2. **Install dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-3. **Start the local development server:**
-
-   ```bash
-   npm run dev
-   ```
-
-   Open your browser and navigate to `http://localhost:5173`.
-
----
-
-## 📦 Production Build & Verification
-
-To compile TypeScript and generate an optimized production bundle:
-
-```bash
-npm run build
-```
-
-Preview the production build locally:
-
-```bash
-npm run preview
-```
-
-Fast TypeScript verification:
-
-```bash
-npx tsc -b --pretty false
-```
+| **Frontend Core** | [React 18.3](https://react.dev/) + [TypeScript 5.5](https://www.typescriptlang.org/) |
+| **Styling & Layout** | [Tailwind CSS 3.4](https://tailwindcss.com/) |
+| **3D & WebGL** | [Three.js](https://threejs.org/) + [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/) |
+| **Backend API** | [Bun](https://bun.sh/) + [Hono](https://hono.dev/) |
+| **Database** | SQLite (`bun:sqlite`) |
+| **Icons & Typography** | [Lucide React](https://lucide.dev/) + Google Fonts |
+| **CI/CD** | GitHub Actions ➔ GitHub Pages |
 
 ---
 
 ## 📂 Codebase Architecture
 
 ```text
-psy-zney.github.io/
+Zney-Portfolio/
 ├── src/
 │   ├── components/
-│   │   ├── IntroPage.tsx        # Editorial landing page and language-aware hero
-│   │   ├── ModelAnalyzer.tsx    # 3D workspace, GLB loading, monitor texture, loader, transitions
-│   │   └── DesktopOverlay.tsx   # Pixel desktop, mechanical keyboard, LED modes, cat paws, key audio
+│   │   ├── IntroPage.tsx        # Landing page and language-aware hero
+│   │   ├── ModelAnalyzer.tsx    # 3D workspace, GLB loading, loader, transitions
+│   │   ├── DesktopOverlay.tsx   # Pixel desktop, mechanical keyboard, cat paws
+│   │   └── AdminDashboard.tsx   # Secret analytics dashboard with flow charts
 │   ├── utils/
-│   │   └── audioPreloader.ts    # Intro.mp3 preload and gesture-safe playback helper
-│   ├── App.tsx                  # Intro/workspace routing, language state, mobile landscape guard
-│   ├── main.tsx                 # React DOM initialization
-│   └── index.css                # Global styles, overlays, keyboard visuals, animation systems
+│   │   ├── visitorTracker.ts    # Frontend telemetry and session tracking
+│   │   └── audioPreloader.ts    # Audio management
+│   └── App.tsx                  # Routing and global state
+├── analytics-backend/           # Full-stack backend for visitor tracking
+│   ├── index.ts                 # Hono/Bun REST API endpoints
+│   └── analytics.sqlite         # SQLite database
 ├── public/
+│   ├── CNAME                    # Custom domain mapping (zney295.id.vn)
 │   ├── main.glb                 # Active 3D workspace model
-│   ├── scene-v2.glb             # Secondary model asset / experimental scene asset
-│   ├── screenDesktop.gif        # Animated monitor texture for the GLB screen
-│   ├── Intro.mp3                # Workspace loading audio
-│   ├── deep-space-panorama.png  # Equirectangular space background
-│   └── sounds/
-│       └── cherrymx-black-pbt/  # Mechvibes-style mechanical keyboard sound pack
-├── .github/
-│   └── workflows/
-│       └── deploy.yml           # GitHub Pages deployment workflow
-├── package.json                 # Project scripts and dependencies
-└── vite.config.ts               # Vite bundler configuration
+│   └── sounds/                  # Mechanical keyboard sound packs
+└── package.json                 # Project scripts and dependencies
 ```
-
----
-
-## 🧩 Asset Notes
-
-- `public/main.glb` is still required. `ModelAnalyzer.tsx` loads it with `useGLTF('./main.glb')`.
-- `screenDesktop.gif` should stay close to 16:9 for the cleanest monitor fit.
-- `Intro.mp3` is started from the workspace entry click to avoid browser autoplay restrictions.
-- The keyboard sound pack expects a Mechvibes-compatible `config.json` plus packed `sound.ogg`.
 
 ---
 
 ## 🌟 Featured Open Source Repositories (@psy-zney)
 
-- **[psy-zney.github.io](https://github.com/psy-zney/psy-zney.github.io)** — Interactive cyberpunk 3D portfolio and workspace experiment.
+- **[Zney-Portfolio](https://github.com/psy-zney/Zney-Portfolio)** — Interactive cyberpunk 3D portfolio and workspace experiment.
 - **[beatsync](https://github.com/psy-zney/beatsync)** — Listen to music in real-time sync with friends across interactive web rooms with WebRTC audio.
 - **[Security](https://github.com/psy-zney/Security)** — Cloud relay server and automated Windows security monitoring daemon for proactive system protection.
 - **[LearningEnglish](https://github.com/psy-zney/LearningEnglish)** — Intelligent language acquisition app featuring automated tense verification and sentence parsing.
-- **[AI_Hill_Climbing_TSP](https://github.com/psy-zney/AI_Hill_Climbing_TSP)** — Artificial intelligence heuristic algorithms solving the Traveling Salesperson Problem using Hill Climbing.
 - **[mandycrimson](https://github.com/psy-zney/mandycrimson)** — Modern full-stack product catalog and interactive presentation web platform.
 
 ---
