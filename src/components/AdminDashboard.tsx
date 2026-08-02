@@ -36,7 +36,7 @@ export function AdminDashboard({ onExit, lang }: AdminDashboardProps) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('https://pot-agrees-transit-watch.trycloudflare.com/stats', {
+      const res = await fetch('https://route-hiv-blog-pdas.trycloudflare.com/stats', {
         headers: { 'Authorization': `Bearer ${pass}` }
       });
       
