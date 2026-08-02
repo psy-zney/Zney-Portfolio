@@ -34,7 +34,7 @@ After entering the screen, the experience switches to a crisp HTML/CSS overlay f
 Unlike most portfolios that use Google Analytics, this project features a 100% custom-built telemetry and analytics system:
 - **Session & Flow Tracking:** Tracks unique user journeys (e.g., `Intro ➔ Workspace ➔ Admin`) using session storage and SQLite.
 - **Hono & Bun Backend:** A high-performance REST API hosted on a private VPS, connected securely via Cloudflare Tunnels.
-- **Secret Admin Dashboard:** Accessible by typing a hidden command (`admin`) in the terminal. Features a beautifully designed UI with real-time stats, visitor geo-location, and user journey flow charts.
+- **Secure Admin Dashboard:** A private, password-protected internal dashboard with real-time stats, visitor geo-location, and user journey flow charts.
 
 ### 🌐 4. Bilingual Adaptive UI
 - Defaults to English, with full Vietnamese support via a language toggle.
