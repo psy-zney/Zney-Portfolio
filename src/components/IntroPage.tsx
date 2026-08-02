@@ -339,6 +339,7 @@ function AITerminalWindow({
     
     if (validPassHash && rawHashHex === validPassHash) {
        // Secret Admin Access Granted!
+       localStorage.setItem('zney_admin_pass', cmd);
        const newH = [...history, { type: 'in' as const, text: '*'.repeat(cmd.length) }];
        newH.push({ type: 'out', text: `[ACCESS GRANTED] Redirecting to Admin Dashboard...` });
        setHistory(newH);

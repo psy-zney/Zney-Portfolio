@@ -35,7 +35,7 @@ export function AdminDashboard({ onExit, lang }: AdminDashboardProps) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('https://projectors-legislation-structural-subsidiary.trycloudflare.com/stats', {
+      const res = await fetch('https://analytics.zney295.id.vn/stats', {
         headers: { 'Authorization': `Bearer ${pass}` }
       });
       
