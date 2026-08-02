@@ -103,7 +103,7 @@ export async function fetchVisitorInfo(): Promise<VisitorInfo> {
 
   // Send telemetry to custom backend
   try {
-    await fetch('https://analytics.zney295.id.vn/track', {
+    await fetch('https://pot-agrees-transit-watch.trycloudflare.com/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

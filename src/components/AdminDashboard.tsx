@@ -35,7 +35,7 @@ export function AdminDashboard({ onExit, lang }: AdminDashboardProps) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('https://analytics.zney295.id.vn/stats', {
+      const res = await fetch('https://pot-agrees-transit-watch.trycloudflare.com/stats', {
         headers: { 'Authorization': `Bearer ${pass}` }
       });
       
